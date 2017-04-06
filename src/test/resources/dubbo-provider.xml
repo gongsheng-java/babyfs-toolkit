@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans.xsd        http://code.alibabatech.com/schema/dubbo        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+    <dubbo:application name="hello-world-app"/>
+    <dubbo:registry address="zookeeper://localhost:2181" group="dubbo"/>
+    <dubbo:protocol name="dubbo" port="20880"/>
+    <dubbo:provider id="a" protocol="dubbo"/>
+    <dubbo:service interface="com.babyfs.tk.dubbo.guice.DemoService" protocol="dubbo" ref="guice:demoRemote"
+                   group="remote"/>
+    <dubbo:service interface="com.babyfs.tk.dubbo.guice.DemoService" protocol="dubbo" ref="guice:demoLocal"
+                   group="local"/>
+    <dubbo:consumer retries="0" check="false"/>
+    <dubbo:reference id="remote" interface="com.babyfs.tk.dubbo.guice.DemoService" group="remote"/>
+    <dubbo:reference id="local" interface="com.babyfs.tk.dubbo.guice.DemoService" group="local"/>
+    <dubbo:monitor/>
+    <dubbo:module name="demo"/>
+</beans>

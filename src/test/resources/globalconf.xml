@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>xml 配置文件测试</comment>
+    <!--
+    <entry key="name.zk.servers">zk.kafka.dev.teemo:2181</entry>
+    -->
+    <entry key="config."><![CDATA[
+            [
+            {"type":"sys"},
+            {
+                "type":"common",
+                "uris":["properties.xml"]
+            }
+            ]
+    ]]>
+    </entry>
+</properties>

@@ -1,0 +1,15 @@
+servers:
+ - svr:
+      id: svr_0
+      ip: 127.0.0.1
+      port: 9123
+   services:
+          - testPB
+          - test
+ - svr:
+      id: svr_1
+      ip: 127.0.0.1
+      port: 9001
+   services:
+           - testABC
+           - testBCD

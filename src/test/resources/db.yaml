@@ -1,0 +1,34 @@
+#数据库实例定义
+databaseInstances:
+  # 第一个数据库实例
+  -   id: db_0
+      ip: 127.0.0.1
+      port: 3306
+      username: gsns
+      password: gsns4test
+  # 第二个数据库实例
+  -   id: db_1
+      ip: 127.0.0.1
+      port: 3306
+      username: gsns
+      password: gsns4test
+
+#shard的配置
+groups:
+  - groupName: gsns #shard的名称
+    shards:
+      - id: gsns_0 #
+        databaseInstance:db_0
+        schema: gsns
+      - id: gsns_1
+        databaseInstance:db_1
+        schema: gsns
+
+entity:
+  - entityClass:com.renren.gsns.model.Entity
+    shardNamePrefix: gsns
+    db:
+           strategy: hash|range
+    table:
+           strategy: hash|range
+

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="bootstrap.servers">127.0.0.1:9021</entry>
+    <entry key="group.id">test</entry>
+    <entry key="value.deserializer">org.apache.kafka.common.serialization.StringDeserializer</entry>
+    <entry key="key.deserializer">org.apache.kafka.common.serialization.StringDeserializer</entry>
+    <entry key="auto.commit.interval.ms">5000</entry>
+    <entry key="auto.offset.reset">earliest</entry>
+    <entry key="_topic.test">
+        <![CDATA[
+{
+"threads":1
+}
+]]>
+    </entry>
+
+    <entry key="_topic.test2">
+        <![CDATA[
+{
+"threads":1
+}
+]]>
+    </entry>
+</properties>

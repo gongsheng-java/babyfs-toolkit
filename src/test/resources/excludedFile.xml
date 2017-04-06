@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- CheckLoginFilter 对应的例外地址 ，可以使用JAVA标准正则  -->
+<excludes>
+    <pattern>/home$</pattern>
+    <pattern>/a/passport/check$</pattern>
+</excludes>

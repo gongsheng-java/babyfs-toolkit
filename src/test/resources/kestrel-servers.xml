@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <servers>
+        <server name="kestrel_main" host="10.22.225.66" port="22133"/>
+        <server name="kestrel_second" host="10.22.225.66" port="22133"/>
+
+        <server name="kestrel_poll_1" host="10.22.225.66" port="22133"/>
+        <server name="kestrel_poll_2" host="10.22.225.66" port="22134"/>
+        <server name="kestrel_poll_3" host="10.22.225.66" port="22133"/>
+        <server name="kestrel_poll_4" host="10.22.225.66" port="22134"/>
+    </servers>
+</root>

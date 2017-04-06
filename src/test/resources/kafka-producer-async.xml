@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="bootstrap.servers">127.0.0.1:9021</entry>
+    <!--
+    sync: 同步发送
+    async: 异步发送
+     -->
+    <entry key="_producer.type">async</entry>
+    <!--
+     0: 不等待是否成功发送 一致性最弱
+     1: 等待leader接收成功 一致性中等
+     －1: 等待所有的replica接收成功 一致性最强
+     -->
+    <entry key="acks">0</entry>
+    <entry key="key.serializer">org.apache.kafka.common.serialization.StringSerializer</entry>
+    <entry key="value.serializer">org.apache.kafka.common.serialization.StringSerializer</entry>
+    <!--
+    none,snappy,gzip
+    -->
+    <entry key="compression.type">gzip</entry>
+</properties>

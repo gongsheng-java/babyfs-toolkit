@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>es cluster name</comment>
+    <entry key="cluster.name">es-d0ngw</entry>
+    <entry key="es.client.type">TransportClient</entry>
+    <entry key="es.client.hosts">12.0.0.120:9300</entry>
+</properties>

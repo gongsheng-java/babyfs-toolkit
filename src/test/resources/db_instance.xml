@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dbInstances>
+    <server id="db_0" ip="127.0.0.1" port="3306" user="root" password=""/>
+    <server id="db_1" ip="127.0.0.1" port="3306" user="root" password=""/>
+</dbInstances>
+

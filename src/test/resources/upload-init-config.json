@@ -1,0 +1,15 @@
+{
+    "servlets": [
+        {
+            "name": "uploadServlet",
+            "class": "com.babyfs.tk.http.upload.UploadServlet",
+            "url": "/up",
+            "async": true,
+            "multipart": true,
+            "multipart.location": "/tmp/imageUpload",
+            "multipart.maxFileSize": 102400,
+            "multipart.maxRequestSize": 150000,
+            "multipart.fileSizeThreshold": 0
+        }
+    ]
+}

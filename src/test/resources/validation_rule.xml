@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rules>
+    <rule name="optionalEmail">
+        <email/>
+    </rule>
+    <rule name="notEmpty">
+        <notEmpty/>
+    </rule>
+    <rule name="requiredId">
+        <notEmpty/>
+        <regExp>^[1-9][0-9]*$</regExp>
+    </rule>
+    <rule name="optionalInt">
+        <int>
+            <minValue>1</minValue>
+        </int>
+    </rule>
+</rules>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <groups>
+        <group name="unit_test_msg">
+            <servers>
+                <server name="kestrel_main"/>
+            </servers>
+            <properties>
+                <property name="test">3</property>
+            </properties>
+        </group>
+        <group name="unit_test_retweet">
+            <servers>
+                <server name="kestrel_second"/>
+            </servers>
+            <properties>
+                <property name="test">3</property>
+            </properties>
+        </group>
+
+        <group name="test_poll_msg">
+            <servers>
+                <server name="kestrel_poll_1"/>
+                <server name="kestrel_poll_2"/>
+                <!--<server name="kestrel_poll_3"/>-->
+                <!--<server name="kestrel_poll_4"/>-->
+            </servers>
+            <properties>
+                <property name="mode">poll</property>
+            </properties>
+        </group>
+    </groups>
+</root>

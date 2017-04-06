@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Shard的配置信息 -->
+<shardGroups>
+    <!-- 默认的shard -->
+    <defaultShard groupId="default" shardId="default_0"/>
+    <groups>
+        <shardGroup id="default">
+            <shardInstance id="default_0" dbInstanceId="db_0" schema="gsns"/>
+        </shardGroup>
+        <shardGroup id="gsns_test">
+            <shardInstance id="gsns_0" dbInstanceId="db_0" schema="gsns">
+                <parameter name="characterEncoding" value="utf8"/>
+            </shardInstance>
+            <shardInstance id="gsns_1" dbInstanceId="db_0" schema="gsns_test"/>
+            <shardInstance id="gsns_2" dbInstanceId="db_0" schema="gsns_dev"/>
+        </shardGroup>
+    </groups>
+</shardGroups>
+

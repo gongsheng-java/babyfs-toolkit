@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rules>
+    <rule name="requiredEmail">
+        <notEmpty/>
+        <email/>
+    </rule>
+    <rule name="notEmpty">
+        <notEmpty/>
+    </rule>
+    <rule name="requiredNonNegativeInt">
+        <notEmpty/>
+        <int>
+            <minValue>0</minValue>
+        </int>
+    </rule>
+    <rule name="optionalIntRange">
+        <int>
+            <minValue>-10</minValue>
+            <maxValue>10</maxValue>
+        </int>
+    </rule>
+    <rule name="notNull">
+        <notNull/>
+    </rule>
+    <rule name="requiredRegExp">
+        <notNull/>
+        <regExp>\d+</regExp>
+    </rule>
+    <rule name="long">
+        <notEmpty/>
+        <long minValue="1" />
+    </rule>
+</rules>

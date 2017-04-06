@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 实体类的shard策略 -->
+<entityShards>
+    <!--
+    class: 实体的类名
+    groups: shard的组名
+    -->
+    <entityShard className="com.babyfs.tk.dal.db.model.ShardFriend" groups="gsns_test">
+        <!-- shard 策略 -->
+        <!-- 数据库的shard策略 -->
+        <dbShardStrategies>
+            <!--
+            class: IShardStrategy的子类名
+            -->
+            <shardStrategy type="hash">
+                <properties>
+                    <property name="shardCount">3</property>
+                    <property name="shardNamePrefix">gsns</property>
+                </properties>
+            </shardStrategy>
+        </dbShardStrategies>
+        <!-- 表的shard策略 -->
+        <tableShardStrategies>
+            <shardStrategy type="named">
+                <properties>
+                    <property name="shardName">friend_shard</property>
+                </properties>
+            </shardStrategy>
+        </tableShardStrategies>
+    </entityShard>
+</entityShards>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <groups>
+        <group name="user.list">
+            <servers>
+                <server name="redis_1"/>
+                <server name="redis_2"/>
+            </servers>
+        </group>
+        <group name="counter.group">
+            <servers>
+                <server name="redis_1"/>
+                <server name="redis_2"/>
+            </servers>
+        </group>
+        <group name="subscribe">
+            <servers>
+                <server name="redis_1"/>
+            </servers>
+        </group>
+        <group name="daily.counter">
+            <servers>
+                <server name="redis_1"/>
+            </servers>
+        </group>
+    </groups>
+</root>

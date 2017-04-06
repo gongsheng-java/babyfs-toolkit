@@ -1,0 +1,9 @@
+servers:
+ - svr:
+      id: svr_0
+      ip: 127.0.0.1
+      port: 9123
+   services:
+          - testPB
+          - testReload
+
