@@ -2,9 +2,8 @@ package com.babyfs.tk.service.biz.cache;
 
 import com.google.common.base.Function;
 import com.babyfs.tk.commons.base.Pair;
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.db.DaoFactory;
-import com.babyfs.tk.service.biz.cache.utils.CacheParameter;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.transaction.TransactionStatus;
 

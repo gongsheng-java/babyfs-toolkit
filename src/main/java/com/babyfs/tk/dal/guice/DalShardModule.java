@@ -9,7 +9,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.util.Types;
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.db.*;
 import com.babyfs.tk.dal.db.annotation.Dao;
 import com.babyfs.tk.dal.db.shard.*;

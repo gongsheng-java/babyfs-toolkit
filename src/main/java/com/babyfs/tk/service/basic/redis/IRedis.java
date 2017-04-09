@@ -5,7 +5,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
-import com.babyfs.tk.service.basic.redis.client.PipelineFunction;
+import com.babyfs.tk.service.basic.redis.client.PipelineFunc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -424,10 +424,10 @@ public interface IRedis {
     /**
      * 使用管道处理多个命令
      *
-     * @param pipelineFunction
+     * @param pipelineFunc
      * @return
      */
-    List<Object> pipelined(PipelineFunction pipelineFunction);
+    List<Object> pipelined(PipelineFunc pipelineFunc);
 
 
     /**

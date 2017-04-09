@@ -1,6 +1,6 @@
 package com.babyfs.tk.dal.db.model;
 
-import com.babyfs.tk.orm.Shard;
+import com.babyfs.tk.dal.meta.Shard;
 import com.babyfs.tk.dal.db.IDao;
 import com.babyfs.tk.dal.db.annotation.Dao;
 import com.babyfs.tk.dal.db.annotation.Sql;

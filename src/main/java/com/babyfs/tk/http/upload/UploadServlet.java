@@ -185,7 +185,7 @@ public class UploadServlet extends HttpServlet implements AsyncListener {
      * @param parameters
      */
     private void fillQueryString(String queryString, Map<String, List<String>> parameters) {
-        List<NameValuePair> nameValuePairs = URLEncodedUtils.parse(queryString, Constants.DEFAULT_CHARSET_OBJ);
+        List<NameValuePair> nameValuePairs = URLEncodedUtils.parse(queryString, Constants.UTF8_CHARSET);
         for (NameValuePair pair : nameValuePairs) {
             List<String> strings = parameters.get(pair.getName());
             if (strings == null) {

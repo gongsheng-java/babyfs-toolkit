@@ -75,7 +75,7 @@ public final class GitVersionUtil {
                     url = new URL("jar:" + url.toString() + "!/" + resourceName);
                 }
                 ByteSource byteSource = Resources.asByteSource(url);
-                CharSource source = byteSource.asCharSource(Constants.DEFAULT_CHARSET_OBJ);
+                CharSource source = byteSource.asCharSource(Constants.UTF8_CHARSET);
                 add(gitVersionList, from, source);
             }
         } catch (Exception e) {

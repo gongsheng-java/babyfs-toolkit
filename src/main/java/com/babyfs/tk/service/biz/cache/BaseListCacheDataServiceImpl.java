@@ -5,9 +5,7 @@ import com.google.common.collect.Lists;
 import com.babyfs.tk.commons.base.Pair;
 import com.babyfs.tk.service.basic.INameResourceService;
 import com.babyfs.tk.service.basic.redis.IRedis;
-import com.babyfs.tk.service.basic.redis.client.PipelineFunction;
-import com.babyfs.tk.service.biz.cache.utils.CacheParameter;
-import com.babyfs.tk.service.biz.cache.utils.CacheUtils;
+import com.babyfs.tk.service.basic.redis.client.PipelineFunc;
 import redis.clients.jedis.ShardedJedisPipeline;
 import redis.clients.jedis.Tuple;
 
@@ -84,7 +82,7 @@ public abstract class BaseListCacheDataServiceImpl<T extends Serializable> imple
             }
 
             //从列表中删除数据
-            List<Object> pipelined = listRedis.pipelined(new PipelineFunction("list-del") {
+            List<Object> pipelined = listRedis.pipelined(new PipelineFunc("list-del") {
                 @Override
                 public Void apply(ShardedJedisPipeline pipeline) {
                     pipeline.zrem(listKey, String.valueOf(id));
@@ -170,7 +168,7 @@ public abstract class BaseListCacheDataServiceImpl<T extends Serializable> imple
              * 1.先从redis列表尝试加载从[start,end]的数据
              * 2.如果从redis列表中加载的数据不够,尝试从数据库中加载
              */
-            List<Object> pipelined = listRedis.pipelined(new PipelineFunction("list-get") {
+            List<Object> pipelined = listRedis.pipelined(new PipelineFunc("list-get") {
                 public Void apply(ShardedJedisPipeline pipeline) {
                     pipeline.zrangeWithScores(listKey, start, end);
                     //pipeline.zrange(listKey, start, end);
@@ -283,7 +281,7 @@ public abstract class BaseListCacheDataServiceImpl<T extends Serializable> imple
     private void addToList(final String listKey, final List<Pair<Long, Long>> allIds) {
         final IRedis listRedis = getListRedisCacheClient();
 
-        listRedis.pipelined(new PipelineFunction("list-add") {
+        listRedis.pipelined(new PipelineFunc("list-add") {
             @Nullable
             @Override
             public Void apply(@Nullable ShardedJedisPipeline pipeline) {

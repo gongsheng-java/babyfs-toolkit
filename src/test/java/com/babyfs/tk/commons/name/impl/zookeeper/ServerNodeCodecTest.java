@@ -41,7 +41,7 @@ public class ServerNodeCodecTest {
         ServerNodeJsonCodec codec = new ServerNodeJsonCodec();
         byte[] encode = codec.encode(server);
         System.out.println("json len:" + encode.length);
-        System.out.println(new String(encode, Constants.DEFAULT_CHARSET));
+        System.out.println(new String(encode, Constants.UTF_8));
 
         NamingServices.NSServer server = (NamingServices.NSServer) codec.decode(encode);
         Assert.assertNotNull(server);

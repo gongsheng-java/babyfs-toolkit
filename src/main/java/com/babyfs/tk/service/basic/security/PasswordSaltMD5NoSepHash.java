@@ -29,7 +29,7 @@ public class PasswordSaltMD5NoSepHash extends PasswordSaltHash {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(password));
         HashFunction hashFunction = Hashing.md5();
         Hasher hasher = hashFunction.newHasher();
-        hasher.putBytes(password.getBytes(Constants.DEFAULT_CHARSET_OBJ));
+        hasher.putBytes(password.getBytes(Constants.UTF8_CHARSET));
         if (saltBytes != null && saltBytes.length > 0) {
             hasher.putBytes(saltBytes);
         }

@@ -221,7 +221,7 @@ public class RSAEncrypterUtil {
      * @return
      */
     public static Key getPrivateKey(String key) {
-        byte[] keyBytes = Base64.decodeBase64(key.getBytes(Constants.DEFAULT_CHARSET_OBJ));
+        byte[] keyBytes = Base64.decodeBase64(key.getBytes(Constants.UTF8_CHARSET));
         return getPrivateKey(keyBytes);
     }
 
@@ -260,7 +260,7 @@ public class RSAEncrypterUtil {
      * @return
      */
     public static Key getPublicKey(String key) {
-        byte[] keyBytes = Base64.decodeBase64(key.getBytes(Constants.DEFAULT_CHARSET_OBJ));
+        byte[] keyBytes = Base64.decodeBase64(key.getBytes(Constants.UTF8_CHARSET));
         return getPublicKey(keyBytes);
     }
 
@@ -344,6 +344,6 @@ public class RSAEncrypterUtil {
     }
 
     private static String getString(Key key) {
-        return new String(Base64.encodeBase64(key.getEncoded()), Constants.DEFAULT_CHARSET_OBJ);
+        return new String(Base64.encodeBase64(key.getEncoded()), Constants.UTF8_CHARSET);
     }
 }

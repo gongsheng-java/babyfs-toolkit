@@ -35,7 +35,7 @@ public class ServerNodeJsonCodec implements ICodec {
         json.put("registerToken", server.getRegisterToken());
         json.put("services", ListUtil.transform(server.getServicesList(), STRING_STRING_FUNCTION));
         try {
-            return json.toJSONString().getBytes(Constants.DEFAULT_CHARSET);
+            return json.toJSONString().getBytes(Constants.UTF_8);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -44,7 +44,7 @@ public class ServerNodeJsonCodec implements ICodec {
     @Override
     public Object decode(byte[] data) {
         try {
-            String str = new String(data, Constants.DEFAULT_CHARSET);
+            String str = new String(data, Constants.UTF_8);
             JSONObject map = JSONObject.parseObject(str);
             NamingServices.NSServer.Builder builder = NamingServices.NSServer.newBuilder().setId(map.getString("id")).setIp(map.getString("ip"));
             builder.setPort(map.getIntValue("port"));

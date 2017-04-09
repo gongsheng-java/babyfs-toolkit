@@ -3,6 +3,7 @@ package com.babyfs.tk.service.basic.utils;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.babyfs.tk.service.biz.constants.ErrorCode;
 import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import com.babyfs.tk.commons.model.ServiceResponse;
@@ -127,6 +128,20 @@ public class ResponseUtil {
         } catch (Exception e) {
             LOGGER.error("writer to response exception.", e);
             return false;
+        }
+    }
+
+    /**
+     * 根据结果构建ServiceResponse
+     *
+     * @param result true,success;false,fail
+     * @return ServiceResponse
+     */
+    public static ServiceResponse<Boolean> buildBoolResponse(boolean result) {
+        if (result) {
+            return ServiceResponse.createSuccessResponse(true);
+        } else {
+            return ServiceResponse.createFailResponse(ErrorCode.FAIL, false, null);
         }
     }
 }

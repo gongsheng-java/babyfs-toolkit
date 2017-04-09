@@ -1,6 +1,6 @@
 package com.babyfs.tk.dal.db.model;
 
-import com.babyfs.tk.orm.AssignIdEntity;
+import com.babyfs.tk.dal.orm.AssignIdEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

@@ -1,6 +1,6 @@
 package com.babyfs.tk.dal.db.model;
 
-import com.babyfs.tk.orm.AutoIdEntity;
+import com.babyfs.tk.dal.orm.AutoIdEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

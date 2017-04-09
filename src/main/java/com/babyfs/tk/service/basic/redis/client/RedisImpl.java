@@ -1132,19 +1132,19 @@ public class RedisImpl implements IRedis {
     /**
      * 使用管道处理多个命令
      *
-     * @param pipelineFunction
+     * @param pipelineFunc
      * @return
      */
     @Override
-    public List<Object> pipelined(PipelineFunction pipelineFunction) {
+    public List<Object> pipelined(PipelineFunc pipelineFunc) {
         ShardedJedis shardedJedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
-        String itemName = pipelineFunction.getName();
+        String itemName = pipelineFunc.getName();
         try {
             ShardedJedisPipeline pipelined = shardedJedis.pipelined();
-            pipelineFunction.apply(pipelined);
+            pipelineFunc.apply(pipelined);
             return pipelined.syncAndReturnAll();
         } catch (Exception e) {
             success = false;
@@ -1245,7 +1245,7 @@ public class RedisImpl implements IRedis {
 
 
     /**
-     * 按照{@link Constants#DEFAULT_CHARSET}编码取得byte数组
+     * 按照{@link Constants#UTF_8}编码取得byte数组
      *
      * @param str
      * @return
@@ -1253,9 +1253,9 @@ public class RedisImpl implements IRedis {
      */
     private byte[] getStringBytes(String str) {
         try {
-            return str.getBytes(Constants.DEFAULT_CHARSET);
+            return str.getBytes(Constants.UTF_8);
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Can't get bytes for [" + str + "] with charset [" + Constants.DEFAULT_CHARSET + "]", e);
+            throw new RuntimeException("Can't get bytes for [" + str + "] with charset [" + Constants.UTF_8 + "]", e);
         }
     }
 

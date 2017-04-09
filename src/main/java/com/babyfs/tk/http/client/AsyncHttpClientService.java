@@ -104,7 +104,7 @@ public class AsyncHttpClientService {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(url), "URL can not be empty or null.");
         LOGGER.debug("Get Request:{}", url);
         AsyncHttpClient.BoundRequestBuilder boundRequestBuilder = httpClient.prepareGet(url)
-                .setBodyEncoding(Constants.DEFAULT_CHARSET)
+                .setBodyEncoding(Constants.UTF_8)
                 .setQueryParameters(getParams)
                 .setHeaders(headers);
         return sendRequest(boundRequestBuilder);
@@ -170,7 +170,7 @@ public class AsyncHttpClientService {
                 }
             }
             // 如果response头部没有指示编码格式，认为非压缩，直接返回
-            InputStreamReader inputReader = new InputStreamReader(response.getResponseBodyAsStream(), Constants.DEFAULT_CHARSET);
+            InputStreamReader inputReader = new InputStreamReader(response.getResponseBodyAsStream(), Constants.UTF_8);
             return CharStreams.toString(inputReader);
         } finally {
             /// 不论如何，释放连接

@@ -5,7 +5,7 @@ import com.google.inject.Provider;
 import com.babyfs.tk.commons.MapConfig;
 import com.babyfs.tk.commons.config.IConfigService;
 import com.babyfs.tk.service.basic.INameResourceService;
-import com.babyfs.tk.service.basic.common.CommonNameResourceServiceImpl;
+import com.babyfs.tk.service.basic.CommonNameResourceService;
 import com.babyfs.tk.service.basic.guice.annotation.ServiceRedis;
 import com.babyfs.tk.service.basic.redis.Constants;
 import com.babyfs.tk.service.basic.redis.IRedis;
@@ -66,7 +66,7 @@ public final class BasicServiceModuleProviders {
         public INameResourceService<IRedis> get() {
             RedisConfig redisConfig = buildRedisConfig(conf);
             ShardedRedisServiceLoaderImpl redisServiceLoader = new ShardedRedisServiceLoaderImpl(redisConfig, servers, serviceGroup);
-            return new CommonNameResourceServiceImpl<>(redisServiceLoader);
+            return new CommonNameResourceService<>(redisServiceLoader);
         }
     }
 
@@ -92,7 +92,7 @@ public final class BasicServiceModuleProviders {
         public INameResourceService<JedisPool> get() {
             RedisConfig redisConfig = buildRedisConfig(conf);
             JRedisPoolServiceLoaderImpl redisServiceLoader = new JRedisPoolServiceLoaderImpl(redisConfig, servers, serviceGroup);
-            return new CommonNameResourceServiceImpl<>(redisServiceLoader);
+            return new CommonNameResourceService<>(redisServiceLoader);
         }
 
     }

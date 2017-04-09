@@ -16,7 +16,7 @@ public class PasswordSaltMD5Hash extends PasswordSaltHash {
     /**
      * 密码与盐值中间的分隔符
      */
-    private static final byte[] PASS_SALT_SEP = "_".getBytes(Constants.DEFAULT_CHARSET_OBJ);
+    private static final byte[] PASS_SALT_SEP = "_".getBytes(Constants.UTF8_CHARSET);
 
     public PasswordSaltMD5Hash() {
     }
@@ -33,7 +33,7 @@ public class PasswordSaltMD5Hash extends PasswordSaltHash {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(password));
         HashFunction hashFunction = Hashing.md5();
         Hasher hasher = hashFunction.newHasher();
-        hasher.putBytes(password.getBytes(Constants.DEFAULT_CHARSET_OBJ));
+        hasher.putBytes(password.getBytes(Constants.UTF8_CHARSET));
         if (saltBytes != null && saltBytes.length > 0) {
             hasher.putBytes(PASS_SALT_SEP);
             hasher.putBytes(saltBytes);

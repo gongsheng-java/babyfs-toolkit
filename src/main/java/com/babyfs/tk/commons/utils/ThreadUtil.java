@@ -52,4 +52,17 @@ public final class ThreadUtil {
             Thread.currentThread().interrupt();
         }
     }
+
+    /**
+     * 执行由command指定任务,并忽略异常
+     *
+     * @param command
+     */
+    public static void runQuitely(Runnable command) {
+        try {
+            command.run();
+        } catch (Exception e) {
+            LOGGER.error("ignore it", e);
+        }
+    }
 }

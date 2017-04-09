@@ -5,15 +5,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.babyfs.tk.commons.base.Pair;
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.db.DaoFactory;
 import com.babyfs.tk.dal.db.IDao;
 import com.babyfs.tk.service.basic.INameResourceService;
 import com.babyfs.tk.service.basic.guice.annotation.ServiceRedis;
 import com.babyfs.tk.service.basic.redis.IRedis;
-import com.babyfs.tk.service.biz.cache.utils.CacheParameter;
-import com.babyfs.tk.service.biz.cache.utils.CacheUtils;
-import com.babyfs.tk.service.biz.cache.utils.ObjArray2IdFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -35,6 +32,14 @@ import java.util.stream.Collectors;
  */
 public class BaseCacheDataService implements IBaseCacheDataService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseCacheDataService.class);
+
+    static final Function<Object[],Long> ObjArray2IdFunction = new Function<Object[], Long>() {
+        @Override
+        public Long apply(Object[] input) {
+            Preconditions.checkArgument(input != null);
+            return Long.parseLong(input[0].toString());
+        }
+    };
 
     @Inject
     @ServiceRedis
@@ -311,7 +316,7 @@ public class BaseCacheDataService implements IBaseCacheDataService {
         if (results == null || results.isEmpty()) {
             return Lists.newArrayListWithCapacity(0);
         } else {
-            List<Long> ids = Lists.transform(results, ObjArray2IdFunction.INSTANCE);
+            List<Long> ids = Lists.transform(results, ObjArray2IdFunction);
             return this.queryEntitiesWithCache(ids, tClass, dao, cacheParameter);
         }
     }

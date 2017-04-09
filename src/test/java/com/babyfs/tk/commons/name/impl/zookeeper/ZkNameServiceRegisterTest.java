@@ -33,7 +33,7 @@ public class ZkNameServiceRegisterTest {
     @Test
     public void test_acl() throws NoSuchAlgorithmException {
         try {
-            String password = Base64.encodeBase64String(DigestUtils.sha("gsns@zookeeper".getBytes(Constants.DEFAULT_CHARSET)));
+            String password = Base64.encodeBase64String(DigestUtils.sha("gsns@zookeeper".getBytes(Constants.UTF_8)));
             System.out.println(password);
             password = DigestAuthenticationProvider.generateDigest("gsns" + ":" + "gsns@zookeeper");
             System.out.println(password);

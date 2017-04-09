@@ -1,7 +1,7 @@
 package com.babyfs.tk.dal.db;
 
 import com.babyfs.tk.commons.base.Pair;
-import com.babyfs.tk.orm.AssignIdEntity;
+import com.babyfs.tk.dal.orm.AssignIdEntity;
 import com.babyfs.tk.dal.orm.IEntityMeta;
 import org.junit.Assert;
 import org.junit.Test;

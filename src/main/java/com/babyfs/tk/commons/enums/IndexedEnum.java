@@ -16,8 +16,6 @@ import java.util.List;
  * <p/>
  */
 public interface IndexedEnum {
-
-
     /**
      * 取得该枚举元素的索引值
      *
@@ -97,6 +95,19 @@ public interface IndexedEnum {
                 return null;
             }
             return values.get(index);
+        }
+    }
+
+    class Index implements IndexedEnum {
+        private final int index;
+
+        public Index(int index) {
+            this.index = index;
+        }
+
+        @Override
+        public int getIndex() {
+            return index;
         }
     }
 }

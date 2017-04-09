@@ -1,6 +1,6 @@
 package com.babyfs.tk.dal.orm;
 
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.meta.EntityField;
 
 import java.util.List;
 

@@ -56,7 +56,7 @@ public class YamlNameServiceProvider implements INameServiceProvider {
      * @param config
      */
     public YamlNameServiceProvider(@Nonnull String config) {
-        this(config, Constants.DEFAULT_CHARSET);
+        this(config, Constants.UTF_8);
     }
 
     /**

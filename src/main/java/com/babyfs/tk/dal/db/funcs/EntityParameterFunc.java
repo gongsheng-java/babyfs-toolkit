@@ -1,7 +1,7 @@
 package com.babyfs.tk.dal.db.funcs;
 
 import com.google.common.base.Function;
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 
 /**
  * 从方法的参数中提取{@link IEntity}

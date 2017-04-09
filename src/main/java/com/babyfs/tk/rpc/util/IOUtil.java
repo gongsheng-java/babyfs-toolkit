@@ -25,7 +25,7 @@ public final class IOUtil {
             return;
         }
         try {
-            byte[] data = str.getBytes(Constants.DEFAULT_CHARSET);
+            byte[] data = str.getBytes(Constants.UTF_8);
             buffer.writeInt(data.length);
             buffer.writeBytes(data);
         } catch (UnsupportedEncodingException e) {
@@ -48,7 +48,7 @@ public final class IOUtil {
         byte[] data = new byte[length];
         buffer.readBytes(data);
         try {
-            return new String(data, Constants.DEFAULT_CHARSET);
+            return new String(data, Constants.UTF_8);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

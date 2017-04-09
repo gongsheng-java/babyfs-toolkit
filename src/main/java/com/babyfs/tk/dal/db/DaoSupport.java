@@ -4,7 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.babyfs.tk.commons.base.Pair;
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.db.shard.DBObjectSet;
 import com.babyfs.tk.dal.db.shard.EntityShard;
 import com.babyfs.tk.dal.db.shard.ShardUtil;

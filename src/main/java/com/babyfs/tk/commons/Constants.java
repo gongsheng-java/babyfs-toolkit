@@ -6,14 +6,14 @@ import java.nio.charset.Charset;
  */
 public final class Constants {
     /**
-     * 系统默认编码:{@value Constants#DEFAULT_CHARSET}
+     * 系统默认编码:{@value Constants#UTF_8}
      */
-    public static final String DEFAULT_CHARSET = "UTF-8";
+    public static final String UTF_8 = "UTF-8";
 
     /**
      * 系统默认编码
      */
-    public static final Charset DEFAULT_CHARSET_OBJ = Charset.forName(DEFAULT_CHARSET);
+    public static final Charset UTF8_CHARSET = Charset.forName(UTF_8);
 
     /**
      * 全局配置:服务器的id

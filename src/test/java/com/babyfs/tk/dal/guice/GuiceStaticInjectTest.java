@@ -1,7 +1,7 @@
 package com.babyfs.tk.dal.guice;
 
 import com.google.inject.*;
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.db.model.Friend;
 import com.babyfs.tk.dal.db.model.User;
 import org.junit.Assert;

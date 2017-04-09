@@ -71,7 +71,7 @@ public final class ListUtil {
      * @param list
      * @return
      */
-    public static boolean isEmtpy(List list) {
+    public static boolean isEmpty(List list) {
         return list == null || list.isEmpty();
     }
 
@@ -95,7 +95,7 @@ public final class ListUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T[] toArray(List<T> list) {
-        if (ListUtil.isEmtpy(list)) {
+        if (ListUtil.isEmpty(list)) {
             return (T[]) EMPTY_ARRAY;
         }
         Object[] objs = new Object[list.size()];

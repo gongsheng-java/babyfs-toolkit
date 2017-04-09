@@ -1,6 +1,6 @@
 package com.babyfs.tk.dal.db;
 
-import com.babyfs.tk.orm.IListEntity;
+import com.babyfs.tk.dal.orm.IListEntity;
 import com.babyfs.tk.dal.db.annotation.Sql;
 import com.babyfs.tk.dal.db.annotation.SqlParam;
 import com.babyfs.tk.dal.db.annotation.SqlType;

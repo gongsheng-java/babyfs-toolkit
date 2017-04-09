@@ -1,6 +1,6 @@
 package com.babyfs.tk.dal.db.model;
 
-import com.babyfs.tk.orm.AssignIdShardEntity;
+import com.babyfs.tk.dal.orm.AssignIdShardEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

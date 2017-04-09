@@ -9,8 +9,7 @@ import com.babyfs.tk.commons.guice.GuiceKeys;
 import com.babyfs.tk.service.basic.INameResourceService;
 import com.babyfs.tk.service.basic.guice.annotation.ServiceRedis;
 import com.babyfs.tk.service.basic.redis.IRedis;
-import com.babyfs.tk.service.biz.cache.utils.CacheParameter;
-import com.babyfs.tk.service.biz.factory.StaticModuleFactory;
+import com.babyfs.tk.service.biz.Modules;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,8 +30,8 @@ public class BaseListCacheDataServiceImplTest {
     @Ignore
     public void testList() {
         Injector injector = Guice.createInjector(
-                StaticModuleFactory.BASIC_MODULE_REDIS_CONF,
-                StaticModuleFactory.BASIC_MODULE_REDIS_SERVICE
+                Modules.BASIC_MODULE_REDIS_CONF,
+                Modules.BASIC_MODULE_REDIS_SERVICE
         );
 
         CacheParameter listCache = new CacheParameter(60 * 30, "user.list", "list_", "");

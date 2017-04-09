@@ -4,7 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.babyfs.tk.commons.utils.ListUtil;
-import com.babyfs.tk.service.basic.common.ServiceLoader;
+import com.babyfs.tk.service.basic.ServiceLoader;
 import com.babyfs.tk.service.basic.redis.IRedis;
 import com.babyfs.tk.service.basic.xml.client.Group;
 import com.babyfs.tk.service.basic.xml.client.ServerElement;

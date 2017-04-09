@@ -1,8 +1,8 @@
 package com.babyfs.tk.dal.db;
 
-import com.babyfs.tk.orm.AssignIdEntity;
-import com.babyfs.tk.orm.Shard;
-import com.babyfs.tk.dal.orm.SimpleEntityMeta;
+import com.babyfs.tk.dal.orm.AssignIdEntity;
+import com.babyfs.tk.dal.meta.Shard;
+import com.babyfs.tk.dal.meta.SimpleEntityMeta;
 import javassist.CannotCompileException;
 import javassist.CtClass;
 import org.junit.Assert;

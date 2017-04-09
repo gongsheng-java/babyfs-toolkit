@@ -24,7 +24,7 @@ public class FunctionUtil {
                 return null;
             }
             try {
-                return input.getBytes(Constants.DEFAULT_CHARSET);
+                return input.getBytes(Constants.UTF_8);
             } catch (UnsupportedEncodingException e) {
                 //ignore it
             }
@@ -42,7 +42,7 @@ public class FunctionUtil {
                 return null;
             }
             try {
-                return new String(input, Constants.DEFAULT_CHARSET);
+                return new String(input, Constants.UTF_8);
             } catch (UnsupportedEncodingException e) {
                 //ignore it
             }

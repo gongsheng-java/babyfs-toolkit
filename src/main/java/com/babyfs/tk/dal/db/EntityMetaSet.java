@@ -3,9 +3,9 @@ package com.babyfs.tk.dal.db;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.babyfs.tk.commons.base.Pair;
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.orm.IEntityMeta;
-import com.babyfs.tk.dal.orm.SimpleEntityMeta;
+import com.babyfs.tk.dal.meta.SimpleEntityMeta;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.ConcurrentMap;

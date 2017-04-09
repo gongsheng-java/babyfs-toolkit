@@ -6,7 +6,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 import com.babyfs.tk.commons.guice.GuiceGrapher;
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.db.DaoFactory;
 import com.babyfs.tk.dal.db.model.IShardFriendDao;
 import com.babyfs.tk.dal.db.model.IUserDao;

@@ -42,7 +42,7 @@ public final class HttpClientUtils {
      */
     public static String uncompressStream(HttpClientConfig.CompressFormat compressFormat, InputStream inputStream, String charset) throws IOException {
         if (charset == null) {
-            charset = Constants.DEFAULT_CHARSET;
+            charset = Constants.UTF_8;
         }
 
         FilterInputStream compressStream = null;
@@ -117,7 +117,7 @@ public final class HttpClientUtils {
             nvps.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
         }
         try {
-            postMethod.setEntity(new UrlEncodedFormEntity(nvps, Constants.DEFAULT_CHARSET));
+            postMethod.setEntity(new UrlEncodedFormEntity(nvps, Constants.UTF_8));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

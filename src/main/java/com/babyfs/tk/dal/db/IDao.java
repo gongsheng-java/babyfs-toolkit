@@ -1,6 +1,6 @@
 package com.babyfs.tk.dal.db;
 
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

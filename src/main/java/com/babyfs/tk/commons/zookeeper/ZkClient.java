@@ -174,7 +174,7 @@ public class ZkClient {
                 zooKeeper = new ZooKeeper(this.zkServers, this.sessiontTimeout, watcher);
             }
             if (this.zkUser != null && this.zkPassword != null) {
-                zooKeeper.addAuthInfo("digest", (this.zkUser + ":" + this.zkPassword).getBytes(Constants.DEFAULT_CHARSET));
+                zooKeeper.addAuthInfo("digest", (this.zkUser + ":" + this.zkPassword).getBytes(Constants.UTF_8));
             }
             if (connectionTimeout > 0) {
                 if (!connected.await(connectionTimeout, TimeUnit.MILLISECONDS)) {

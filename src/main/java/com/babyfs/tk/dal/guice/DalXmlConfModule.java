@@ -9,7 +9,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.babyfs.tk.commons.base.Pair;
 import com.babyfs.tk.commons.utils.ListUtil;
 import com.babyfs.tk.commons.xml.JAXBUtil;
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.db.shard.DBInstance;
 import com.babyfs.tk.dal.db.shard.DBShardInstance;
 import com.babyfs.tk.dal.db.shard.EntityShard;

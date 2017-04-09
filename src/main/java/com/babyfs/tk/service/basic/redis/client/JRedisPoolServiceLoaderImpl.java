@@ -1,7 +1,7 @@
 package com.babyfs.tk.service.basic.redis.client;
 
 import com.google.common.base.Preconditions;
-import com.babyfs.tk.service.basic.common.ServiceLoader;
+import com.babyfs.tk.service.basic.ServiceLoader;
 import com.babyfs.tk.service.basic.xml.client.Group;
 import com.babyfs.tk.service.basic.xml.client.ServerElement;
 import com.babyfs.tk.service.basic.xml.client.ServiceGroup;

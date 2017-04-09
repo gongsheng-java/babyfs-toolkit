@@ -3,7 +3,7 @@ package com.babyfs.tk.dal.db.shard;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

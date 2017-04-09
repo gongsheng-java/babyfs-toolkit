@@ -2,7 +2,7 @@ package com.babyfs.tk.dal.db;
 
 import com.google.common.base.Function;
 import com.babyfs.tk.commons.base.Pair;
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.db.model.Friend;
 import com.babyfs.tk.dal.db.model.IUserDao;
 import com.babyfs.tk.dal.db.model.User;

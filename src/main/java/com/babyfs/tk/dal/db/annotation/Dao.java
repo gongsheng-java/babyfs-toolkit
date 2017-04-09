@@ -1,6 +1,6 @@
 package com.babyfs.tk.dal.db.annotation;
 
-import com.babyfs.tk.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntity;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -452,7 +452,7 @@ public class HttpClientService {
         }
 
         if (Strings.isNullOrEmpty(charset)) {
-            charset = Constants.DEFAULT_CHARSET;
+            charset = Constants.UTF_8;
         }
 
         Header encodingHeader = closeableHttpResponse.getFirstHeader(HttpHeaders.CONTENT_ENCODING);
