@@ -1,8 +1,6 @@
 package com.babyfs.tk.service.biz.verify;
 
 
-import com.babyfs.tk.service.biz.verify.SmsCodeParameter;
-
 /**
  * 短信验证码服务接口
  */
