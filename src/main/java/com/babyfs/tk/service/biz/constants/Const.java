@@ -49,7 +49,7 @@ public class Const {
     public static final int DEFAULT_ADD_LOCK_SECONDS = 6;
 
 
-    private Const() {
+    protected Const() {
 
     }
 }
