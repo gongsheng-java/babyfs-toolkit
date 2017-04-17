@@ -93,12 +93,6 @@ public final class Modules {
      */
     public static final Module BASE_MODULE_VALIDATE_SERVICE = new ValidateServiceModule();
 
-    /**
-     * 非严格模式数据校验服务
-     */
-    public static final Module BASE_MODULE_VALIDATE_SERVICE_NO_STRICT = new ValidateServiceModule(false);
-
-
     /* 加密服务 */
     public static final CryptoServiceModule CRYPTO_SERVICE_MODULE = new CryptoServiceModule();
 

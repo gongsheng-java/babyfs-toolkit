@@ -8,7 +8,7 @@ import com.babyfs.tk.service.biz.counter.IDSequenceService;
  * 计数服务Module
  * <p/>
  */
-public class CounterServiceModule extends ServiceModule {
+public class IDSequenceServiceModule extends ServiceModule {
 
     @Override
     protected void configure() {

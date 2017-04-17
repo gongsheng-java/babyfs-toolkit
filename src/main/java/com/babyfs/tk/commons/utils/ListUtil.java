@@ -81,7 +81,7 @@ public final class ListUtil {
      * @param list
      * @return
      */
-    public static boolean isNotEmtpy(List list) {
+    public static boolean isNotEmpty(List list) {
         return list != null && !list.isEmpty();
     }
 

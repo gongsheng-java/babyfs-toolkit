@@ -113,7 +113,7 @@ public class BackendUserServiceImpl implements IBackendUserService {
 
         String uniqName = Util.getInternalUserName(userAccount);
         List<BackendUserEntity> entities = backendUserDao.getByName(uniqName);
-        if (ListUtil.isNotEmtpy(entities)) {
+        if (ListUtil.isNotEmpty(entities)) {
             BackendUserEntity entityByName = entities.get(0);
             if (entityByName.getId() != userAccount.getId()) {
                 return ServiceResponse.createFailResponse(ServiceResponse.FAIL_KEY, "用户名已经存在");
