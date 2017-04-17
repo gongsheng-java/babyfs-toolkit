@@ -3,7 +3,7 @@ package com.babyfs.tk.service.biz.counter;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.babyfs.tk.service.biz.Modules;
-import com.babyfs.tk.service.biz.counter.guice.CounterServiceModule;
+import com.babyfs.tk.service.biz.counter.guice.IDSequenceServiceModule;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -27,7 +27,7 @@ public class CounterServiceTest {
         Injector injector = Guice.createInjector(
                 Modules.BASIC_MODULE_REDIS_CONF,
                 Modules.BASIC_MODULE_REDIS_SERVICE,
-                new CounterServiceModule()
+                new IDSequenceServiceModule()
         );
         IDSequenceService service = injector.getInstance(IDSequenceService.class);
         Date date = new Date();

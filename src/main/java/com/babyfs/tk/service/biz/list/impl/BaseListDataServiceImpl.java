@@ -162,7 +162,7 @@ public class BaseListDataServiceImpl<L extends BaseListEntity, C extends BaseLis
         Long id = CacheUtils.get(key, this.listOwnerTargetIdCacheParam, this.cacheService);
         if (id == null) {
             List<L> list = dao.getByOwnerAndTargetId(ownerId, targetId);
-            if (ListUtil.isNotEmtpy(list)) {
+            if (ListUtil.isNotEmpty(list)) {
                 id = list.get(0).getId();
                 CacheUtils.set(key, id, this.listOwnerTargetIdCacheParam, this.cacheService);
             } else {

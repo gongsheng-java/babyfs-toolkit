@@ -18,7 +18,7 @@ abstract class ListDataServiceSupport {
             List<Long> list = DalUtil.extractColumn(objects, 0);
             return list.stream().map(targetId -> Pair.of(targetId, targetId)).collect(Collectors.toList());
         } else {
-            if (ListUtil.isNotEmtpy(objects)) {
+            if (ListUtil.isNotEmpty(objects)) {
                 List<Pair<Long, Long>> ret = Lists.newArrayListWithCapacity(objects.size());
                 for (Object[] obj : objects) {
                     ret.add(Pair.of((Long) obj[0], (Long) obj[1]));

@@ -161,7 +161,7 @@ public class BaseStrListDataServiceImpl<SL extends BaseStrListEntity, C extends 
         Long id = CacheUtils.get(key, this.listOwnerTargetIdCacheParam, this.cacheService);
         if (id == null) {
             List<SL> list = dao.getByOwnerAndTargetId(ownerId, targetId);
-            if (ListUtil.isNotEmtpy(list)) {
+            if (ListUtil.isNotEmpty(list)) {
                 id = list.get(0).getId();
                 CacheUtils.set(key, id, this.listOwnerTargetIdCacheParam, this.cacheService);
             } else {

@@ -17,7 +17,7 @@ public class TomcatDataSourceCreator implements IDataSourceCreator {
     @Override
     public javax.sql.DataSource create(String ip, int port, String user, String password, String schema, List<Pair<String, String>> paramters) {
         PoolProperties p = new PoolProperties();
-        if (ListUtil.isNotEmtpy(paramters)) {
+        if (ListUtil.isNotEmpty(paramters)) {
             p.setUrl(MySQLUtil.buildMySQLURL(ip, port, schema, paramters));
         } else {
             p.setUrl(MySQLUtil.buildMySQLURL(ip, port, schema));
