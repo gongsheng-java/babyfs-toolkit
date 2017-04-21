@@ -30,7 +30,6 @@ public class BackendUserModule extends ServiceModule {
 
         //Auth
         MapBinder<Integer, IAuth> authMapBinder = MapBinder.newMapBinder(binder(), Integer.class, IAuth.class);
-        authMapBinder.addBinding(AccountType.LDAP.getType()).to(LDAPAuthImpl.class).asEagerSingleton();
         authMapBinder.addBinding(AccountType.INTERNAL.getType()).to(InternalAuthImpl.class).asEagerSingleton();
     }
 }
