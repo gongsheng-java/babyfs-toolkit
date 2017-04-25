@@ -1,4 +1,4 @@
-package com.babyfs.tk.service.biz.base.model;
+package com.babyfs.tk.service.biz.base;
 
 
 import com.babyfs.tk.commons.enums.IndexedEnum;
