@@ -27,10 +27,6 @@ public class KVConfEntity extends BaseAutoIdEntity {
      * 配置的内容
      */
     private String content;
-    /**
-     * 根据type解析过的内容
-     */
-    private transient Object parsedObject;
 
     @Column(name = "name")
     public String getName() {
@@ -57,14 +53,5 @@ public class KVConfEntity extends BaseAutoIdEntity {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    @Transient
-    public <T> T getParsedObject() {
-        return (T) parsedObject;
-    }
-
-    public void setParsedObject(Object parsedObject) {
-        this.parsedObject = parsedObject;
     }
 }

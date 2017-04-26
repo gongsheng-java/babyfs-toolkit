@@ -119,13 +119,13 @@ public abstract class BaseDataServiceImpl<T extends IBaseEntity> extends BaseCac
             addCacheToCleanList(entity.getId(), cacheParam);
             entity.setVer(newVersion);
             isSuccess = dao.updateWithVersion(entity, version);
-            CacheUtils.delete(entity.getId(), cacheParam, redisService);
             return isSuccess;
         } finally {
             //如果更新不成功,重置版本号
             if (!isSuccess) {
                 entity.setVer(version);
             }
+            CacheUtils.delete(entity.getId(), cacheParam, redisService);
         }
     }
 
