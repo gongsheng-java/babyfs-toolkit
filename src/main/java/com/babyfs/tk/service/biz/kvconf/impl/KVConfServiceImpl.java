@@ -7,15 +7,12 @@ import com.babyfs.tk.service.basic.INameResourceService;
 import com.babyfs.tk.service.basic.guice.annotation.ServiceRedis;
 import com.babyfs.tk.service.basic.redis.IRedis;
 import com.babyfs.tk.service.basic.utils.ResponseUtil;
+import com.babyfs.tk.service.biz.base.model.ParsedEntity;
 import com.babyfs.tk.service.biz.cache.*;
 import com.babyfs.tk.service.biz.constants.ErrorCode;
 import com.babyfs.tk.service.biz.constants.ValidateConst;
-import com.babyfs.tk.service.biz.kvconf.ConfCacheConst;
-import com.babyfs.tk.service.biz.kvconf.KVConfJSONType;
-import com.babyfs.tk.service.biz.kvconf.KVConfType;
+import com.babyfs.tk.service.biz.kvconf.*;
 import com.babyfs.tk.service.biz.kvconf.model.KVConfEntity;
-import com.babyfs.tk.service.biz.kvconf.IKVConfDataService;
-import com.babyfs.tk.service.biz.kvconf.IKVConfService;
 import com.babyfs.tk.service.biz.pubsub.RedisPubSubServcie;
 import com.babyfs.tk.service.biz.validator.IValidateService;
 import com.google.common.base.Preconditions;
@@ -36,12 +33,12 @@ import static com.babyfs.tk.commons.model.ServiceResponse.failResponse;
 public class KVConfServiceImpl implements IKVConfService {
     private static final Logger LOGGER = LoggerFactory.getLogger(KVConfServiceImpl.class);
     private static final CacheParameter NAME_CACHE = ConfCacheConst.CONF_NAME_CACHE_PARAM;
-    private static final KVConfEntity LOCAL_NULL_CONF = new KVConfEntity();
+    private static final ParsedEntity<KVConfEntity> LOCAL_NULL_CONF = new ParsedEntity<>();
 
     private final IKVConfDataService dataService;
     private final IValidateService validateService;
     private final INameResourceService<IRedis> redisService;
-    private final LoadingCache<String, KVConfEntity> localNameCache;
+    private final LoadingCache<String, ParsedEntity<KVConfEntity>> localNameCache;
 
     @Inject(optional = true)
     RedisPubSubServcie pubSubService;
@@ -51,10 +48,10 @@ public class KVConfServiceImpl implements IKVConfService {
         this.dataService = Preconditions.checkNotNull(dataService);
         this.validateService = Preconditions.checkNotNull(validateService);
         this.redisService = Preconditions.checkNotNull(redisService);
-        localNameCache = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).maximumSize(10000).build(new CacheLoader<String, KVConfEntity>() {
+        localNameCache = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).maximumSize(10000).build(new CacheLoader<String, ParsedEntity<KVConfEntity>>() {
             @Override
-            public KVConfEntity load(String key) throws Exception {
-                ServiceResponse<KVConfEntity> byName = getByName(key);
+            public ParsedEntity<KVConfEntity> load(String key) throws Exception {
+                ServiceResponse<ParsedEntity<KVConfEntity>> byName = getByName(key);
                 if (byName.getData() == null) {
                     //如果返回的结果为空,则返回空对象代替
                     return LOCAL_NULL_CONF;
@@ -73,7 +70,7 @@ public class KVConfServiceImpl implements IKVConfService {
             return response;
         }
 
-        ServiceResponse<KVConfEntity> byName = this.getByName(entity.getName());
+        ServiceResponse<ParsedEntity<KVConfEntity>> byName = this.getByName(entity.getName());
         if (byName.isSuccess() && byName.getData() != null) {
             return ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "已经存在");
         }
@@ -95,13 +92,13 @@ public class KVConfServiceImpl implements IKVConfService {
 
     @Override
     public ServiceResponse<Boolean> update(KVConfEntity entity) {
-        ServiceResponse<KVConfEntity> get = this.get(entity.getId());
+        ServiceResponse<ParsedEntity<KVConfEntity>> get = this.get(entity.getId());
         if (!get.isSuccess() || get.getData() == null) {
             return ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "不存在");
         }
 
         // 仅能修改内容
-        KVConfEntity toUpdate = get.getData();
+        KVConfEntity toUpdate = get.getData().getEntity();
         toUpdate.setContent(entity.getContent());
 
         ServiceResponse response = checkAndFillEntity(toUpdate);
@@ -122,22 +119,21 @@ public class KVConfServiceImpl implements IKVConfService {
 
 
     @Override
-    public ServiceResponse<KVConfEntity> get(long id) {
+    public ServiceResponse<ParsedEntity<KVConfEntity>> get(long id) {
         if (id <= 0) {
             return ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "id应该大于0");
         }
 
         KVConfEntity entity = dataService.get(id);
         if (entity != null) {
-            parseContent(entity);
-            return createSuccessResponse(entity);
+            return createSuccessResponse(parseContent(entity));
         } else {
             return failResponse();
         }
     }
 
     @Override
-    public ServiceResponse<KVConfEntity> getByName(String name) {
+    public ServiceResponse<ParsedEntity<KVConfEntity>> getByName(String name) {
         KVConfEntity entity;
         do {
             entity = CacheUtils.get(name, NAME_CACHE, redisService);
@@ -153,17 +149,16 @@ public class KVConfServiceImpl implements IKVConfService {
         } while (false);
 
         if (entity != null) {
-            parseContent(entity);
-            return createSuccessResponse(entity);
+            return createSuccessResponse(parseContent(entity));
         } else {
             return failResponse();
         }
     }
 
     @Override
-    public ServiceResponse<KVConfEntity> getByNameWithLocalCache(String name) {
+    public ServiceResponse<ParsedEntity<KVConfEntity>> getByNameWithLocalCache(String name) {
         try {
-            KVConfEntity entity = this.localNameCache.get(name);
+            ParsedEntity<KVConfEntity> entity = this.localNameCache.get(name);
             if (entity != null && entity != LOCAL_NULL_CONF) {
                 return createSuccessResponse(entity);
             }
@@ -255,24 +250,29 @@ public class KVConfServiceImpl implements IKVConfService {
      *
      * @param entity
      */
-    private void parseContent(KVConfEntity entity) {
+    private ParsedEntity<KVConfEntity> parseContent(KVConfEntity entity) {
+        final ParsedEntity<KVConfEntity> parsedKVConfEntity = new ParsedEntity<>();
+        parsedKVConfEntity.setEntity(entity);
+
         String content = entity.getContent();
         if (Strings.isNullOrEmpty(content)) {
-            return;
+            return parsedKVConfEntity;
         }
 
         if (entity.getType() == KVConfType.INTEGER.getIndex()) {
-            entity.setParsedObject(Integer.parseInt(content));
+            parsedKVConfEntity.setParsed(Integer.parseInt(content));
         } else if (entity.getType() == KVConfType.DOUBLE.getIndex()) {
-            entity.setParsedObject(Double.parseDouble(content));
+            parsedKVConfEntity.setParsed(Double.parseDouble(content));
         } else if (entity.getType() == KVConfType.JSONOBJECT_TEXT.getIndex()) {
             KVConfJSONType jsonType = KVConfJSONType.get(entity.getName());
             if (jsonType == null) {
-                entity.setParsedObject(JSONObject.parseObject(content));
+                parsedKVConfEntity.setParsed(JSONObject.parseObject(content));
             } else {
-                entity.setParsedObject(JSONObject.parseObject(content, jsonType.getValueType()));
+                parsedKVConfEntity.setParsed(JSONObject.parseObject(content, jsonType.getValueType()));
             }
         }
+
+        return parsedKVConfEntity;
     }
 
     private void invalidateLocalCache(KVConfEntity toInvalidate) {

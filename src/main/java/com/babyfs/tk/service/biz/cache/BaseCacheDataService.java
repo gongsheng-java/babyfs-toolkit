@@ -1,16 +1,16 @@
 package com.babyfs.tk.service.biz.cache;
 
+import com.babyfs.tk.commons.base.Pair;
+import com.babyfs.tk.dal.db.DaoFactory;
+import com.babyfs.tk.dal.db.IDao;
+import com.babyfs.tk.dal.orm.IEntity;
+import com.babyfs.tk.service.basic.INameResourceService;
+import com.babyfs.tk.service.basic.guice.annotation.ServiceRedis;
+import com.babyfs.tk.service.basic.redis.IRedis;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.babyfs.tk.commons.base.Pair;
-import com.babyfs.tk.dal.orm.IEntity;
-import com.babyfs.tk.dal.db.DaoFactory;
-import com.babyfs.tk.dal.db.IDao;
-import com.babyfs.tk.service.basic.INameResourceService;
-import com.babyfs.tk.service.basic.guice.annotation.ServiceRedis;
-import com.babyfs.tk.service.basic.redis.IRedis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class BaseCacheDataService implements IBaseCacheDataService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseCacheDataService.class);
 
-    static final Function<Object[],Long> ObjArray2IdFunction = new Function<Object[], Long>() {
+    static final Function<Object[], Long> ObjArray2IdFunction = new Function<Object[], Long>() {
         @Override
         public Long apply(Object[] input) {
             Preconditions.checkArgument(input != null);
@@ -226,9 +226,11 @@ public class BaseCacheDataService implements IBaseCacheDataService {
         Preconditions.checkArgument(null != dao, "dao is null");
         Preconditions.checkArgument(null != cacheParameter, "cacheParameter is null");
         addCacheToCleanList(entity.getId(), cacheParameter);
-        boolean isSuccess = updateEntity(entity, dao);
-        CacheUtils.delete(entity.getId(), cacheParameter, redisService);
-        return isSuccess;
+        try {
+            return updateEntity(entity, dao);
+        } finally {
+            CacheUtils.delete(entity.getId(), cacheParameter, redisService);
+        }
     }
 
     /**
@@ -245,9 +247,11 @@ public class BaseCacheDataService implements IBaseCacheDataService {
         Preconditions.checkArgument(null != dao, "dao is null");
         Preconditions.checkArgument(null != cacheParameter, "cacheParameter is null");
         addCacheToCleanList(entity.getId(), cacheParameter);
-        boolean isSuccess = dao.delete(entity);
-        CacheUtils.delete(entity.getId(), cacheParameter, redisService);
-        return isSuccess;
+        try {
+            return dao.delete(entity);
+        } finally {
+            CacheUtils.delete(entity.getId(), cacheParameter, redisService);
+        }
     }
 
     /**
