@@ -1,5 +1,6 @@
 package com.babyfs.tk.dal.meta;
 
+import com.babyfs.tk.commons.utils.ListUtil;
 import com.babyfs.tk.dal.DalUtil;
 import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.orm.IEntityMeta;
@@ -8,18 +9,16 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.babyfs.tk.commons.utils.ListUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  */
@@ -108,7 +107,7 @@ public class SimpleEntityMeta<T extends IEntity> implements IEntityMeta<T> {
             this.updateSqlColumns = joiner.join(ListUtil.transform(tUpdate, new Function<EntityField, String>() {
                 @Override
                 public String apply(@Nonnull EntityField input) {
-                    return input.getColumnName() + "=:" + input.getAttribueName();
+                    return toUpdateColumn(input);
                 }
             }));
         }
@@ -178,6 +177,39 @@ public class SimpleEntityMeta<T extends IEntity> implements IEntityMeta<T> {
     public String getInsertSqlColumnsValues() {
         return insertSqlColumnsValues;
     }
+
+
+    @Override
+    public String paritalUpdateColumns(String[] includeColumns, String[] excludeColumns) {
+        LinkedHashMap<String, EntityField> fields;
+        LinkedHashMap<String, EntityField> columnMap = Maps.newLinkedHashMap();
+        for (EntityField field : this.update) {
+            columnMap.put(field.getColumnName(), field);
+        }
+        if (includeColumns == null || includeColumns.length == 0) {
+            fields = columnMap;
+        } else {
+            fields = Maps.newLinkedHashMap();
+            for (String column : includeColumns) {
+                EntityField field = Preconditions.checkNotNull(columnMap.get(column), "Can't find include column %s in class %s", column, this.entityClass);
+                fields.put(field.getColumnName(), field);
+            }
+        }
+        if (excludeColumns != null) {
+            for (String column : excludeColumns) {
+                EntityField field = Preconditions.checkNotNull(columnMap.get(column), "Can't find exclude column %s in class %s", column, this.entityClass);
+                fields.remove(field.getColumnName());
+            }
+        }
+
+        Preconditions.checkState(!fields.isEmpty(), "no update fields");
+        return Joiner.on(",").skipNulls().join(fields.values().stream().map(this::toUpdateColumn).collect(Collectors.toList()));
+    }
+
+    protected String toUpdateColumn(EntityField field) {
+        return field.getColumnName() + "=:" + field.getAttribueName();
+    }
+
 
     /**
      * @param clazz

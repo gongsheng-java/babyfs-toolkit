@@ -85,4 +85,12 @@ public interface IEntityMeta<T extends IEntity> {
      */
     String getInsertSqlColumnsValues();
 
+    /**
+     * 取得用于局部更新的以逗号分割的字段列表
+     *
+     * @param includeColumns
+     * @param excludeColumns
+     * @return
+     */
+    String paritalUpdateColumns(String[] includeColumns, String[] excludeColumns);
 }

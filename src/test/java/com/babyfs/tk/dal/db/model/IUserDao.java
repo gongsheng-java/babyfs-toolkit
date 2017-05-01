@@ -1,15 +1,12 @@
 package com.babyfs.tk.dal.db.model;
 
 import com.babyfs.tk.dal.db.IDao;
-import com.babyfs.tk.dal.db.annotation.Dao;
-import com.babyfs.tk.dal.db.annotation.Sql;
-import com.babyfs.tk.dal.db.annotation.SqlParam;
-import com.babyfs.tk.dal.db.annotation.SqlType;
+import com.babyfs.tk.dal.db.annotation.*;
 
 import java.util.List;
 
 /**
-*/
+ */
 @Dao(entityClass = User.class)
 public interface IUserDao extends IDao<User> {
     @Sql(condition = "where id > :id2 and name like :name order by id desc limit :number")
@@ -26,4 +23,5 @@ public interface IUserDao extends IDao<User> {
 
     @Sql(type = SqlType.DELETE, condition = "where name= :name")
     int deleteName(@SqlParam("name") String name);
+
 }

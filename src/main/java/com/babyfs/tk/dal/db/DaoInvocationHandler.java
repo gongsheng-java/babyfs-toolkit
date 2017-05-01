@@ -1,20 +1,21 @@
 package com.babyfs.tk.dal.db;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.babyfs.tk.commons.JavaProxyUtil;
 import com.babyfs.tk.commons.base.Pair;
-import com.babyfs.tk.dal.orm.IEntity;
-import com.babyfs.tk.dal.meta.Shard;
 import com.babyfs.tk.dal.db.annotation.*;
 import com.babyfs.tk.dal.db.funcs.EntityParameterFunc;
 import com.babyfs.tk.dal.db.funcs.GetNumberFunction;
 import com.babyfs.tk.dal.db.funcs.SetShardParameterFunc;
 import com.babyfs.tk.dal.db.funcs.SetSqlParameterFunc;
+import com.babyfs.tk.dal.meta.Shard;
+import com.babyfs.tk.dal.orm.IEntity;
+import com.babyfs.tk.dal.orm.IEntityMeta;
 import com.babyfs.tk.probe.metrics.MetricsProbe;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import javax.annotation.Nonnull;
@@ -77,8 +78,8 @@ public final class DaoInvocationHandler implements InvocationHandler {
         this.daoSupport = daoSupport;
         this.interfaces = interfaces;
         final Dao dao = this.daoClass.getAnnotation(Dao.class);
-        entityClass = dao.entityClass();
-        daoSimpleName = daoClass.getSimpleName();
+        this.entityClass = dao.entityClass();
+        this.daoSimpleName = daoClass.getSimpleName();
         init();
     }
 
@@ -125,6 +126,8 @@ public final class DaoInvocationHandler implements InvocationHandler {
                 methodFunctionMap.put(get, getFunc);
             }
 
+            final Pair<IEntityMeta, IEntityHelper> metaPair = this.daoSupport.getEntityMetaSet().getMetaPair(this.entityClass);
+
             //扫描所有的方法
             Method[] methods = daoClass.getMethods();
             for (Method method : methods) {
@@ -165,6 +168,12 @@ public final class DaoInvocationHandler implements InvocationHandler {
                     methodFunctionMap.put(method, func);
                 } else if (type == SqlType.EXEC) {
                     ExceFunc func = new ExceFunc(setSqlParameterFuncs, setShardParameterFuncs, sql.execSql(), sql.replaceTableName());
+                    methodFunctionMap.put(method, func);
+                } else if (type == SqlType.UPDATE_PARTIAL_ENTITY) {
+                    EntityParameterFunc entityParameterFunc = Preconditions.checkNotNull(generateEntityParameterFunc(method), "Can't find @EntityParam ");
+                    IEntityMeta entityMeta = metaPair.getFirst();
+                    String updateColumns = entityMeta.paritalUpdateColumns(sql.includeColumns(), sql.excludeColumns());
+                    UpdateParitialEntityWithConditionFunc func = new UpdateParitialEntityWithConditionFunc(entityParameterFunc, setSqlParameterFuncs, updateColumns, sql.condition());
                     methodFunctionMap.put(method, func);
                 } else {
                     throw new UnsupportedOperationException("Unknown type:" + type);
@@ -410,6 +419,34 @@ public final class DaoInvocationHandler implements InvocationHandler {
                 func.apply(shardPair);
             }
             return daoSupport.exec(entityClass, execSql, this.tableNameParaName, pair.first, shardPair.first);
+        }
+    }
+
+    /**
+     * 更新指定的实体的个别字段
+     */
+    private final class UpdateParitialEntityWithConditionFunc implements Function<Object[], Object> {
+        private EntityParameterFunc entityParameterFunc;
+        private final List<SetSqlParameterFunc> setSqlParameterFuncs;
+        private final String updateColumns;
+        private final String condition;
+
+
+        private UpdateParitialEntityWithConditionFunc(@Nonnull EntityParameterFunc entityParameterFunc, @Nonnull List<SetSqlParameterFunc> setSqlParameterFuncs, @Nonnull String updateColumns, @Nonnull String condition) {
+            this.entityParameterFunc = Preconditions.checkNotNull(entityParameterFunc, "entityParameterFunc");
+            this.setSqlParameterFuncs = Preconditions.checkNotNull(setSqlParameterFuncs, "setSqlParameterFuncs");
+            this.updateColumns = Preconditions.checkNotNull(updateColumns, "updateColumns");
+            this.condition = Preconditions.checkNotNull(condition, "condition");
+        }
+
+        @Override
+        public Object apply(@Nullable Object[] input) {
+            Pair<MapSqlParameterSource, Object[]> pair = new Pair<>(new MapSqlParameterSource(), input);
+            for (SetSqlParameterFunc func : setSqlParameterFuncs) {
+                func.apply(pair);
+            }
+            IEntity entity = Preconditions.checkNotNull(entityParameterFunc.apply(input));
+            return daoSupport.updatePartial(entity, this.updateColumns, this.condition, pair.first);
         }
     }
 
