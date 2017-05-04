@@ -31,7 +31,7 @@ public interface IKVConfService {
      * @param id id
      * @return 操作结果
      */
-    ServiceResponse<ParsedEntity<KVConfEntity>> get(long id);
+    ServiceResponse<ParsedEntity<KVConfEntity, Object>> get(long id);
 
     /**
      * 根据名称查询,根据类型解析{@link KVConfEntity#getContent()}
@@ -39,7 +39,7 @@ public interface IKVConfService {
      * @param name 非空
      * @return
      */
-    ServiceResponse<ParsedEntity<KVConfEntity>> getByName(String name);
+    ServiceResponse<ParsedEntity<KVConfEntity, Object>> getByName(String name);
 
     /**
      * 根据名称查询,优先从本地Cache中加载,本地如果没有数据,再从{@link #getByName(String)}加载.
@@ -48,7 +48,7 @@ public interface IKVConfService {
      * @param name
      * @return
      */
-    ServiceResponse<ParsedEntity<KVConfEntity>> getByNameWithLocalCache(String name);
+    ServiceResponse<ParsedEntity<KVConfEntity, Object>> getByNameWithLocalCache(String name);
 
     /**
      * 删除一个字典

@@ -45,4 +45,18 @@ public @interface Sql {
      * @return
      */
     boolean replaceTableName() default true;
+
+    /**
+     * 供{@link SqlType#UPDATE_PARTIAL_ENTITY}使用,表示更新实体是需要包含的字段
+     *
+     * @return
+     */
+    String[] includeColumns() default {};
+
+    /**
+     * 供{@link SqlType#UPDATE_PARTIAL_ENTITY}使用,表示更新实体是需要排除的字段
+     *
+     * @return
+     */
+    String[] excludeColumns() default {};
 }

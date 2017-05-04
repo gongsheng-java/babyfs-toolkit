@@ -1,14 +1,14 @@
 package com.babyfs.tk.dal.db;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.babyfs.tk.commons.base.Pair;
-import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.db.shard.DBObjectSet;
 import com.babyfs.tk.dal.db.shard.EntityShard;
 import com.babyfs.tk.dal.db.shard.ShardUtil;
+import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.orm.IEntityMeta;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,6 @@ public class DaoSupport {
      */
     public DaoSupport(DataSource dataSource, EntityMetaSet entityMetaSet) {
         this(dataSource, entityMetaSet, null);
-
     }
 
     /**
@@ -470,37 +469,22 @@ public class DaoSupport {
      * @return
      */
     public boolean update(@Nonnull IEntity entity, String condition, MapSqlParameterSource conditionParameter) {
-        final Pair<IEntityMeta, IEntityHelper> metaPair = entityMetaSet.getMetaPair(entity.getClass());
-        final IEntityMeta entityMeta = metaPair.first;
-        final IEntityHelper helper = metaPair.second;
-        final String updateSqlColumns = entityMeta.getUpdateSqlColumns();
-        final String idColumnName = entityMeta.getIdField().getColumnName();
-        final String idAttribueName = entityMeta.getIdField().getAttribueName();
-        try {
-            String tableName = getTableName(entity, metaPair);
-            setupDBShard(entity, metaPair);
-            condition = StringUtils.trimToEmpty(condition);
-            if (!Strings.isNullOrEmpty(condition)) {
-                condition = " AND " + condition;
-            }
-
-            final String sql = "update " + tableName + " set " + updateSqlColumns + " where " + idColumnName + " =:" + idAttribueName + condition;
-            MapSqlParameterSource entityParameter = helper.toSource(entity);
-            if (!Strings.isNullOrEmpty(condition) && conditionParameter != null && !conditionParameter.getValues().isEmpty()) {
-                for (String key : conditionParameter.getValues().keySet()) {
-                    if (entityParameter.hasValue(key)) {
-                        throw new IllegalArgumentException("Can't set parameter [" + key + "],because it's already exist in entity property");
-                    }
-                }
-                entityParameter.addValues(conditionParameter.getValues());
-            }
-            return namedJdbcTemplate.update(sql, entityParameter) == 1;
-        } catch (DataAccessException e) {
-            throw logAndReThrowException(e);
-        } finally {
-            cleanUpDBShard();
-        }
+        return this.updateWithColumnsAndCondition(entity, null, condition, conditionParameter);
     }
+
+    /**
+     * 根据条件更新指定的实体的指定字段
+     *
+     * @param entity             需要被更新的实体,非空
+     * @param updateColumsn      需要被更新的字段，非空
+     * @param condition          更新条件,可以为空
+     * @param conditionParameter 更新条件的参数,可以为空,参数的key不能与entity中的属性重名
+     * @return
+     */
+    public boolean updatePartial(@Nonnull IEntity entity, String updateColumsn, String condition, MapSqlParameterSource conditionParameter) {
+        return this.updateWithColumnsAndCondition(entity, updateColumsn, condition, conditionParameter);
+    }
+
 
     /**
      * 执行通用的Sql更新
@@ -524,6 +508,10 @@ public class DaoSupport {
         } finally {
             cleanUpDBShard();
         }
+    }
+
+    public EntityMetaSet getEntityMetaSet() {
+        return entityMetaSet;
     }
 
     private <T extends IEntity> void setupDBShard(T shardValue, Pair<IEntityMeta, IEntityHelper> pair) {
@@ -630,6 +618,48 @@ public class DaoSupport {
             return (Object[]) varArgs[0];
         } else {
             return varArgs;
+        }
+    }
+
+    /**
+     * 根据条件更新指定的实体
+     *
+     * @param entity             需要被更新的实体,非空
+     * @param updateColumns
+     * @param condition          更新条件,可以为空
+     * @param conditionParameter 更新条件的参数,可以为空,参数的key不能与entity中的属性重名
+     * @return
+     */
+    private boolean updateWithColumnsAndCondition(@Nonnull IEntity entity, String updateColumns, String condition, MapSqlParameterSource conditionParameter) {
+        final Pair<IEntityMeta, IEntityHelper> metaPair = entityMetaSet.getMetaPair(entity.getClass());
+        final IEntityMeta entityMeta = metaPair.first;
+        final IEntityHelper helper = metaPair.second;
+        final String updateSqlColumns = updateColumns == null ? entityMeta.getUpdateSqlColumns() : updateColumns;
+        final String idColumnName = entityMeta.getIdField().getColumnName();
+        final String idAttribueName = entityMeta.getIdField().getAttribueName();
+        try {
+            String tableName = getTableName(entity, metaPair);
+            setupDBShard(entity, metaPair);
+            condition = StringUtils.trimToEmpty(condition);
+            if (!Strings.isNullOrEmpty(condition)) {
+                condition = " AND " + condition;
+            }
+
+            final String sql = "update " + tableName + " set " + updateSqlColumns + " where " + idColumnName + " =:" + idAttribueName + condition;
+            MapSqlParameterSource entityParameter = helper.toSource(entity);
+            if (!Strings.isNullOrEmpty(condition) && conditionParameter != null && !conditionParameter.getValues().isEmpty()) {
+                for (String key : conditionParameter.getValues().keySet()) {
+                    if (entityParameter.hasValue(key)) {
+                        throw new IllegalArgumentException("Can't set parameter [" + key + "],because it's already exist in entity property");
+                    }
+                }
+                entityParameter.addValues(conditionParameter.getValues());
+            }
+            return namedJdbcTemplate.update(sql, entityParameter) == 1;
+        } catch (DataAccessException e) {
+            throw logAndReThrowException(e);
+        } finally {
+            cleanUpDBShard();
         }
     }
 

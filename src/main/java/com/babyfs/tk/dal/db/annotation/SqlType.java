@@ -31,5 +31,9 @@ public enum SqlType {
     /**
      * 自定义的更新
      */
-    EXEC;
+    EXEC,
+    /**
+     * 更新实体的部分字段
+     */
+    UPDATE_PARTIAL_ENTITY;
 }
