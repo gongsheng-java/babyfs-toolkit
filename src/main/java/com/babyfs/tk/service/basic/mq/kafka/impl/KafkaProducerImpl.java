@@ -1,7 +1,8 @@
-package com.babyfs.tk.service.basic.mq.kafka.internal;
+package com.babyfs.tk.service.basic.mq.kafka.impl;
 
-import com.google.common.collect.Lists;
 import com.babyfs.tk.service.basic.mq.kafka.IKafkaProducer;
+import com.babyfs.tk.service.basic.mq.kafka.KafkaConfs;
+import com.google.common.collect.Lists;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -34,20 +35,18 @@ public class KafkaProducerImpl<K, V> implements IKafkaProducer<K, V> {
     public KafkaProducerImpl(@Nonnull Map<String, String> conf) {
         config = new Properties();
         config.putAll(conf);
-        if (!config.containsKey("max.block.ms")) {
-            config.setProperty("max.block.ms", "5000");
-        }
+        KafkaConfs.setDefaultConfs(config);
 
         this.name = config.getProperty(CLIENT_ID);
         String producerType = config.getProperty(PRODUCER_TYPE);
         config.remove(PRODUCER_TYPE);
         if (ASYNC.equals(producerType)) {
             //异步Producer
-            this.producer = new KafkaProducer<K, V>(config);
+            this.producer = new KafkaProducer<>(config);
             sync = false;
         } else if (SYNC.equals(producerType)) {
             //同步Producer
-            this.producer = new KafkaProducer<K, V>(config);
+            this.producer = new KafkaProducer<>(config);
             sync = true;
         } else {
             throw new IllegalArgumentException("Unknown producer tyep:" + producerType);

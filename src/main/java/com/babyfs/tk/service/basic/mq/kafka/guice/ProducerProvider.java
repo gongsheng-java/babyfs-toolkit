@@ -5,7 +5,7 @@ import com.google.inject.Provider;
 import com.babyfs.tk.commons.service.IContext;
 import com.babyfs.tk.service.basic.guice.annotation.ServiceConf;
 import com.babyfs.tk.service.basic.mq.kafka.IKafkaProducer;
-import com.babyfs.tk.service.basic.mq.kafka.internal.KafkaProducerImpl;
+import com.babyfs.tk.service.basic.mq.kafka.impl.KafkaProducerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

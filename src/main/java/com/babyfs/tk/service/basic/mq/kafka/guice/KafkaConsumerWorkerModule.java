@@ -1,5 +1,8 @@
-package com.babyfs.tk.service.basic.mq.kafka;
+package com.babyfs.tk.service.basic.mq.kafka.guice;
 
+import com.babyfs.tk.service.basic.mq.kafka.IKafkaConsumer;
+import com.babyfs.tk.service.basic.mq.kafka.IKafkaMsgProcessor;
+import com.babyfs.tk.service.basic.mq.kafka.KafkaConsumerWorkerService;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.*;
@@ -9,7 +12,6 @@ import com.google.inject.name.Names;
 import com.babyfs.tk.commons.application.LifeServiceBindUtil;
 import com.babyfs.tk.commons.xml.XmlProperties;
 import com.babyfs.tk.service.basic.guice.SimpleBasicServiceModule;
-import com.babyfs.tk.service.basic.mq.kafka.guice.KafkaModuleFactory;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
