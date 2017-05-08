@@ -14,5 +14,5 @@ public interface IKafkaMsgProcessor<K, V> {
      * @param retryCount 重试的次数
      * @return true, 处理成功;false,处理失败
      */
-    public boolean process(String topic, K key, V message, long retryCount);
+    boolean process(String topic, K key, V message, long retryCount);
 }

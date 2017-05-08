@@ -10,7 +10,6 @@ import com.babyfs.tk.commons.xml.XmlProperties;
 import com.babyfs.tk.service.basic.INameResourceService;
 import com.babyfs.tk.service.basic.guice.annotation.ServiceConf;
 import com.babyfs.tk.service.basic.guice.annotation.ServiceQueueKestrel;
-import com.babyfs.tk.service.basic.queue.IQueue;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -27,7 +26,7 @@ public abstract class BasicServiceModule extends PrivateModule {
      * 该绑定需要指定{@link INameResourceService}泛性类别，如 INameResourceService<IQueue>
      * 这样可以在服务中明确返回的服务对象，如下使用:
      *
-     * @param resourceType 服务的类型 如{@link IQueue}
+     * @param resourceType 服务的类型
      * @param provider
      * @param annotation   当前支持的注解类型：{@link ServiceQueueKestrel} 等
      */

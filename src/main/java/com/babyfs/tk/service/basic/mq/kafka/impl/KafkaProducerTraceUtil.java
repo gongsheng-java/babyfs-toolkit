@@ -1,4 +1,4 @@
-package com.babyfs.tk.service.basic.mq.kafka.internal;
+package com.babyfs.tk.service.basic.mq.kafka.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;

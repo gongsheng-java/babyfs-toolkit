@@ -20,7 +20,7 @@ public final class KafkaModuleFactory {
      * @return
      */
     public static SimpleBasicServiceModule<IKafkaProducer> createProducerModule(String conf) {
-        return new SimpleBasicServiceModule<IKafkaProducer>(conf, IKafkaProducer.class, ProducerProvider.class, null);
+        return new SimpleBasicServiceModule<>(conf, IKafkaProducer.class, ProducerProvider.class, null);
     }
 
     /**
@@ -31,7 +31,7 @@ public final class KafkaModuleFactory {
      * @return
      */
     public static SimpleBasicServiceModule<IKafkaProducer> createProducerModule(String conf, String name) {
-        return new SimpleBasicServiceModule<IKafkaProducer>(conf, IKafkaProducer.class, ProducerProvider.class, name);
+        return new SimpleBasicServiceModule<>(conf, IKafkaProducer.class, ProducerProvider.class, name);
     }
 
 
@@ -42,7 +42,7 @@ public final class KafkaModuleFactory {
      * @return
      */
     public static SimpleBasicServiceModule<IKafkaConsumer> createConsumerModule(String conf) {
-        return new SimpleBasicServiceModule<IKafkaConsumer>(conf, IKafkaConsumer.class, ConsumerProvider.class, null);
+        return new SimpleBasicServiceModule<>(conf, IKafkaConsumer.class, ConsumerProvider.class, null);
     }
 
     /**
@@ -53,6 +53,6 @@ public final class KafkaModuleFactory {
      * @return
      */
     public static SimpleBasicServiceModule<IKafkaConsumer> createConsumerModule(String conf, String name) {
-        return new SimpleBasicServiceModule<IKafkaConsumer>(conf, IKafkaConsumer.class, ConsumerProvider.class, name);
+        return new SimpleBasicServiceModule<>(conf, IKafkaConsumer.class, ConsumerProvider.class, name);
     }
 }

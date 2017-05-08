@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.babyfs.tk.commons.xml.XmlProperties;
 import com.babyfs.tk.service.basic.mq.kafka.IKafkaConsumer;
-import com.babyfs.tk.service.basic.mq.kafka.internal.KafkaConsumerImpl;
+import com.babyfs.tk.service.basic.mq.kafka.impl.KafkaConsumerImpl;
 import com.babyfs.tk.service.basic.mq.kafka.IKafkaMsgProcessor;
 import com.babyfs.tk.service.basic.mq.kafka.KafkaConsumerWorkerService;
 import org.junit.Ignore;

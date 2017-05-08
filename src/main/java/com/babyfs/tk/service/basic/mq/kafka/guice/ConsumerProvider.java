@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.babyfs.tk.service.basic.guice.annotation.ServiceConf;
 import com.babyfs.tk.service.basic.mq.kafka.IKafkaConsumer;
-import com.babyfs.tk.service.basic.mq.kafka.internal.KafkaConsumerImpl;
+import com.babyfs.tk.service.basic.mq.kafka.impl.KafkaConsumerImpl;
 
 import java.util.Map;
 

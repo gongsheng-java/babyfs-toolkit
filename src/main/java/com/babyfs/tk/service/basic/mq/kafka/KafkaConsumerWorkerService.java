@@ -1,16 +1,17 @@
 package com.babyfs.tk.service.basic.mq.kafka;
 
 import com.alibaba.fastjson.JSONObject;
+import com.babyfs.tk.commons.service.LifeServiceSupport;
+import com.babyfs.tk.commons.thread.NamedThreadFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.babyfs.tk.commons.service.LifeServiceSupport;
-import com.babyfs.tk.commons.thread.NamedThreadFactory;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,6 +122,7 @@ public class KafkaConsumerWorkerService extends LifeServiceSupport {
             this.consumer = consumer;
         }
 
+        @SuppressWarnings("unchecked")
         public synchronized void start() {
             Preconditions.checkState(this.executor == null, "The executor shoud be null");
             LOGGER.info("Starting Kafka consumer group {}", consumer.getGroupId());
@@ -133,6 +135,13 @@ public class KafkaConsumerWorkerService extends LifeServiceSupport {
                 IKafkaMsgProcessor processor = topicProcessorMap.get(topic);
                 for (KafkaConsumer stream : kafkaStreams) {
                     LOGGER.info("Starting Kafka consumer group {},topic:{}", consumer.getGroupId(), topic);
+                    try {
+                        Map<String, List<PartitionInfo>> topics = stream.listTopics();
+                        LOGGER.info("topics:{}", topics);
+                    } catch (Exception e) {
+                        LOGGER.info("fetch topics fail", e);
+                        throw e;
+                    }
                     KafkaMessageTask task = new KafkaMessageTask(stream, processor, consumer.getGroupId(), topic, consumer.isAutoCommitEnable(), consumer.isStriceMode());
                     this.executor.submit(task);
                 }
@@ -190,88 +199,95 @@ public class KafkaConsumerWorkerService extends LifeServiceSupport {
 
                 try {
                     while (!stop) {
-                        ConsumerRecords<K, V> records = this.stream.poll(Long.MAX_VALUE);
-                        for (TopicPartition partition : records.partitions()) {
-                            List<ConsumerRecord<K, V>> recordList = records.records(partition);
-                            for (ConsumerRecord<K, V> record : recordList) {
-                                String topic = record.topic();
-                                K key = record.key();
-                                V message = record.value();
-                                //在严格模式下,要确保消息确实被处理了,一直尝试重试,直到消息被消费了成功了
-                                long reTryCount = 0;
-                                boolean processRet = false;
-                                final JSONObject topicMsg = new JSONObject();
-                                topicMsg.put("topic", topic);
-                                topicMsg.put("message", message);
-                                do {
-                                    try {
-                                        processRet = processor.process(topic, key, message, reTryCount++);
-                                    } catch (Throwable e) {
-                                        LOGGER.error("Process message error for topic " + topic, e);
-                                    }
-                                    if (!processRet) {
-                                        if (strictMode && !stop) {
-                                            if (reTryCount % 5 == 1) {
-                                                LOGGER.warn("Process message fail,retry:{} {}", reTryCount, topicMsg.toJSONString());
-                                            }
-                                            try {
-                                                Thread.sleep(50);
-                                            } catch (InterruptedException e) {
-                                                LOGGER.error("Thread interrupted", e);
-                                                Thread.currentThread().interrupt();
-                                            }
+                        try {
+                            ConsumerRecords<K, V> records = this.stream.poll(1000 * 60);
+                            if (records == null || records.isEmpty()) {
+                                continue;
+                            }
+                            for (TopicPartition partition : records.partitions()) {
+                                List<ConsumerRecord<K, V>> recordList = records.records(partition);
+                                for (ConsumerRecord<K, V> record : recordList) {
+                                    String topic = record.topic();
+                                    K key = record.key();
+                                    V message = record.value();
+                                    //在严格模式下,要确保消息确实被处理了,一直尝试重试,直到消息被消费了成功了
+                                    long reTryCount = 0;
+                                    boolean processRet = false;
+                                    final JSONObject topicMsg = new JSONObject();
+                                    topicMsg.put("topic", topic);
+                                    topicMsg.put("message", message);
+                                    do {
+                                        try {
+                                            processRet = processor.process(topic, key, message, reTryCount++);
+                                        } catch (Throwable e) {
+                                            LOGGER.error("Process message error for topic " + topic, e);
                                         }
-                                    } else {
-                                        break;
-                                    }
-                                } while (strictMode && !stop);
-
-                                if (!processRet) {
-                                    LOGGER.warn("Process message error:{}", topicMsg.toJSONString());
-                                }
-
-                                if (strictMode) {
-                                    if (!processRet && !stop) {
-                                        String msg = "The processRet and stop are both false in strict mode,which should not happen,may be it's a bug";
-                                        LOGGER.error(msg);
-                                        throw new IllegalStateException(msg);
-                                    }
-                                }
-
-                                if (autoCommit) {
-                                    continue;
-                                }
-
-                                reTryCount = 0;
-                                long offset = record.offset();
-                                boolean commitOffsetRet = false;
-                                String msg = "Update topic:" + topic + " partition:" + partition + " offset:" + offset;
-                                do {
-                                    try {
-                                        this.stream.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(offset + 1)));
-                                        commitOffsetRet = true;
-                                    } catch (Exception e) {
-                                        LOGGER.error(msg, e);
-                                    }
-                                    if (commitOffsetRet) {
-                                        break;
-                                    } else {
-                                        reTryCount++;
-                                        //最多等待10秒,如果更新一直失败,那么会导致消息重复被处理
-                                        if (reTryCount <= 10) {
-                                            try {
-                                                Thread.sleep(1000);
-                                            } catch (InterruptedException ie) {
-                                                LOGGER.error("Thread interrupted", ie);
-                                                Thread.currentThread().interrupt();
+                                        if (!processRet) {
+                                            if (strictMode && !stop) {
+                                                if (reTryCount % 5 == 1) {
+                                                    LOGGER.warn("Process message fail,retry:{} {}", reTryCount, topicMsg.toJSONString());
+                                                }
+                                                try {
+                                                    Thread.sleep(50);
+                                                } catch (InterruptedException e) {
+                                                    LOGGER.error("Thread interrupted", e);
+                                                    Thread.currentThread().interrupt();
+                                                }
                                             }
                                         } else {
-                                            LOGGER.warn(msg + " reTryCount:" + reTryCount + ",skip it");
                                             break;
                                         }
+                                    } while (strictMode && !stop);
+
+                                    if (!processRet) {
+                                        LOGGER.warn("Process message error:{}", topicMsg.toJSONString());
                                     }
-                                } while (!stop);
+
+                                    if (strictMode) {
+                                        if (!processRet && !stop) {
+                                            String msg = "The processRet and stop are both false in strict mode,which should not happen,may be it's a bug";
+                                            LOGGER.error(msg);
+                                            throw new IllegalStateException(msg);
+                                        }
+                                    }
+
+                                    if (autoCommit) {
+                                        continue;
+                                    }
+
+                                    reTryCount = 0;
+                                    long offset = record.offset();
+                                    boolean commitOffsetRet = false;
+                                    String msg = "Update topic:" + topic + " partition:" + partition + " offset:" + offset;
+                                    do {
+                                        try {
+                                            this.stream.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(offset + 1)));
+                                            commitOffsetRet = true;
+                                        } catch (Exception e) {
+                                            LOGGER.error(msg, e);
+                                        }
+                                        if (commitOffsetRet) {
+                                            break;
+                                        } else {
+                                            reTryCount++;
+                                            //最多等待10秒,如果更新一直失败,那么会导致消息重复被处理
+                                            if (reTryCount <= 10) {
+                                                try {
+                                                    Thread.sleep(1000);
+                                                } catch (InterruptedException ie) {
+                                                    LOGGER.error("Thread interrupted", ie);
+                                                    Thread.currentThread().interrupt();
+                                                }
+                                            } else {
+                                                LOGGER.warn(msg + " reTryCount:" + reTryCount + ",skip it");
+                                                break;
+                                            }
+                                        }
+                                    } while (!stop);
+                                }
                             }
+                        } catch (Exception e) {
+                            LOGGER.error("process topic " + topic + " fail", e);
                         }
                     }
                     LOGGER.info("Process topic {} strict mode {},finished", topic, strictMode);

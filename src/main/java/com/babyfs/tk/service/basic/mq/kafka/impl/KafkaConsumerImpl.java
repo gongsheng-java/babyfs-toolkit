@@ -1,10 +1,11 @@
-package com.babyfs.tk.service.basic.mq.kafka.internal;
+package com.babyfs.tk.service.basic.mq.kafka.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.babyfs.tk.service.basic.mq.kafka.IKafkaConsumer;
+import com.babyfs.tk.service.basic.mq.kafka.KafkaConfs;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.babyfs.tk.service.basic.mq.kafka.IKafkaConsumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,13 +51,13 @@ public class KafkaConsumerImpl<K, V> implements IKafkaConsumer<K, V> {
     private final boolean strictMode;
 
     public KafkaConsumerImpl(@Nonnull Map<String, String> conf) {
-        Map<String, String> consumerConfigMap = Maps.filterKeys(conf, input -> !input.startsWith(TOPIC_CONFIG_PREFIX) && !input.startsWith(CONSUMER_CONFIG_PREFIEX));
+        Map<String, String> consumerConfigMap = Maps.filterKeys(conf, input -> input != null && !input.startsWith(TOPIC_CONFIG_PREFIX) && !input.startsWith(CONSUMER_CONFIG_PREFIEX));
         config = new Properties();
         config.putAll(consumerConfigMap);
+        KafkaConfs.setDefaultConfs(config);
+
         groupId = this.config.getProperty(GROUP_ID);
-        Map<String, String> topicConfig = Maps.filterKeys(conf, input -> {
-            return input.startsWith(TOPIC_CONFIG_PREFIX);
-        });
+        Map<String, String> topicConfig = Maps.filterKeys(conf, input -> input != null && input.startsWith(TOPIC_CONFIG_PREFIX));
         this.autoCommitEnable = "true".equalsIgnoreCase(this.config.getProperty(ENABLE_AUTO_COMMIT));
         this.strictMode = "true".equalsIgnoreCase(conf.get(CONSUMER_CONFIG_STRICT_MODE));
         LOGGER.info("autocommit:{},strict_mode:{}", this.autoCommitEnable, this.strictMode);
