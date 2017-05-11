@@ -62,10 +62,6 @@ public class CacheConst {
      * Freq相关的缓存组
      */
     public static final String REDIS_CACHE_GROUP_FREQ = DEFAULT_ENTITY_CACHE_GROUP;
-    /**
-     * 意见反馈统一前缀
-     */
-    public static final String FEEDBACK_PREFIX = "fb_";
 
     protected CacheConst() {
 
