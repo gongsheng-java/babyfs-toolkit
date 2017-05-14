@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.SecureRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -13,8 +14,9 @@ import java.util.concurrent.TimeUnit;
 public final class ThreadUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadUtil.class);
 
-    private ThreadUtil() {
+    private static final ThreadLocal<SecureRandom> SECURE_RANDOM_THREAD_LOCAL = ThreadLocal.withInitial(SecureRandom::new);
 
+    private ThreadUtil() {
     }
 
     /**
@@ -64,5 +66,14 @@ public final class ThreadUtil {
         } catch (Exception e) {
             LOGGER.error("ignore it", e);
         }
+    }
+
+    /**
+     * 取得供当前线程使用的{@link SecureRandom}
+     *
+     * @return
+     */
+    public static SecureRandom currentThreadSecureRandom() {
+        return SECURE_RANDOM_THREAD_LOCAL.get();
     }
 }

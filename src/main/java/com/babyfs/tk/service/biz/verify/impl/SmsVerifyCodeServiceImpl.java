@@ -1,6 +1,7 @@
 package com.babyfs.tk.service.biz.verify.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.babyfs.tk.commons.utils.ThreadUtil;
 import com.babyfs.tk.service.basic.INameResourceService;
 import com.babyfs.tk.service.basic.guice.annotation.ServiceRedis;
 import com.babyfs.tk.service.basic.redis.IRedis;
@@ -17,7 +18,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.SecureRandom;
 import java.util.Objects;
 
 /**
@@ -27,7 +27,6 @@ public class SmsVerifyCodeServiceImpl implements ISmsVerifyCodeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmsVerifyCodeServiceImpl.class);
     private static final CacheParameter CACHE_PARAM = VerifyCacheConst.SMS_CODE_CACHE_PARAM;
     private static final String FORMAT_KEY = "%d_%s";
-    private static final SecureRandom RANDOM = new SecureRandom();
 
     @Inject
     @ServiceRedis
@@ -150,6 +149,6 @@ public class SmsVerifyCodeServiceImpl implements ISmsVerifyCodeService {
      * 生成短信验证码
      */
     protected Integer generateSmsCode() {
-        return RANDOM.nextInt(899999) + 100000;
+        return ThreadUtil.currentThreadSecureRandom().nextInt(899999) + 100000;
     }
 }
