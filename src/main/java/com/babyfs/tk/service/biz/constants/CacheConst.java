@@ -7,6 +7,18 @@ import com.babyfs.tk.service.biz.cache.CacheParameter;
  */
 public class CacheConst {
     /**
+     * 默认的Entity缓存失效时间: 1小时
+     */
+    public static final int ONE_HOUR_ENTITY_CACHE_SECONDS = 60 * 60;
+    /**
+     * 缓存失效时间: 1 天
+     */
+    public static final int ONE_DAY_ENTITY_CACHE_SECONDS = 24 * ONE_HOUR_ENTITY_CACHE_SECONDS;
+    /**
+     * 默认列表缓存失效时间: 12小时
+     */
+    public static final int DEFAULT_LIST_CACHE_SECONDS = 12 * ONE_HOUR_ENTITY_CACHE_SECONDS;
+    /**
      * Null保护key前缀
      */
     public static final String NULL_PREFIX = "_NULL";
@@ -27,23 +39,13 @@ public class CacheConst {
      */
     public static final String TEMPOAL_COUNTER_PREFIX = "tcc_";
     /**
-     * 默认的Entity缓存失效时间: 1小时
-     */
-    public static final int ONE_HOUR_ENTITY_CACHE_SECONDS = 60 * 60;
-    /**
-     * 缓存失效时间: 1 天
-     */
-    public static final int ONE_DAY_ENTITY_CACHE_SECONDS = 24 * ONE_HOUR_ENTITY_CACHE_SECONDS;
-    /**
      * Entity相关的缓存组
      */
     public static final String DEFAULT_ENTITY_CACHE_GROUP = "cache_entity";
-
     /**
      * 列表相关的缓存组
      */
     public static final String DEFAULT_LIST_CACHGE_GROUP = "cache_list";
-
     /**
      * 计数相关的缓存组
      */
@@ -60,11 +62,6 @@ public class CacheConst {
      * Freq相关的缓存组
      */
     public static final String REDIS_CACHE_GROUP_FREQ = DEFAULT_ENTITY_CACHE_GROUP;
-    /**
-     * 默认列表缓存失效时间: 12小时
-     */
-    public static final int DEFAULT_LIST_CACHE_SECONDS = 12 * 60 * 60;
-
 
     protected CacheConst() {
 

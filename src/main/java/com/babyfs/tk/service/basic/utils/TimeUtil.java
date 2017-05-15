@@ -35,6 +35,7 @@ public final class TimeUtil {
     public static final String YYYYMMDDHHMMSS = "yyyyMMddHHmmss";
     public static final String YYYYMMDD = "yyyyMMdd";
     public static final String YYYYMM = "yyyyMM";
+    public static final String YYMMDD = "yyMMdd";
 
     private static final Map<String, FastDateFormat> FAST_DATE_FORMAT_MAP = initFormatMap();
 
