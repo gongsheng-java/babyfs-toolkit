@@ -192,6 +192,7 @@ public class KryoCodecTest {
     }
 
     @Test
+    @Ignore
     public void test_in_multithread() throws IOException {
         final User user = new User();
         user.setName("myname");
