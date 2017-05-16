@@ -1,10 +1,10 @@
 package com.babyfs.tk.service.basic.utils;
 
+import com.babyfs.tk.commons.base.Pair;
+import com.babyfs.tk.commons.base.Tuple;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.babyfs.tk.commons.base.Pair;
-import com.babyfs.tk.commons.base.Tuple;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.slf4j.Logger;
@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -37,6 +38,8 @@ public final class TimeUtil {
     public static final String YYYYMM = "yyyyMM";
     public static final String YYMMDD = "yyMMdd";
 
+    public static final DateTimeFormatter YYYYMMDD_FORMATTER = DateTimeFormatter.ofPattern(TimeUtil.YYYYMMDD);
+
     private static final Map<String, FastDateFormat> FAST_DATE_FORMAT_MAP = initFormatMap();
 
     /* 指定日期 */
@@ -53,6 +56,7 @@ public final class TimeUtil {
         formatMap.put(YYYY_MM_DD_HH_MM, FastDateFormat.getInstance(YYYY_MM_DD_HH_MM));
         formatMap.put(YYYYMMDDHHMMSS, FastDateFormat.getInstance(YYYYMMDDHHMMSS));
         formatMap.put(YYYY_MM_DD_HH_MM_SS, FastDateFormat.getInstance(YYYY_MM_DD_HH_MM_SS));
+        formatMap.put(YYMMDD, FastDateFormat.getInstance(YYMMDD));
         return formatMap;
     }
 
@@ -403,7 +407,7 @@ public final class TimeUtil {
     /**
      * 获取输入时间往前N天
      *
-     * @param sDate 开始时间
+     * @param sDate   开始时间
      * @param isEnter 是否包含回车符
      * @return {@link Date}当前时间
      * {@link String}星期名
@@ -417,8 +421,8 @@ public final class TimeUtil {
         String resStr;
         for (int i = 0; i < num; i++) {
             resDate = getOffsetDateByNum(sDate, 0 - i);
-            resStr=getWeekDate(resDate, isEnter);
-            days.add(Pair.of(resDate,resStr));
+            resStr = getWeekDate(resDate, isEnter);
+            days.add(Pair.of(resDate, resStr));
         }
         return days;
     }
