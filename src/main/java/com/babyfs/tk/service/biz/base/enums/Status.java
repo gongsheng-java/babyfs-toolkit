@@ -44,4 +44,24 @@ public enum Status implements IndexedEnum {
     public static Status indexOf(final int index) {
         return IndexedEnum.Util.valueOf(INDEXS, index);
     }
+
+    /**
+     * 是否是无效的
+     *
+     * @param value
+     * @return
+     */
+    public static boolean isDisable(final int value) {
+        return value == DISABLE.getValue();
+    }
+
+    /**
+     * 是否是有效的
+     *
+     * @param value
+     * @return
+     */
+    public static boolean isEnable(final int value) {
+        return value == ENABLE.getValue();
+    }
 }

@@ -42,4 +42,24 @@ public enum DeleteEnum {
             return null;
         }
     }
+
+    /**
+     * 是否是正常的
+     *
+     * @param value
+     * @return
+     */
+    public static boolean isNormal(int value) {
+        return value == NORMAL.getVal();
+    }
+
+    /**
+     * 是否已经删除
+     *
+     * @param value
+     * @return
+     */
+    public static boolean isDeleted(int value) {
+        return value == DELETED.getVal();
+    }
 }
