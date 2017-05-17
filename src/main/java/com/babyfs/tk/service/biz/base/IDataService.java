@@ -1,13 +1,13 @@
 package com.babyfs.tk.service.biz.base;
 
-import com.babyfs.tk.service.biz.base.entity.IBaseEntity;
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.babyfs.tk.commons.base.Pair;
 import com.babyfs.tk.commons.enums.DeleteEnum;
 import com.babyfs.tk.service.basic.INameResourceService;
 import com.babyfs.tk.service.basic.redis.IRedis;
+import com.babyfs.tk.service.biz.base.entity.IBaseEntity;
 import com.babyfs.tk.service.biz.cache.CacheParameter;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.transaction.TransactionStatus;
 
@@ -100,6 +100,40 @@ public interface IDataService<T extends IBaseEntity> {
      */
     boolean updateWithVersion(T entity);
 
+    /**
+     * 批量获取实体
+     *
+     * @param ids not null
+     * @return
+     */
+    List<T> getEntityListWithCache(long[] ids);
+
+    /**
+     * 批量获取实体
+     *
+     * @param ids           not null
+     * @param getEntityFunc not null
+     * @return
+     */
+    List<T> getEntityListWithCache(long[] ids, Function<Long, T> getEntityFunc);
+
+    /**
+     * 执行事务过程
+     *
+     * @param func
+     * @param <T>
+     * @return
+     */
+    <T> T doTransactionWithCleanCache(Function<Pair<NamedParameterJdbcOperations, TransactionStatus>, T> func);
+
+    /**
+     * 根据id + 游标 id查询实体
+     *
+     * @param scrollId 游标id,>=0
+     * @param size     长度,>0
+     * @return
+     */
+    List<T> scrollFetch(long scrollId, int size);
 
     /**
      * 根据唯一key查找id,然后根据id再加载实体
@@ -182,37 +216,12 @@ public interface IDataService<T extends IBaseEntity> {
     }
 
     /**
-     * 批量获取实体
+     * 是否是有效的实体
      *
-     * @param ids not null
+     * @param entity
      * @return
      */
-    List<T> getEntityListWithCache(long[] ids);
-
-    /**
-     * 批量获取实体
-     *
-     * @param ids           not null
-     * @param getEntityFunc not null
-     * @return
-     */
-    List<T> getEntityListWithCache(long[] ids, Function<Long, T> getEntityFunc);
-
-    /**
-     * 执行事务过程
-     *
-     * @param func
-     * @param <T>
-     * @return
-     */
-    <T> T doTransactionWithCleanCache(Function<Pair<NamedParameterJdbcOperations, TransactionStatus>, T> func);
-
-    /**
-     * 根据id + 游标 id查询实体
-     *
-     * @param scrollId 游标id,>=0
-     * @param size     长度,>0
-     * @return
-     */
-    List<T> scrollFetch(long scrollId, int size);
+    default boolean isValid(T entity) {
+        return entity != null && DeleteEnum.isDeleted(entity.getDel());
+    }
 }
