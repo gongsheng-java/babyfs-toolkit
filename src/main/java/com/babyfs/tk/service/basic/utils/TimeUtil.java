@@ -39,6 +39,7 @@ public final class TimeUtil {
     public static final String YYMMDD = "yyMMdd";
 
     public static final DateTimeFormatter YYYYMMDD_FORMATTER = DateTimeFormatter.ofPattern(TimeUtil.YYYYMMDD);
+    public static final DateTimeFormatter YYYY_MM_DD_FORMATTER = DateTimeFormatter.ofPattern(TimeUtil.YYYY_MM_DD);
 
     private static final Map<String, FastDateFormat> FAST_DATE_FORMAT_MAP = initFormatMap();
 
