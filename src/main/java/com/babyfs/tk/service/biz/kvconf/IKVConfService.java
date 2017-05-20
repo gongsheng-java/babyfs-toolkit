@@ -5,6 +5,8 @@ import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.service.biz.base.model.ParsedEntity;
 import com.babyfs.tk.service.biz.kvconf.model.KVConfEntity;
 
+import java.util.List;
+
 /**
  * KV配置业务服务
  */
@@ -32,6 +34,30 @@ public interface IKVConfService {
      * @return 操作结果
      */
     ServiceResponse<ParsedEntity<KVConfEntity, Object>> get(long id);
+
+    /**
+     * 根据id查询,根据类型解析{@link KVConfEntity#getContent()},优先从本地架子啊
+     *
+     * @param id
+     * @return
+     */
+    ServiceResponse<ParsedEntity<KVConfEntity, Object>> getWithLocalCache(long id);
+
+    /**
+     * 根据id数组获取配置列表
+     *
+     * @param ids
+     * @return
+     */
+    ServiceResponse<List<ParsedEntity<KVConfEntity, Object>>> getList(long[] ids);
+
+    /**
+     * 根据id数组获取配置列表,优先从本地缓存中加载
+     *
+     * @param ids
+     * @return
+     */
+    ServiceResponse<List<ParsedEntity<KVConfEntity, Object>>> getListWithLocalCache(long[] ids);
 
     /**
      * 根据名称查询,根据类型解析{@link KVConfEntity#getContent()}
@@ -65,4 +91,11 @@ public interface IKVConfService {
      * @return
      */
     boolean isSysName(String name);
+
+    /**
+     * 根据类型{@link KVConfEntity#getContent()},将值设置到{@link ParsedEntity#parsed}
+     *
+     * @param entity
+     */
+    ParsedEntity<KVConfEntity, Object> parse(KVConfEntity entity);
 }

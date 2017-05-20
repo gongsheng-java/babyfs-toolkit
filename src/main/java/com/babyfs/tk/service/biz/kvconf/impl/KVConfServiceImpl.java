@@ -2,6 +2,7 @@ package com.babyfs.tk.service.biz.kvconf.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.babyfs.tk.commons.model.ServiceResponse;
+import com.babyfs.tk.commons.utils.ThreadUtil;
 import com.babyfs.tk.commons.validator.ValidateResult;
 import com.babyfs.tk.service.basic.INameResourceService;
 import com.babyfs.tk.service.basic.guice.annotation.ServiceRedis;
@@ -20,15 +21,17 @@ import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
-import static com.babyfs.tk.commons.model.ServiceResponse.createSuccessResponse;
-import static com.babyfs.tk.commons.model.ServiceResponse.failResponse;
+import static com.babyfs.tk.commons.model.ServiceResponse.*;
 
 public class KVConfServiceImpl implements IKVConfService {
     private static final Logger LOGGER = LoggerFactory.getLogger(KVConfServiceImpl.class);
@@ -39,6 +42,7 @@ public class KVConfServiceImpl implements IKVConfService {
     private final IValidateService validateService;
     private final INameResourceService<IRedis> redisService;
     private final LoadingCache<String, ParsedEntity<KVConfEntity, Object>> localNameCache;
+    private final LoadingCache<Long, ParsedEntity<KVConfEntity, Object>> localIdCache;
 
     @Inject(optional = true)
     RedisPubSubServcie pubSubService;
@@ -48,7 +52,7 @@ public class KVConfServiceImpl implements IKVConfService {
         this.dataService = Preconditions.checkNotNull(dataService);
         this.validateService = Preconditions.checkNotNull(validateService);
         this.redisService = Preconditions.checkNotNull(redisService);
-        localNameCache = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).maximumSize(10000).build(new CacheLoader<String, ParsedEntity<KVConfEntity, Object>>() {
+        localNameCache = buildLocalCacheBuilder().build(new CacheLoader<String, ParsedEntity<KVConfEntity, Object>>() {
             @Override
             public ParsedEntity<KVConfEntity, Object> load(String key) throws Exception {
                 ServiceResponse<ParsedEntity<KVConfEntity, Object>> byName = getByName(key);
@@ -59,8 +63,22 @@ public class KVConfServiceImpl implements IKVConfService {
                 return byName.getData();
             }
         });
-        localCacheRegistry.register(LocalCacheType.KV_CONF, localNameCache, LocalCacheRegistry.ToStringFunction);
+        localIdCache = buildLocalCacheBuilder().build(new CacheLoader<Long, ParsedEntity<KVConfEntity, Object>>() {
+            @Override
+            public ParsedEntity<KVConfEntity, Object> load(Long id) throws Exception {
+                ServiceResponse<ParsedEntity<KVConfEntity, Object>> byId = get(id);
+                if (byId.getData() == null) {
+                    //如果返回的结果为空,则返回空对象代替
+                    return LOCAL_NULL_CONF;
+                }
+                return byId.getData();
+            }
+        });
+
+        localCacheRegistry.register(LocalCacheType.KV_CONF_NAME, localNameCache, LocalCacheRegistry.ToStringFunction);
+        localCacheRegistry.register(LocalCacheType.KV_CONF_ID, localNameCache, LocalCacheRegistry.ToLongFunction);
     }
+
 
     @Override
     public ServiceResponse<KVConfEntity> add(KVConfEntity entity) {
@@ -70,9 +88,9 @@ public class KVConfServiceImpl implements IKVConfService {
             return response;
         }
 
-        ServiceResponse<ParsedEntity<KVConfEntity,Object>> byName = this.getByName(entity.getName());
+        ServiceResponse<ParsedEntity<KVConfEntity, Object>> byName = this.getByName(entity.getName());
         if (byName.isSuccess() && byName.getData() != null) {
-            return ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "已经存在");
+            return createFailResponse(ErrorCode.PARAM_ERROR, entity.getName() + "已经存在");
         }
 
         KVConfEntity add = null;
@@ -87,14 +105,14 @@ public class KVConfServiceImpl implements IKVConfService {
             invalidateLocalCache(add);
         }
 
-        return ServiceResponse.createFailResponse("新增配置失败");
+        return createFailResponse("新增配置失败");
     }
 
     @Override
     public ServiceResponse<Boolean> update(KVConfEntity entity) {
-        ServiceResponse<ParsedEntity<KVConfEntity,Object>> get = this.get(entity.getId());
+        ServiceResponse<ParsedEntity<KVConfEntity, Object>> get = this.get(entity.getId());
         if (!get.isSuccess() || get.getData() == null) {
-            return ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "不存在");
+            return createFailResponse(ErrorCode.PARAM_ERROR, "不存在");
         }
 
         // 仅能修改内容
@@ -121,15 +139,53 @@ public class KVConfServiceImpl implements IKVConfService {
     @Override
     public ServiceResponse<ParsedEntity<KVConfEntity, Object>> get(long id) {
         if (id <= 0) {
-            return ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "id应该大于0");
+            return createFailResponse(ErrorCode.PARAM_ERROR, "id应该大于0");
         }
 
         KVConfEntity entity = dataService.get(id);
         if (entity != null) {
-            return createSuccessResponse(parseContent(entity));
+            return createSuccessResponse(parse(entity));
         } else {
             return failResponse();
         }
+    }
+
+    @Override
+    public ServiceResponse<ParsedEntity<KVConfEntity, Object>> getWithLocalCache(long id) {
+        try {
+            ParsedEntity<KVConfEntity, Object> entity = this.localIdCache.get(id);
+            if (entity != null && entity != LOCAL_NULL_CONF) {
+                return createSuccessResponse(entity);
+            }
+        } catch (ExecutionException e) {
+            LOGGER.error("get conf with `" + id + "` fail.", e);
+        }
+        return failResponse();
+    }
+
+
+    @Override
+    public ServiceResponse<List<ParsedEntity<KVConfEntity, Object>>> getList(long[] ids) {
+        if (ids == null || ids.length == 0) {
+            return createFailResponse("ids is empty");
+        }
+
+        List<KVConfEntity> entities = this.dataService.getEntityListWithCache(ids);
+        List<ParsedEntity<KVConfEntity, Object>> parsedEntityList = entities.stream().map(this::parse).collect(Collectors.toList());
+        return createSuccessResponse(parsedEntityList);
+    }
+
+    @Override
+    public ServiceResponse<List<ParsedEntity<KVConfEntity, Object>>> getListWithLocalCache(long[] ids) {
+        if (ids == null || ids.length == 0) {
+            return createFailResponse("ids is empty");
+        }
+
+        List<ParsedEntity<KVConfEntity, Object>> ret = Lists.newArrayListWithCapacity(ids.length);
+        for (long id : ids) {
+            ret.add(this.getWithLocalCache(id).getData());
+        }
+        return createSuccessResponse(ret);
     }
 
     @Override
@@ -149,7 +205,7 @@ public class KVConfServiceImpl implements IKVConfService {
         } while (false);
 
         if (entity != null) {
-            return createSuccessResponse(parseContent(entity));
+            return createSuccessResponse(parse(entity));
         } else {
             return failResponse();
         }
@@ -171,7 +227,18 @@ public class KVConfServiceImpl implements IKVConfService {
 
     @Override
     public ServiceResponse<Boolean> del(long id) {
-        return ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "不能删除配置");
+        KVConfEntity confEntity = this.dataService.get(id);
+        if (confEntity == null) {
+            return createFailResponse("无效的配置id");
+        }
+        try {
+            return ResponseUtil.buildBoolResponse(this.dataService.del(confEntity));
+        } finally {
+            ThreadUtil.runQuitely(() -> {
+                CacheUtils.delete(confEntity.getName(), NAME_CACHE, redisService);
+            });
+            this.invalidateLocalCache(confEntity);
+        }
     }
 
     @Override
@@ -187,11 +254,11 @@ public class KVConfServiceImpl implements IKVConfService {
      */
     private ServiceResponse checkAndFillEntity(KVConfEntity entity) {
         if (entity == null) {
-            return ServiceResponse.createFailResponse(ServiceResponse.FAIL_KEY, "无效的配置数据");
+            return createFailResponse(ServiceResponse.FAIL_KEY, "无效的配置数据");
         }
 
         if (KVConfType.indexOf(entity.getType()) == null) {
-            return ServiceResponse.createFailResponse(ServiceResponse.FAIL_KEY, "无效的配置类型");
+            return createFailResponse(ServiceResponse.FAIL_KEY, "无效的配置类型");
         }
 
         // name统一转为小写
@@ -207,13 +274,13 @@ public class KVConfServiceImpl implements IKVConfService {
                 try {
                     Long.parseLong(content);
                 } catch (Exception e) {
-                    return ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "无效的整数");
+                    return createFailResponse(ErrorCode.PARAM_ERROR, "无效的整数");
                 }
             } else if (entity.getType() == KVConfType.DOUBLE.getIndex()) {
                 try {
                     Double.parseDouble(content);
                 } catch (Exception e) {
-                    return ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "无效的浮点数");
+                    return createFailResponse(ErrorCode.PARAM_ERROR, "无效的浮点数");
                 }
             } else if (entity.getType() == KVConfType.JSONOBJECT_TEXT.getIndex()) {
                 final String jsonContent;
@@ -222,14 +289,14 @@ public class KVConfServiceImpl implements IKVConfService {
                     try {
                         jsonContent = JSONObject.toJSONString(JSONObject.parseObject(content, kvConfJSONType.getValueType()));
                     } catch (Exception e) {
-                        return ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "无效的JSON值");
+                        return createFailResponse(ErrorCode.PARAM_ERROR, "无效的JSON值");
                     }
                 } else {
                     try {
                         JSONObject jsonObject = JSONObject.parseObject(content);
                         jsonContent = jsonObject.toJSONString();
                     } catch (Exception e) {
-                        return ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "无效的JSON值");
+                        return createFailResponse(ErrorCode.PARAM_ERROR, "无效的JSON值");
                     }
                 }
                 entity.setContent(jsonContent);
@@ -240,17 +307,17 @@ public class KVConfServiceImpl implements IKVConfService {
                 ValidateConst.KVCONF_CONTENT, entity.getContent()
         );
         if (!validateResult.isSuccess()) {
-            return ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, validateResult.getErrorMsg());
+            return createFailResponse(ErrorCode.PARAM_ERROR, validateResult.getErrorMsg());
         }
         return ServiceResponse.SUCCESS_RESPONSE;
     }
 
-    /**
-     * 根据类型解析内容
-     *
-     * @param entity
-     */
-    private ParsedEntity<KVConfEntity, Object> parseContent(KVConfEntity entity) {
+    @Override
+    public ParsedEntity<KVConfEntity, Object> parse(KVConfEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
         final ParsedEntity<KVConfEntity, Object> parsedKVConfEntity = new ParsedEntity<>();
         parsedKVConfEntity.setEntity(entity);
 
@@ -281,10 +348,21 @@ public class KVConfServiceImpl implements IKVConfService {
         }
         //删除本地
         localNameCache.invalidate(toInvalidate.getName());
+        localIdCache.invalidate(toInvalidate.getId());
         //发送缓存变更通知
         if (pubSubService != null) {
-            LocalCacheChangeMessage message = LocalCacheChangeMessage.newMessage(LocalCacheType.KV_CONF, toInvalidate.getName());
-            pubSubService.publish(pubSubService.getDeaultRedisGroup(), pubSubService.getDefaultChannelName(), JSONObject.toJSONString(message));
+            LocalCacheChangeMessage[] messages = new LocalCacheChangeMessage[]{
+                    LocalCacheChangeMessage.newMessage(LocalCacheType.KV_CONF_NAME, toInvalidate.getName()),
+                    LocalCacheChangeMessage.newMessage(LocalCacheType.KV_CONF_ID, toInvalidate.getId())
+            };
+
+            for (LocalCacheChangeMessage changeMessage : messages) {
+                pubSubService.publish(pubSubService.getDeaultRedisGroup(), pubSubService.getDefaultChannelName(), JSONObject.toJSONString(changeMessage));
+            }
         }
+    }
+
+    private CacheBuilder<Object, Object> buildLocalCacheBuilder() {
+        return CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).maximumSize(10000);
     }
 }

@@ -38,6 +38,7 @@ public final class TimeUtil {
     public static final String YYYYMM = "yyyyMM";
     public static final String YYMMDD = "yyMMdd";
 
+    public static final DateTimeFormatter YYYY_MM_DD_HH_MM_SS_FORMATTER = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
     public static final DateTimeFormatter YYYYMMDD_FORMATTER = DateTimeFormatter.ofPattern(TimeUtil.YYYYMMDD);
     public static final DateTimeFormatter YYYY_MM_DD_FORMATTER = DateTimeFormatter.ofPattern(TimeUtil.YYYY_MM_DD);
 

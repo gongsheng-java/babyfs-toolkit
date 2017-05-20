@@ -11,11 +11,15 @@ public interface LocalCacheType extends IndexedEnum {
      */
     LocalCacheType UNKOWN = new Index(0);
     /**
-     * KV配置
+     * KV按名称缓存
      */
-    LocalCacheType KV_CONF = new Index(1);
+    LocalCacheType KV_CONF_NAME = new Index(1);
+    /**
+     * KV按ID缓存
+     */
+    LocalCacheType KV_CONF_ID = new Index(2);
 
-    class Index extends IndexedEnum.Index implements LocalCacheType{
+    class Index extends IndexedEnum.Index implements LocalCacheType {
         public Index(int index) {
             super(index);
         }
