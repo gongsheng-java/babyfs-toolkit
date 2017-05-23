@@ -38,9 +38,7 @@ public interface IContext {
      * 取得Guice的Inject对象,这个方法是为了一些hack功能,不推荐使用
      *
      * @return
-     * @deprecated
      */
-    @Deprecated
     Injector getInjector();
 
 
