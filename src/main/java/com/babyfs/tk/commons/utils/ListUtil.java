@@ -1,11 +1,10 @@
 package com.babyfs.tk.commons.utils;
 
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -37,32 +36,8 @@ public final class ListUtil {
      * @param <T>
      * @return
      */
-    public static <F, T> List<T> transform(List<F> fromList, Function<? super
-            F, ? extends T> function) {
+    public static <F, T> List<T> transform(List<F> fromList, Function<? super F, ? extends T> function) {
         return Lists.newArrayList(Lists.transform(fromList, function));
-    }
-
-    /**
-     * 遍历迭代对象，使每个迭代的元素被指定Function调用
-     * <p/>
-     * <p/>
-     * 该方法不关心传入Function的返回值，因此Function的返回值是{@link Void}
-     * <p/>
-     * 对于关心返回值的需求，请使用{@link ListUtil#transform(List, com.google.common.base.Function)}
-     *
-     * @param iterable
-     * @param function
-     * @param <F>
-     */
-    public static <F> void iterateViaFunc(final Iterable<F> iterable,
-                                          final Function<? super F, Void> function) {
-        checkNotNull(iterable);
-        Iterator<F> iterator = iterable.iterator();
-        checkNotNull(iterator);
-        checkNotNull(function);
-        while (iterator.hasNext()) {
-            function.apply(iterator.next());
-        }
     }
 
     /**
@@ -84,7 +59,6 @@ public final class ListUtil {
     public static boolean isNotEmpty(List list) {
         return list != null && !list.isEmpty();
     }
-
 
     /**
      * 将list转为数组
@@ -112,11 +86,34 @@ public final class ListUtil {
      */
     public static <T> List<T> toList(Collection<T> collection) {
         if (collection == null || collection.isEmpty()) {
-            return Collections.emptyList();
+            return Lists.newArrayListWithCapacity(0);
+        }
+        List<T> lists = Lists.newArrayListWithCapacity(collection.size());
+        lists.addAll(collection);
+        return lists;
+    }
+
+    /**
+     * 按limit指定的长度分割列表
+     *
+     * @param list  not null
+     * @param limit >0
+     * @param <T>
+     * @return
+     */
+    public static <T> List<List<T>> splitList(List<T> list, int limit) {
+        checkNotNull(list);
+        Preconditions.checkArgument(limit > 0, "limit >0");
+        List<List<T>> splits = Lists.newArrayList();
+        if (list.size() <= limit) {
+            splits.add(list);
+            return splits;
         }
 
-        List<T> lists = Lists.newArrayList();
-        collection.forEach(lists::add);
-        return lists;
+        for (int from = 0; from < list.size(); from += limit) {
+            int to = Math.min(from + limit, list.size());
+            splits.add(Lists.newArrayList(list.subList(from, to)));
+        }
+        return splits;
     }
 }
