@@ -1,22 +1,23 @@
 package com.babyfs.tk.dal;
 
+import com.babyfs.tk.commons.base.Pair;
+import com.babyfs.tk.dal.db.DaoFactory;
+import com.babyfs.tk.dal.db.IDao;
+import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.service.biz.base.query.PageParams;
 import com.babyfs.tk.service.biz.base.query.PageResult;
+import com.babyfs.tk.service.biz.cache.BaseCacheDataService;
+import com.babyfs.tk.service.biz.cache.CacheParameter;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.babyfs.tk.commons.base.Pair;
-import com.babyfs.tk.dal.orm.IEntity;
-import com.babyfs.tk.dal.db.DaoFactory;
-import com.babyfs.tk.dal.db.IDao;
-import com.babyfs.tk.service.biz.cache.BaseCacheDataService;
-import com.babyfs.tk.service.biz.cache.CacheParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * DAL查询结果处理的一些工具方法
@@ -123,7 +124,28 @@ public final class DalUtil {
      * @param dataService
      * @param pageParams
      * @param conditionPair
+     * @param orderCondition
+     * @param <E>
+     * @return
+     * @see {@link #queryByPage(EntityDALContext, DaoFactory, BaseCacheDataService, PageParams, Pair, String, String)}
+     */
+    public static <E extends IEntity> PageResult<E> queryByPage(EntityDALContext<E> dalContext,
+                                                                DaoFactory daoFactory,
+                                                                BaseCacheDataService dataService,
+                                                                PageParams pageParams,
+                                                                Pair<String, Map<String, Object>> conditionPair,
+                                                                String orderCondition) {
+        return queryByPage(dalContext, daoFactory, dataService, pageParams, conditionPair, orderCondition, "id");
+    }
+
+    /**
+     * @param dalContext
+     * @param daoFactory
+     * @param dataService
+     * @param pageParams
+     * @param conditionPair
      * @param orderCondition 排序条件
+     * @param idName         主键的字段名
      * @param <E>
      * @return
      */
@@ -132,7 +154,8 @@ public final class DalUtil {
                                                                 BaseCacheDataService dataService,
                                                                 PageParams pageParams,
                                                                 Pair<String, Map<String, Object>> conditionPair,
-                                                                String orderCondition) {
+                                                                String orderCondition,
+                                                                String idName) {
         Preconditions.checkNotNull(pageParams, "Invalid pageParams");
         Preconditions.checkNotNull(conditionPair, "Invalid conditionPair");
         Preconditions.checkNotNull(conditionPair.first, "Invalid conditionPair first sql");
@@ -144,7 +167,7 @@ public final class DalUtil {
             final String countCondition = conditionPair.first;
             final MapSqlParameterSource countQueryParams = new MapSqlParameterSource(conditionPair.second);
             List<Object[]> countColumns = daoFactory.getDaoSupport().queryEntityColumns(
-                    dalContext.getEntityClass(), "count(id)",
+                    dalContext.getEntityClass(), "count(" + idName + ")",
                     countCondition, countQueryParams, Collections.<String, Object>emptyMap());
             count = extractInt(countColumns, 0);
         }
@@ -163,9 +186,9 @@ public final class DalUtil {
                 pageQueryParams.addValue("size", pageParams.getLimit());
             }
             List<Object[]> idColumns = daoFactory.getDaoSupport().queryEntityColumns(
-                    dalContext.getEntityClass(), "id",
+                    dalContext.getEntityClass(), idName,
                     pageCondition, pageQueryParams, Collections.<String, Object>emptyMap());
-            List<Long> ids = extractColumn(idColumns, 0);
+            List<Long> ids = extractColumn(idColumns, 0).stream().map(id -> ((Number) id).longValue()).collect(Collectors.toList());
             if (count == -1) {
                 count = ids.size();
             }
