@@ -19,6 +19,10 @@ public class LocalCacheChangeMessage extends Message {
      */
     private Object key;
 
+    public LocalCacheChangeMessage() {
+    }
+
+
     public LocalCacheChangeMessage(MessageType messageType) {
         super.setType(messageType.getIndex());
     }
