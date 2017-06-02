@@ -19,6 +19,7 @@ public class LocalCacheChangeMessage extends Message {
      */
     private Object key;
 
+    @SuppressWarnings("unused")
     public LocalCacheChangeMessage() {
     }
 
