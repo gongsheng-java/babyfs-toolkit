@@ -22,7 +22,6 @@ import java.util.Map;
  * 时间相关的工具类
  */
 public final class TimeUtil {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeUtil.class);
 
     private TimeUtil() {
