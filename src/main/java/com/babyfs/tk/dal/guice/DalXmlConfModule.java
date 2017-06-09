@@ -163,7 +163,7 @@ public class DalXmlConfModule extends AbstractModule {
                 String content = Files.toString(file, Charsets.UTF_8);
                 return JAXBUtil.unmarshalByContent(clazz, content);
             } catch (IOException e) {
-                throw new RuntimeException("can't read dal config from " + file);
+                throw new RuntimeException("can't read dal config from " + file, e);
             }
         }
     }
