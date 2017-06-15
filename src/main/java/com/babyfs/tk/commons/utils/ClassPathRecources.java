@@ -51,7 +51,7 @@ public class ClassPathRecources {
      * <p>Currently only {@link URLClassLoader} and only {@code file://} urls are supported.
      *
      * @throws IOException if the attempt to read class path resources (jar files or directories)
-     *                             failed.
+     *                     failed.
      */
     public static ClassPathRecources from(ClassLoader classloader) throws IOException {
         Scanner scanner = new Scanner();
@@ -146,7 +146,7 @@ public class ClassPathRecources {
         }
 
         void scan(URI uri, ClassLoader classloader) throws IOException {
-            if (uri.getScheme().equals("file") && scannedUris.add(uri)) {
+            if ("file".equals(uri.getScheme()) && scannedUris.add(uri)) {
                 scanFrom(new File(uri), classloader);
             }
         }

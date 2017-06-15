@@ -200,7 +200,7 @@ public class KafkaConsumerWorkerService extends LifeServiceSupport {
                 try {
                     while (!stop) {
                         try {
-                            ConsumerRecords<K, V> records = this.stream.poll(1000 * 60);
+                            ConsumerRecords<K, V> records = this.stream.poll(1000 * 60L);
                             if (records == null || records.isEmpty()) {
                                 continue;
                             }

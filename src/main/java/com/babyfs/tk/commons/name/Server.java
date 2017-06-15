@@ -3,7 +3,6 @@ package com.babyfs.tk.commons.name;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,7 +37,7 @@ public class Server {
      * @param ip
      * @param port
      */
-    public Server(@Nonnull String id, @Nonnull String ip, @Nonnegative int port) {
+    public Server(String id, String ip, int port) {
         checkArgument(!Strings.isNullOrEmpty(id), "The server id must not be null or emtpty.");
         checkArgument(!Strings.isNullOrEmpty(ip), "The server ip must not be null or empty.");
         checkArgument(port > 0, "The server port must be > 0.");
