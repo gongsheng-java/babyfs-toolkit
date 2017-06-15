@@ -1,9 +1,15 @@
 package com.babyfs.tk.service.biz.cache;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.babyfs.tk.service.basic.INameResourceService;
 import com.babyfs.tk.service.basic.redis.IRedis;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * 缓存操作的相关工具类
@@ -191,5 +197,31 @@ public final class CacheUtils {
      */
     public static boolean parseAddOrUpdateResult(long result) {
         return result == 0 || result == 1;
+    }
+
+    /**
+     * 构建使用本地缓存的loading cache
+     *
+     * @param expireMinutes 缓存的过期时间，单位分钟
+     * @param limit         缓存上限
+     * @param loadFunc      根据K加载数据的函数
+     * @param registry      本地缓存注册
+     * @param type          本地缓存的类型
+     * @param keyConverter  缓存变更的key转换函数
+     * @param <K>           缓存key类型
+     * @param <V>           缓存值类型
+     * @return
+     */
+    public static <K, V> LoadingCache<K, V> createLocalLoadingCache(int expireMinutes, int limit, Function<K, V> loadFunc,
+                                                                    LocalCacheRegistry registry, LocalCacheType type, Function<Object, Object> keyConverter) {
+        LoadingCache<K, V> loadingCache = CacheBuilder.newBuilder().expireAfterWrite(expireMinutes, TimeUnit.MINUTES).maximumSize(limit).build(
+                new CacheLoader<K, V>() {
+                    @Override
+                    public V load(K id) throws Exception {
+                        return loadFunc.apply(id);
+                    }
+                });
+        registry.register(type, loadingCache, keyConverter);
+        return loadingCache;
     }
 }
