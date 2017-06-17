@@ -76,7 +76,7 @@ public class KVConfServiceImpl implements IKVConfService {
         });
 
         localCacheRegistry.register(LocalCacheType.KV_CONF_NAME, localNameCache, LocalCacheRegistry.ToStringFunction);
-        localCacheRegistry.register(LocalCacheType.KV_CONF_ID, localNameCache, LocalCacheRegistry.ToLongFunction);
+        localCacheRegistry.register(LocalCacheType.KV_CONF_ID, localIdCache, LocalCacheRegistry.ToLongFunction);
     }
 
 
@@ -350,15 +350,13 @@ public class KVConfServiceImpl implements IKVConfService {
         localNameCache.invalidate(toInvalidate.getName());
         localIdCache.invalidate(toInvalidate.getId());
         //发送缓存变更通知
-        if (pubSubService != null) {
-            LocalCacheChangeMessage[] messages = new LocalCacheChangeMessage[]{
-                    LocalCacheChangeMessage.newMessage(LocalCacheType.KV_CONF_NAME, toInvalidate.getName()),
-                    LocalCacheChangeMessage.newMessage(LocalCacheType.KV_CONF_ID, toInvalidate.getId())
-            };
+        LocalCacheChangeMessage[] messages = new LocalCacheChangeMessage[]{
+                LocalCacheChangeMessage.newMessage(LocalCacheType.KV_CONF_NAME, toInvalidate.getName()),
+                LocalCacheChangeMessage.newMessage(LocalCacheType.KV_CONF_ID, toInvalidate.getId())
+        };
 
-            for (LocalCacheChangeMessage changeMessage : messages) {
-                pubSubService.publish(pubSubService.getDeaultRedisGroup(), pubSubService.getDefaultChannelName(), JSONObject.toJSONString(changeMessage));
-            }
+        for (LocalCacheChangeMessage changeMessage : messages) {
+            pubSubService.publish(pubSubService.getDeaultRedisGroup(), pubSubService.getDefaultChannelName(), JSONObject.toJSONString(changeMessage));
         }
     }
 
