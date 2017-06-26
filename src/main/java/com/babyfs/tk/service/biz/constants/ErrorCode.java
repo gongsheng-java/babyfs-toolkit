@@ -14,6 +14,10 @@ public class ErrorCode {
      */
     public static final int PARAM_ERROR = 400;
     /**
+     * 未找到数据
+     */
+    public static final int NODATA_ERROR = 404;
+    /**
      * 未认证
      */
     public static final int UNAUTHORIZED = 401;
