@@ -137,7 +137,7 @@ public class KafkaConsumerWorkerService extends LifeServiceSupport {
                     LOGGER.info("Starting Kafka consumer group {},topic:{}", consumer.getGroupId(), topic);
                     try {
                         Map<String, List<PartitionInfo>> topics = stream.listTopics();
-                        LOGGER.info("topics:{}", topics);
+                        LOGGER.debug("topics:{}", topics);
                     } catch (Exception e) {
                         LOGGER.info("fetch topics fail", e);
                         throw e;
