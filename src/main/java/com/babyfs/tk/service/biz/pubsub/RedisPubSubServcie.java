@@ -1,5 +1,6 @@
 package com.babyfs.tk.service.biz.pubsub;
 
+import com.alibaba.fastjson.JSONObject;
 import com.babyfs.tk.commons.config.IConfigService;
 import com.babyfs.tk.commons.service.LifeServiceSupport;
 import com.babyfs.tk.commons.thread.NamedThreadFactory;
@@ -7,6 +8,8 @@ import com.babyfs.tk.commons.utils.MapUtil;
 import com.babyfs.tk.commons.utils.ThreadUtil;
 import com.babyfs.tk.service.basic.INameResourceService;
 import com.babyfs.tk.service.basic.guice.annotation.ServiceRedis;
+import com.babyfs.tk.service.biz.cache.LocalCacheChangeMessage;
+import com.babyfs.tk.service.biz.cache.LocalCacheType;
 import com.babyfs.tk.service.biz.constants.Const;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -70,6 +73,17 @@ public class RedisPubSubServcie extends LifeServiceSupport {
             LOGGER.error("publish message:`" + message + "` to channel:`" + channelName + "`,redis group:`" + redisGroup + "` fail", e);
             return false;
         }
+    }
+
+    /**
+     * 发送消息到默认的group和channel中
+     *
+     * @param localCacheType
+     * @param id
+     * @return
+     */
+    public boolean publishToDefaultGroup(LocalCacheType localCacheType, Object id) {
+        return publish(getDeaultRedisGroup(), getDefaultChannelName(), JSONObject.toJSONString(LocalCacheChangeMessage.newMessage(localCacheType, id)));
     }
 
     /**
