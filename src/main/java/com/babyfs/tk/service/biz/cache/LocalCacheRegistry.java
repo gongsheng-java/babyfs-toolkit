@@ -108,8 +108,6 @@ public class LocalCacheRegistry {
                 return;
             }
 
-            LOGGER.info("event:{}", event);
-
             LocalCacheChangeMessage localCacheChangeMessage = JSONObject.parseObject(message, LocalCacheChangeMessage.class);
             CacheSet cacheSet = this.caches.get(localCacheChangeMessage.getCacheType());
             if (cacheSet == null) {
