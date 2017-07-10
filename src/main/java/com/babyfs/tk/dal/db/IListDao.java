@@ -105,6 +105,6 @@ public interface IListDao<T extends IListEntity> extends IDao<T> {
      * @param ownerId
      * @return
      */
-    @Sql(type = SqlType.QUERY_COUNT, columns = "count(id)", condition = "where ownerId = :ownerId")
+    @Sql(type = SqlType.QUERY_COUNT, columns = "count(*)", condition = "where ownerId = :ownerId")
     int getCount(@SqlParam("ownerId") long ownerId);
 }

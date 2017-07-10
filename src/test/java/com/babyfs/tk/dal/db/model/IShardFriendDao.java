@@ -16,7 +16,7 @@ public interface IShardFriendDao extends IDao<ShardFriend> {
     @Sql(type = SqlType.QUERY_COLUMNS, columns = "id,name,weight", condition = "where id = :id2")
     List<Object[]> findColumns(@Shard(name = "id") @SqlParam("id2") int id2);
 
-    @Sql(type = SqlType.QUERY_COUNT, columns = "count(id)", condition = "")
+    @Sql(type = SqlType.QUERY_COUNT, columns = "count(*)", condition = "")
     int findCount(@Shard(name = "id") long id);
 
     @Sql(type = SqlType.UPDATE_COLUMNS, columns = "name=:newname", condition = "where id= :id")
