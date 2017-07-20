@@ -25,9 +25,9 @@ public @interface TokenAnnotation {
     boolean requireValid() default false;
 
     /**
-     * 是否需要检查在线设备,默认不检查
+     * 是否需要检查在线设备,默认检查
      *
      * @return
      */
-    boolean checkOnlineDevice() default false;
+    boolean checkOnlineDevice() default true;
 }
