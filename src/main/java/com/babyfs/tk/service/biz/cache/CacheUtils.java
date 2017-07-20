@@ -212,7 +212,7 @@ public final class CacheUtils {
      * @param <V>           缓存值类型
      * @return
      */
-    public static <K, V> LoadingCache<K, V> createLocalLoadingCache(int expireMinutes, int limit, Function<K, V> loadFunc,
+    public static <K, V> LoadingCache<K, V> createLocalLoadingCache(int expireMinutes, long limit, Function<K, V> loadFunc,
                                                                     LocalCacheRegistry registry, LocalCacheType type, Function<Object, Object> keyConverter) {
         LoadingCache<K, V> loadingCache = CacheBuilder.newBuilder().expireAfterWrite(expireMinutes, TimeUnit.MINUTES).maximumSize(limit).build(
                 new CacheLoader<K, V>() {
