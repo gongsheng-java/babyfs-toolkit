@@ -51,6 +51,7 @@ public class TomcatDataSourceCreator implements IDataSourceCreator {
         p.setMinIdle(10);
         p.setLogAbandoned(true);
         p.setRemoveAbandoned(true);
+        p.setLogValidationErrors(true);
         if (ListUtil.isNotEmpty(paramters)) {
             for (Pair<String, String> pair : paramters) {
                 if (INIT_SQL.equals(pair.getFirst())) {
