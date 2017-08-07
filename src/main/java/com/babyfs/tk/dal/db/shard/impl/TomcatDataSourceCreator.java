@@ -54,7 +54,7 @@ public class TomcatDataSourceCreator implements IDataSourceCreator {
         if (ListUtil.isNotEmpty(paramters)) {
             for (Pair<String, String> pair : paramters) {
                 if (INIT_SQL.equals(pair.getFirst())) {
-                    LOGGER.info("use init sql:{}", pair.getFirst());
+                    LOGGER.info("use init sql:{}", pair.getSecond());
                     p.setInitSQL(pair.getSecond());
                 }
             }
