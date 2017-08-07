@@ -1,24 +1,35 @@
 package com.babyfs.tk.dal.db.shard.impl;
 
-import com.google.common.base.Preconditions;
 import com.babyfs.tk.commons.base.Pair;
 import com.babyfs.tk.commons.utils.ListUtil;
 import com.babyfs.tk.dal.db.shard.IDataSourceCreator;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
  * 使用Tomcat DB Pool 实现的数据源
  */
 public class TomcatDataSourceCreator implements IDataSourceCreator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TomcatDataSourceCreator.class);
+
+    private static final String INIT_SQL = "init_sql";
+    private static final Set<String> EXCLUDE_PARAMS = Sets.newHashSet(INIT_SQL);
+
     @Override
     public javax.sql.DataSource create(String ip, int port, String user, String password, String schema, List<Pair<String, String>> paramters) {
         PoolProperties p = new PoolProperties();
         if (ListUtil.isNotEmpty(paramters)) {
-            p.setUrl(MySQLUtil.buildMySQLURL(ip, port, schema, paramters));
+            List<Pair<String, String>> realParams = paramters.stream().filter(e -> !EXCLUDE_PARAMS.contains(e.first)).collect(Collectors.toList());
+            p.setUrl(MySQLUtil.buildMySQLURL(ip, port, schema, realParams));
         } else {
             p.setUrl(MySQLUtil.buildMySQLURL(ip, port, schema));
         }
@@ -40,6 +51,15 @@ public class TomcatDataSourceCreator implements IDataSourceCreator {
         p.setMinIdle(10);
         p.setLogAbandoned(true);
         p.setRemoveAbandoned(true);
+        if (ListUtil.isNotEmpty(paramters)) {
+            for (Pair<String, String> pair : paramters) {
+                if (INIT_SQL.equals(pair.getFirst())) {
+                    LOGGER.info("use init sql:{}", pair.getFirst());
+                    p.setInitSQL(pair.getSecond());
+                }
+            }
+        }
+
         return new org.apache.tomcat.jdbc.pool.DataSource(p);
     }
 
