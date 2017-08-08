@@ -1,6 +1,7 @@
 package com.babyfs.tk.commons.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.babyfs.tk.service.biz.constants.ErrorCode;
 
 import java.io.Serializable;
 
@@ -29,6 +30,16 @@ public class ServiceResponse<T> implements Serializable {
      * 通用的成功响应
      */
     public static final ServiceResponse SUCCESS_RESPONSE = createSuccessResponse(null);
+
+    /**
+     * 通用的未找到数据的失败响应
+     */
+    public static final ServiceResponse FAIL_NOT_FOUND_RESPONSE = createFailResponse(ErrorCode.NODATA_ERROR, null);
+
+    /**
+     * 参数错误的响应
+     */
+    public static final ServiceResponse PARAM_ERROR_RESPONSE = ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "参数错误");
 
     /**
      * 调用结果成功还是失败
@@ -82,6 +93,15 @@ public class ServiceResponse<T> implements Serializable {
 
     public String getMsg() {
         return msg;
+    }
+
+    /**
+     * 是否未找到数据
+     *
+     * @return
+     */
+    public boolean isNotFound() {
+        return this.code == ErrorCode.NODATA_ERROR;
     }
 
     /**
@@ -171,5 +191,27 @@ public class ServiceResponse<T> implements Serializable {
     @SuppressWarnings("unchecked")
     public static <T> ServiceResponse<T> succResponse() {
         return SUCCESS_RESPONSE;
+    }
+
+    /**
+     * 空的未找到数据响应
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> ServiceResponse<T> notFoundResponse() {
+        return FAIL_NOT_FOUND_RESPONSE;
+    }
+
+    /**
+     * 参数错误
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> ServiceResponse<T> paramErrorResponse() {
+        return PARAM_ERROR_RESPONSE;
     }
 }
