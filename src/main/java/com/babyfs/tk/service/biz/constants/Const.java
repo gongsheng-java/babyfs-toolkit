@@ -1,5 +1,7 @@
 package com.babyfs.tk.service.biz.constants;
 
+import com.babyfs.tk.commons.model.ServiceResponse;
+
 /**
  * 通用的常量
  */
@@ -48,6 +50,10 @@ public class Const {
      */
     public static final int DEFAULT_ADD_LOCK_SECONDS = 6;
 
+    /**
+     * 参数错误的响应
+     */
+    public static final ServiceResponse PARAM_ERROR_RESPONSE = ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "参数错误");
 
     protected Const() {
 
