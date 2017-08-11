@@ -6,6 +6,7 @@ import com.babyfs.tk.commons.service.annotation.LifecycleServiceRegistry;
 import com.google.common.base.Preconditions;
 import com.google.inject.Binder;
 import com.google.inject.Key;
+import com.google.inject.Provider;
 import com.google.inject.multibindings.Multibinder;
 
 import javax.annotation.Nonnull;
@@ -13,9 +14,9 @@ import javax.annotation.Nonnull;
 /**
  * {@link ILifeService}的绑定工具,使用该类添加绑定后,在需要注入的地方:
  * <code>
+ *
  * @Inject
- * @LifecycleServiceRegistry
- * private Set<ILifeService> lifeServices;
+ * @LifecycleServiceRegistry private Set<ILifeService> lifeServices;
  * </code>
  */
 public final class LifeServiceBindUtil {
@@ -48,7 +49,7 @@ public final class LifeServiceBindUtil {
         Preconditions.checkNotNull(binder, "binder");
         Preconditions.checkNotNull(lifeServiceClass, "service");
         Multibinder<ILifeService> multibinder = Multibinder.newSetBinder(binder, ILifeService.class, LifecycleServiceRegistry.class);
-        multibinder.addBinding().to(lifeServiceClass);
+        multibinder.addBinding().to(lifeServiceClass).asEagerSingleton();
     }
 
     /**
@@ -59,7 +60,17 @@ public final class LifeServiceBindUtil {
         Preconditions.checkNotNull(binder, "binder");
         Preconditions.checkNotNull(lifeServiceKey, "lifeServiceKey");
         Multibinder<ILifeService> multibinder = Multibinder.newSetBinder(binder, ILifeService.class, LifecycleServiceRegistry.class);
-        multibinder.addBinding().to(lifeServiceKey);
+        multibinder.addBinding().to(lifeServiceKey).asEagerSingleton();
+    }
+
+    /**
+     * @param binder
+     * @param provider
+     */
+    public static void addLifeServiceWithProvider(@Nonnull Binder binder, @Nonnull Class<? extends Provider<? extends ILifeService>> provider) {
+        Preconditions.checkNotNull(binder, "binder");
+        Multibinder<ILifeService> multibinder = Multibinder.newSetBinder(binder, ILifeService.class, LifecycleServiceRegistry.class);
+        multibinder.addBinding().toProvider(provider).asEagerSingleton();
     }
 
     /**
