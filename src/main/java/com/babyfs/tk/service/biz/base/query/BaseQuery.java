@@ -34,6 +34,30 @@ public class BaseQuery {
      * 是否是升序,默认为降序
      */
     private boolean ascend;
+    /**
+     * 开始Id
+     */
+    private long startId;
+    /**
+     * 结束id
+     */
+    private long endId;
+
+    public long getStartId() {
+        return startId;
+    }
+
+    public void setStartId(long startId) {
+        this.startId = startId;
+    }
+
+    public long getEndId() {
+        return endId;
+    }
+
+    public void setEndId(long endId) {
+        this.endId = endId;
+    }
 
     public long getId() {
         return id;
