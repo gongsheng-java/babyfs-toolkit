@@ -25,6 +25,10 @@ public class ErrorCode {
      * 内部错误
      */
     public static final int INTERNAL_ERROR = 500;
+    /**
+     * 已经存在
+     */
+    public static final int EXISTED = 604;
 
     protected ErrorCode() {
 
