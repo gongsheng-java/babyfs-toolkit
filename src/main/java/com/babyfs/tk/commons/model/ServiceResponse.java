@@ -37,9 +37,19 @@ public class ServiceResponse<T> implements Serializable {
     public static final ServiceResponse FAIL_NOT_FOUND_RESPONSE = createFailResponse(ErrorCode.NODATA_ERROR, null);
 
     /**
+     * 通用的未找到数据的失败响应
+     */
+    public static final ServiceResponse FAIL_EXISTED_RESPONSE = createFailResponse(ErrorCode.EXISTED, "已经存在");
+
+    /**
      * 参数错误的响应
      */
     public static final ServiceResponse PARAM_ERROR_RESPONSE = ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "参数错误");
+
+    /**
+     * 状态错误的响应
+     */
+    public static final ServiceResponse STATUS_ERROR_RESPONSE = ServiceResponse.createFailResponse(ErrorCode.PARAM_ERROR, "状态错误");
 
     /**
      * 调用结果成功还是失败
@@ -213,5 +223,27 @@ public class ServiceResponse<T> implements Serializable {
     @SuppressWarnings("unchecked")
     public static <T> ServiceResponse<T> paramErrorResponse() {
         return PARAM_ERROR_RESPONSE;
+    }
+
+    /**
+     * 状态错误
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> ServiceResponse<T> statusErrorResponse() {
+        return STATUS_ERROR_RESPONSE;
+    }
+
+    /**
+     * 已经存在
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> ServiceResponse<T> existedErrorResponse() {
+        return FAIL_EXISTED_RESPONSE;
     }
 }
