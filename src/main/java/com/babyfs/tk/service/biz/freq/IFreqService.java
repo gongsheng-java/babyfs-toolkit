@@ -11,9 +11,18 @@ public interface IFreqService {
      *
      * @param key
      * @param freqParameter
-     * @return
+     * @return true, 频次检查通过;false,不通过
      */
     boolean checkAndUpdate(String key, FreqParameter freqParameter);
+
+    /**
+     * 检查频次
+     *
+     * @param key
+     * @param freqParameter
+     * @return true, 频次检查通过;false,不通过
+     */
+    boolean check(String key, FreqParameter freqParameter);
 
     /**
      * 清除缓存数据

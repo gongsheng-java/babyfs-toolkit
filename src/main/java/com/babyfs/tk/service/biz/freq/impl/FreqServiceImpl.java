@@ -9,6 +9,7 @@ import com.babyfs.tk.service.biz.freq.FreqConst;
 import com.babyfs.tk.service.biz.freq.FreqParameter;
 import com.babyfs.tk.service.biz.freq.IFreqService;
 import com.google.inject.Inject;
+import org.elasticsearch.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,13 +37,7 @@ public class FreqServiceImpl implements IFreqService {
         String result = redis.get(cacheKey);
 
         if (result != null) {
-            try {
-                long resultTime = Long.parseLong(result);
-                if (resultTime >= freqParameter.getTimeLimit()) {
-                    return false;
-                }
-            } catch (NumberFormatException e) {
-                LOGGER.error("Invalid Key." + key + " " + result);
+            if (isExceedTimeLimit(key, freqParameter, result)) {
                 return false;
             }
         }
@@ -54,6 +49,21 @@ public class FreqServiceImpl implements IFreqService {
         }
         return true;
     }
+
+    @Override
+    public boolean check(String key, FreqParameter freqParameter) {
+        String cacheKey = buildCacheKey(freqParameter.getType(), key);
+        IRedis redis = CacheUtils.getRedisCacheClient(redisService, cacheParameter.getRedisServiceGroup());
+        String result = redis.get(cacheKey);
+
+        if (!Strings.isNullOrEmpty(result)) {
+            if (isExceedTimeLimit(key, freqParameter, result)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     @Override
     public void clean(String key, FreqParameter freqParameter) {
@@ -69,5 +79,26 @@ public class FreqServiceImpl implements IFreqService {
      */
     private String buildCacheKey(int type, String key) {
         return cacheParameter.getCacheKey(String.format(REDIS_KEY_TEMPLATE, type, key));
+    }
+
+    /**
+     * 是否超过频次限制
+     *
+     * @param key
+     * @param freqParameter
+     * @param result
+     * @return
+     */
+    private boolean isExceedTimeLimit(String key, FreqParameter freqParameter, String result) {
+        try {
+            long resultTime = Long.parseLong(result);
+            if (resultTime >= freqParameter.getTimeLimit()) {
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            LOGGER.error("Invalid Key." + key + " " + result);
+            return true;
+        }
+        return false;
     }
 }
