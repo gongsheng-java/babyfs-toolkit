@@ -23,6 +23,10 @@ public class Const {
      */
     public static final String EVENTBUS_SUBSCRIBE = "subscribe";
     /**
+     * 用户相关的EventBus名称
+     */
+    public static final String EVENTBUS_USER = "user";
+    /**
      * 系统属性配置,是否禁用事件通知
      */
     public static final String SYS_PROP_DISABLE_EVENT = "disable.event";
