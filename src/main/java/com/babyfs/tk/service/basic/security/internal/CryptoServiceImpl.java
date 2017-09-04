@@ -43,6 +43,11 @@ public class CryptoServiceImpl implements ICryptoService {
     }
 
     @Override
+    public String encryptUrlSafe(String str) {
+        return encryptor.encrypt(str, true);
+    }
+
+    @Override
     public String decrypt(String str) {
         return encryptor.decrypt(str);
     }
