@@ -34,12 +34,20 @@ public interface ICryptoService {
     boolean validatePassword(String toCheckPassword, String hashedPassword, @Nullable String hexSalt);
 
     /**
-     * 对字符串进行加密处理
+     * 对字符串进行加密处理,返回结果是URL不安全的
      *
      * @param str
      * @return
      */
     String encrypt(String str);
+
+    /**
+     * 对字符串进行加密处理,返回结果是URL安全的
+     *
+     * @param str
+     * @return
+     */
+    String encryptUrlSafe(String str);
 
     /**
      * 对字符串进行解密处理

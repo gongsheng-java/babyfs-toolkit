@@ -77,16 +77,22 @@ public class AESEncryptor implements Encryptor {
 
     @Override
     public String encrypt(String str) {
+        return this.encrypt(str, false);
+    }
+
+    @Override
+    public String encrypt(String str, boolean urlSafe) {
         try {
             SecretKeySpec key = cloneSecretKeySpec();
             Cipher ecipher = Cipher.getInstance(TRANSFORMATION);
             ecipher.init(Cipher.ENCRYPT_MODE, key, iv);
-            return EncryptorUtil.encodeBase64ByCipher(str, ecipher);
+            return urlSafe ? EncryptorUtil.encodeBase64ByCipherURLSafe(str, ecipher) : EncryptorUtil.encodeBase64ByCipher(str, ecipher);
         } catch (Exception e) {
             LOGGER.error("encrypt error: str[" + str + "]  ", e);
         }
         return null;
     }
+
 
     @Override
     public String decrypt(String str) {
@@ -117,6 +123,7 @@ public class AESEncryptor implements Encryptor {
             throw new RuntimeException(e);
         }
     }
+
 
     /**
      * 由于不清楚this.secretKey是否线程安全,这里clone一个出来

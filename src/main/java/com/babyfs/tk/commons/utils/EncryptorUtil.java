@@ -46,4 +46,19 @@ public class EncryptorUtil {
         byte[] utf8 = cipher.doFinal(dec);
         return new String(utf8, Constants.UTF8_CHARSET);
     }
+
+    /**
+     * 使用cipher对str进行编码,返回编码后的URL安全的Base64编码
+     *
+     * @param str
+     * @param cipher
+     * @return
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     */
+    public static String encodeBase64ByCipherURLSafe(String str, Cipher cipher) throws IllegalBlockSizeException, BadPaddingException {
+        byte[] utf8 = str.getBytes(Constants.UTF8_CHARSET);
+        byte[] enc = cipher.doFinal(utf8);
+        return Base64.encodeBase64URLSafeString(enc);
+    }
 }

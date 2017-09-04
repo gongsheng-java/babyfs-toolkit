@@ -86,12 +86,17 @@ public class DESEncryptor implements Encryptor {
 
     @Override
     public String encrypt(String str) {
+        return this.encrypt(str, false);
+    }
+
+    @Override
+    public String encrypt(String str, boolean urlSafe) {
         try {
             SecretKeySpec key = cloneSecretKeySpec();
             Cipher ecipher = Cipher.getInstance(key.getAlgorithm());
             PBEParameterSpec pbeParameterSpec = new PBEParameterSpec(this.salt, ITERATION_COUNT);
             ecipher.init(Cipher.ENCRYPT_MODE, key, pbeParameterSpec);
-            return EncryptorUtil.encodeBase64ByCipher(str, ecipher);
+            return urlSafe ? EncryptorUtil.encodeBase64ByCipherURLSafe(str, ecipher) : EncryptorUtil.encodeBase64ByCipher(str, ecipher);
         } catch (Exception e) {
             LOGGER.error("encrypt error: str[" + str + "]  ", e);
         }
@@ -113,6 +118,7 @@ public class DESEncryptor implements Encryptor {
 
         return null;
     }
+
 
     /**
      * 由于不清楚this.secretKey是否线程安全,这里clone一个出来
