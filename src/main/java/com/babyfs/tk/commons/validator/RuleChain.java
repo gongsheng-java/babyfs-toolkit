@@ -26,7 +26,8 @@ public class RuleChain {
             @XmlElement(name = "regExp", type = RegExpRule.class),
             @XmlElement(name = "pwd", type = PwdRule.class),
             @XmlElement(name = "uuid32", type = Uuid32Rule.class),
-            @XmlElement(name = "boolean", type = BooleanRule.class)
+            @XmlElement(name = "boolean", type = BooleanRule.class),
+            @XmlElement(name = "id_card", type = IdCardRule.class)
     })
     private List<IValidateRule> ruleList;
 
