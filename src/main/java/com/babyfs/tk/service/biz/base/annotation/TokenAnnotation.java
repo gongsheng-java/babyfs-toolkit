@@ -3,7 +3,7 @@ package com.babyfs.tk.service.biz.base.annotation;
 import java.lang.annotation.*;
 
 /**
- * Token注解
+ * Token注解,当{@link #requireAuth()}和{@link #requireValid()}都是false时，仅解析token的内容,不填充UserEntity和AccountEntity
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
