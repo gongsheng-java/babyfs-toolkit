@@ -368,4 +368,5 @@ public abstract class BaseController {
     protected double getDoubleParameter(HttpServletRequest request, String name) {
         return ServletRequestUtils.getDoubleParameter(request, name, 0.0);
     }
+
 }
