@@ -364,4 +364,9 @@ public abstract class BaseController {
     protected long getLongParameter(HttpServletRequest request, String name) {
         return ServletRequestUtils.getLongParameter(request, name, 0L);
     }
+
+    protected double getDoubleParameter(HttpServletRequest request, String name) {
+        return ServletRequestUtils.getDoubleParameter(request, name, 0.0);
+    }
+
 }
