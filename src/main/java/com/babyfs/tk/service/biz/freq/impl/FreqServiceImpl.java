@@ -67,7 +67,9 @@ public class FreqServiceImpl implements IFreqService {
 
     @Override
     public void clean(String key, FreqParameter freqParameter) {
-        CacheUtils.delete(buildCacheKey(freqParameter.getType(), key), cacheParameter, redisService);
+        IRedis redis = CacheUtils.getRedisCacheClient(redisService, cacheParameter.getRedisServiceGroup());
+        String cacheKey = buildCacheKey(freqParameter.getType(), key);
+        redis.del(cacheKey);
     }
 
     /**
