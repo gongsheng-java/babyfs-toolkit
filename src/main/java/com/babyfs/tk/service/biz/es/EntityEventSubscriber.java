@@ -7,6 +7,7 @@ import com.babyfs.tk.service.biz.base.model.ChangeType;
 import com.babyfs.tk.service.biz.base.model.EntityEvent;
 import com.babyfs.tk.service.biz.constants.Const;
 import com.google.common.base.Preconditions;
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -46,6 +47,7 @@ public class EntityEventSubscriber {
     }
 
     @Subscribe
+    @AllowConcurrentEvents
     @SuppressWarnings("unchecked")
     public void handlEvent(EntityEvent event) {
         if (event == null) {

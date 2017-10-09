@@ -10,6 +10,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.collect.Maps;
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
@@ -91,6 +92,7 @@ public class LocalCacheRegistry {
      * @param event
      */
     @Subscribe
+    @AllowConcurrentEvents
     @SuppressWarnings("unchecked")
     public void handleCacheEvent(PubSubChannelEvent event) {
         if (event == null) {
