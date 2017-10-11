@@ -11,6 +11,7 @@ import com.babyfs.tk.service.biz.cache.CacheParameter;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import java.lang.reflect.Method;
@@ -245,6 +246,26 @@ public final class DalUtil {
             }
         }
         return null;
+    }
+
+    /**
+     * 是否是重复key异常
+     *
+     * @param e
+     * @return
+     */
+    public static boolean isDuplicateKeyException(Throwable e) {
+        if (e == null) {
+            return false;
+        }
+
+        while (e != null) {
+            if (e instanceof DuplicateKeyException) {
+                return true;
+            }
+            e = e.getCause();
+        }
+        return false;
     }
 
     /**
