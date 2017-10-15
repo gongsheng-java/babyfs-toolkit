@@ -37,8 +37,8 @@ public class TomcatDataSourceCreator implements IDataSourceCreator {
         p.setUsername(user);
         p.setPassword(password);
         p.setJmxEnabled(false);
-        p.setTestWhileIdle(false);
-        p.setTestOnBorrow(true);
+        p.setTestWhileIdle(true);
+        p.setTestOnBorrow(false);
         p.setValidationQuery("SELECT 1");
         p.setTestOnReturn(false);
         p.setValidationInterval(30000);
