@@ -1,13 +1,13 @@
 package com.babyfs.tk.http.client;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.net.MediaType;
 import com.babyfs.tk.commons.Constants;
 import com.babyfs.tk.commons.base.Pair;
 import com.babyfs.tk.commons.base.Tuple;
 import com.babyfs.tk.http.constants.HttpClientConfig;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.net.MediaType;
 import org.apache.http.*;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -23,6 +23,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -325,9 +326,8 @@ public class HttpClientService {
      * @param defaultCharset 默认的响应编码
      * @return 返回response字符串
      * @throws IOException
-     * @throws IllegalStateException 对于gzip和deflate以外压缩格式，抛出该异常
      */
-    private String sendRequest(HttpRequestBase method, String defaultCharset) throws IOException, IllegalStateException {
+    private String sendRequest(HttpRequestBase method, String defaultCharset) throws IOException{
         CloseableHttpResponse closeableHttpResponse = null;
         try {
             closeableHttpResponse = httpClient.execute(method);
@@ -336,7 +336,7 @@ public class HttpClientService {
 
             String responseContent = getResponseContent(closeableHttpResponse, defaultCharset);
             if (statusCode != HttpStatus.SC_OK) {
-                throw new IllegalStateException("Http response error. status code:" + statusCode + " uri:" + method.getURI() + " resp:" + responseContent);
+                throw new IOException("Http response error. status code:" + statusCode + " uri:" + method.getURI() + " resp:" + responseContent);
             }
 
             return responseContent;
@@ -392,6 +392,51 @@ public class HttpClientService {
     }
 
     /**
+     * 发送MutilPart请求
+     *
+     * @param url     请求的URL
+     * @param headers 请求头
+     * @param params  参数
+     * @param streams key,{@link Pair#getFirst()} 字段名,{@link Pair#getSecond()} 文件名
+     * @return
+     * @throws IOException
+     */
+    public String sendMultipartPost(String url, Map<String, String> headers, Map<String, String> params, Map<Pair<String, String>, InputStream> streams) throws IOException {
+        HttpPost httpPost = new HttpPost(url);
+        MultipartEntityBuilder multiPartBuilder = MultipartEntityBuilder.create();
+        if (headers != null) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                String name = entry.getKey();
+                String value = entry.getValue();
+                httpPost.setHeader(name, value);
+            }
+        }
+
+        if (params != null) {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                String name = entry.getKey();
+                String value = entry.getValue();
+                if (!Strings.isNullOrEmpty(name) && !Strings.isNullOrEmpty(value)) {
+                    multiPartBuilder.addPart(name, new StringBody(value, TEXT_UTF8));
+                    multiPartBuilder.addPart(name, new StringBody(value, TEXT_UTF8));
+                }
+            }
+        }
+
+        if (streams != null) {
+            for (Map.Entry<Pair<String, String>, InputStream> entry : streams.entrySet()) {
+                String fieldName = entry.getKey().getFirst();
+                String fileName = entry.getKey().getSecond();
+                multiPartBuilder.addBinaryBody(fieldName, entry.getValue(), ContentType.DEFAULT_BINARY, fileName);
+            }
+        }
+
+        HttpEntity entity = multiPartBuilder.build();
+        httpPost.setEntity(entity);
+        return this.sendRequest(httpPost, Constants.UTF_8);
+    }
+
+    /**
      * 发送指定Http方法的请求，并接收response的二进制流
      * <p/>
      * 对于服务器返回的数据不压缩
@@ -407,7 +452,7 @@ public class HttpClientService {
             int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
             LOGGER.debug("Response return statusCode:{}", statusCode);
             if (statusCode != HttpStatus.SC_OK) {
-                throw new IllegalStateException("Http response error. status code:" + statusCode);
+                throw new IOException("Http response error. status code:" + statusCode);
             }
 
             String contentType = null;
