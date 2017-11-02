@@ -12,29 +12,26 @@ public class NamedThreadFactory implements ThreadFactory {
     private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final ThreadGroup group;
     private final String namePrefix;
-    private final boolean isDaemon;
 
     public NamedThreadFactory() {
         this("pool");
     }
 
-    public NamedThreadFactory(String name) {
-        this(name, false);
-    }
 
-    public NamedThreadFactory(String preffix, boolean daemon) {
+    public NamedThreadFactory(String preffix) {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() : Thread.currentThread()
                 .getThreadGroup();
         namePrefix = preffix + "-" + POOL_NUMBER.getAndIncrement() + "-thread-";
-        isDaemon = daemon;
     }
 
 
     public Thread newThread(Runnable r) {
         Thread t = new Thread(group, r, namePrefix
                 + threadNumber.getAndIncrement(), 0);
-        t.setDaemon(isDaemon);
+        if (t.isDaemon()) {
+            t.setDaemon(false);
+        }
         if (t.getPriority() != Thread.NORM_PRIORITY) {
             t.setPriority(Thread.NORM_PRIORITY);
         }

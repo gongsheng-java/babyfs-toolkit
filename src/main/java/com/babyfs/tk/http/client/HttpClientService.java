@@ -4,6 +4,7 @@ import com.babyfs.tk.commons.Constants;
 import com.babyfs.tk.commons.base.Pair;
 import com.babyfs.tk.commons.base.Tuple;
 import com.babyfs.tk.http.constants.HttpClientConfig;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -327,7 +328,7 @@ public class HttpClientService {
      * @return 返回response字符串
      * @throws IOException
      */
-    private String sendRequest(HttpRequestBase method, String defaultCharset) throws IOException{
+    private String sendRequest(HttpRequestBase method, String defaultCharset) throws IOException {
         CloseableHttpResponse closeableHttpResponse = null;
         try {
             closeableHttpResponse = httpClient.execute(method);
@@ -367,6 +368,29 @@ public class HttpClientService {
             HttpGet get = new HttpGet(HttpClientUtils.assemblyGetURI(url, getParams));
             HttpClientUtils.assemblyHeaders(get, headers);
             return sendRequestForRaw(get);
+        } catch (URISyntaxException ue) {
+            throw new RuntimeException(ue);
+        }
+    }
+
+    /**
+     * 发送get请求,调用processFunc处理请求
+     * <p/>
+     * 主要应用于图片下载，  返回数据无压缩
+     *
+     * @param url         请求的URL
+     * @param getParams   GET请求参数
+     * @param headers     GET请求头
+     * @param processFunc 处理函数
+     * @return 返回processFunc的处理结果
+     */
+    public <T> T sendGetForRaw(String url, Map<String, String> getParams, Map<String, String> headers, Function<Pair<String, InputStream>, T> processFunc) throws IOException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(url), "URL can not be empty or null.");
+        LOGGER.info("Get Request:{}", url);
+        try {
+            HttpGet get = new HttpGet(HttpClientUtils.assemblyGetURI(url, getParams));
+            HttpClientUtils.assemblyHeaders(get, headers);
+            return sendRequestForRaw(get, processFunc);
         } catch (URISyntaxException ue) {
             throw new RuntimeException(ue);
         }
@@ -471,6 +495,41 @@ public class HttpClientService {
         }
     }
 
+    /**
+     * 发送指定Http方法的请求，并调用processFunc处理返回的数据
+     *
+     * @param method      GET或POST方法
+     * @param processFunc 处理函数
+     * @return 返回processFunc的处理结果
+     * @throws IOException
+     */
+    private <T> T sendRequestForRaw(HttpRequestBase method, Function<Pair<String, InputStream>, T> processFunc) throws IOException {
+        CloseableHttpResponse closeableHttpResponse = null;
+        try {
+            closeableHttpResponse = httpClient.execute(method);
+            int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
+            LOGGER.debug("Response return statusCode:{}", statusCode);
+            if (statusCode != HttpStatus.SC_OK) {
+                throw new IOException("Http response error. status code:" + statusCode);
+            }
+
+            String contentType = null;
+            Header contentTypeHeader = closeableHttpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+            if (contentTypeHeader != null) {
+                contentType = contentTypeHeader.getValue();
+            }
+            try (InputStream in = getRawInputStream(closeableHttpResponse)) {
+                return processFunc.apply(Pair.of(contentType, in));
+            }
+        } finally {
+            // 不论如何，释放连接
+            method.releaseConnection();
+            if (closeableHttpResponse != null) {
+                closeableHttpResponse.close();
+            }
+        }
+    }
+
     private String getResponseContent(CloseableHttpResponse closeableHttpResponse, String defaultCharset) throws IOException {
         HttpEntity entity = closeableHttpResponse.getEntity();
         if (entity == null) {
@@ -517,29 +576,22 @@ public class HttpClientService {
         return EntityUtils.toString(entity, charset);
     }
 
-    private byte[] getRawResponse(CloseableHttpResponse closeableHttpResponse) throws IOException {
+    private InputStream getRawInputStream(CloseableHttpResponse closeableHttpResponse) throws IOException {
         HttpEntity entity = closeableHttpResponse.getEntity();
         if (entity == null) {
             return null;
         }
 
-
         Header encodingHeader = closeableHttpResponse.getFirstHeader(HttpHeaders.CONTENT_ENCODING);
         if (encodingHeader != null) {
             if (HttpClientConfig.CompressFormat.COMPRESS_FORMAT_GZIP.isBelong(encodingHeader.getValue())) {
-                return HttpClientUtils.uncompressStreamRaw(HttpClientConfig.CompressFormat.COMPRESS_FORMAT_GZIP, entity.getContent());
+                return HttpClientUtils.getCompressStream(HttpClientConfig.CompressFormat.COMPRESS_FORMAT_GZIP, entity.getContent());
             } else if (HttpClientConfig.CompressFormat.COMPRESS_FORMAT_DEFLATE.isBelong(encodingHeader.getValue())) {
-                return HttpClientUtils.uncompressStreamRaw(HttpClientConfig.CompressFormat.COMPRESS_FORMAT_DEFLATE, entity.getContent());
+                return HttpClientUtils.getCompressStream(HttpClientConfig.CompressFormat.COMPRESS_FORMAT_DEFLATE, entity.getContent());
             } else if (HttpClientConfig.CompressFormat.COMPRESS_FORMAT_IDENTITY.isBelong(encodingHeader.getValue())) {
-                return EntityUtils.toByteArray(entity);
-            } else {
-                LOGGER.error("Unsupported HTTP compressed encoding:{}", encodingHeader.getValue());
-                throw new RuntimeException("Unsupported HTTP compressed encoding:" + encodingHeader.getValue());
+                return entity.getContent();
             }
         }
-        // 如果response头部没有指示编码格式，认为非压缩，直接返回
-        return EntityUtils.toByteArray(entity);
+        return entity.getContent();
     }
-
-
 }
