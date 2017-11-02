@@ -18,7 +18,7 @@ import com.google.inject.name.Named;
  * </ul>
  */
 public abstract class SimpleConsoleService extends LifeServiceSupport {
-    private static final NamedThreadFactory THREAD_FACTORY = new NamedThreadFactory("console", false);
+    private static final NamedThreadFactory THREAD_FACTORY = new NamedThreadFactory("console");
     private Thread thread;
 
     @Inject

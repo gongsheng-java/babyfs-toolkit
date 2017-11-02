@@ -6,6 +6,7 @@ import com.babyfs.tk.commons.service.VersionModule;
 import com.babyfs.tk.http.guice.HttpClientModule;
 import com.babyfs.tk.service.basic.es.guice.ESClientModule;
 import com.babyfs.tk.service.biz.constants.Const;
+import com.babyfs.tk.service.biz.schedule.guice.ExecutorServiceModule;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -107,6 +108,7 @@ public final class Modules {
 
     /**
      * 构建基础的Module
+     *
      * @return
      */
     private static ImmutableList<Module> buildCoreModules() {
@@ -133,11 +135,8 @@ public final class Modules {
             install(new ESClientModule(null, "_es."));
             install(new HttpClientModule());
 
-            // 后台任务Executor,用于非关键的业务场景
-            final int processors = Runtime.getRuntime().availableProcessors();
-            ThreadPoolExecutor backgroundExecutor = new ThreadPoolExecutor(processors, processors * 5, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<>(10000));
-            backgroundExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-            bind(ExecutorService.class).annotatedWith(Names.named(Const.NAME_BACKGROUND_EXECUTOR)).toInstance(backgroundExecutor);
+            //一般的后台任务Executor,用于非关键的业务场景
+            install(new ExecutorServiceModule(Const.NAME_BACKGROUND_EXECUTOR));
         }
     }
 }

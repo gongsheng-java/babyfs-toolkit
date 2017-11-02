@@ -169,7 +169,7 @@ public final class HttpClientUtils {
         return null;
     }
 
-    static FilterInputStream getCompressStream(HttpClientConfig.CompressFormat compressFormat, InputStream inputStream) throws IOException {
+    public static FilterInputStream getCompressStream(HttpClientConfig.CompressFormat compressFormat, InputStream inputStream) throws IOException {
         switch (compressFormat) {
             case COMPRESS_FORMAT_GZIP:
                 return new GZIPInputStream(inputStream);
