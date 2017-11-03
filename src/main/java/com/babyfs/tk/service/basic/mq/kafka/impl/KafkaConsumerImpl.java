@@ -100,8 +100,8 @@ public class KafkaConsumerImpl<K, V> implements IKafkaConsumer<K, V> {
         for (Map.Entry<String, String> entry : topicConfig.entrySet()) {
             String topicName = entry.getKey().substring(TOPIC_CONFIG_PREFIX.length());
             String topicConfigValue = entry.getValue();
-            KafkaConsumer<K, V> consumer = new KafkaConsumer<K, V>(this.config);
-            consumer.subscribe(Lists.<String>newArrayList(topicName));
+            //KafkaConsumer<K, V> consumer = new KafkaConsumer<K, V>(this.config);
+            //consumer.subscribe(Lists.<String>newArrayList(topicName));
             JSONObject jsonObject = JSONObject.parseObject(topicConfigValue);
             Integer threads = jsonObject.getInteger("threads");
             Preconditions.checkArgument(threads != null, "Can't find the `threads` config for topic %s", topicName);
