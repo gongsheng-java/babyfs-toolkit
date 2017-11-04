@@ -73,6 +73,9 @@ public interface KVConfJSONType {
     static void register(String key, KVConfJSONType type) {
         Preconditions.checkNotNull(key);
         Preconditions.checkNotNull(type);
+        if (TypeReg.keyToType.containsKey(key)) {
+            throw new IllegalArgumentException(("Duplicate key:" + key));
+        }
         TypeReg.keyToType.put(key, type);
     }
 
