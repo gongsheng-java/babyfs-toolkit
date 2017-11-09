@@ -130,7 +130,7 @@ public class KafkaConsumerWorkerModule extends AbstractModule {
                 buildProcessorBinder(processorMapBinder, topicProcessorMap);
             }
             bind(String.class).annotatedWith(Names.named(NAME)).toInstance(name);
-            bind(kafkaConsumerWorkerServiceKey).toProvider(KafkaConsumerWorkerServiceProvider.class);
+            bind(kafkaConsumerWorkerServiceKey).toProvider(KafkaConsumerWorkerServiceProvider.class).asEagerSingleton();
             expose(kafkaConsumerWorkerServiceKey);
         }
 
