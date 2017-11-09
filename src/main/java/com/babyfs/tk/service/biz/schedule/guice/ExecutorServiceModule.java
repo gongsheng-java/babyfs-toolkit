@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.internal.Scoping;
 import com.google.inject.name.Names;
 
 import java.util.concurrent.*;
@@ -56,7 +57,7 @@ public class ExecutorServiceModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(ExecutorService.class).annotatedWith(Names.named(this.name)).toProvider(new ExectorServiceProvider());
+        bind(ExecutorService.class).annotatedWith(Names.named(this.name)).toProvider(new ExectorServiceProvider()).asEagerSingleton();
     }
 
     /**
