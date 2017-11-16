@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -57,15 +58,15 @@ public class HttpClientService {
     /**
      * 默认主机最大连接数
      */
-    private static final int DEFAULT_MAX_CON_PER_HOST = 100;
+    public static final int DEFAULT_MAX_CON_PER_HOST = 200;
     /**
      * 默认连接超时毫秒数
      */
-    private static final int DEFAULT_CON_TIME_OUT_MS = 3000;
+    public static final int DEFAULT_CON_TIME_OUT_MS = 3000;
     /**
      * 默认套接字超时毫秒数
      */
-    private static final int DEFAULT_SO_TIME_OUT_MS = 3000;
+    public static final int DEFAULT_SO_TIME_OUT_MS = 3000;
 
     /**
      * 使用默认值构造HTTP客户端服务<br/>
@@ -102,7 +103,8 @@ public class HttpClientService {
     public HttpClientService(final int maxConPerHost, final int conTimeOutMs,
                              final int soTimeOutMs, final HttpClientProxyConfig proxyConfig) {
 
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(30, TimeUnit.SECONDS);
+        connectionManager.setMaxTotal(maxConPerHost * 5);
         connectionManager.setDefaultMaxPerRoute(maxConPerHost);
         SocketConfig socketConfig = SocketConfig.custom()
                 .setTcpNoDelay(true)
