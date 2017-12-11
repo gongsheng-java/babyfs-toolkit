@@ -29,6 +29,10 @@ public class ErrorCode {
      * 已经存在
      */
     public static final int EXISTED = 604;
+    /**
+     * 超时
+     */
+    public static final int TIMEOUT= 408;
 
     protected ErrorCode() {
 
