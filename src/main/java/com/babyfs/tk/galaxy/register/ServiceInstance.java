@@ -5,13 +5,15 @@ public class ServiceInstance {
 
     private String appName;
 
+    private String  port;
+
+    private String host;
+
     public ServiceInstance(String appName, String host, String port) {
         this.appName = appName;
         this.host = host;
         this.port = port;
     }
-
-    private String host;
 
     @Override
     public String toString() {
@@ -46,7 +48,6 @@ public class ServiceInstance {
         this.port = port;
     }
 
-    private String  port;
 
 
 }

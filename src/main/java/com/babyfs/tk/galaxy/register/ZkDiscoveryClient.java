@@ -6,6 +6,7 @@ import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,14 +48,14 @@ public class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         List<ServiceInstance> instances = new ArrayList<>();
         String path = properties.getDiscoveryPrefix() + "/" + appName;
         List<String> list = getChildren(path);
-        if(list ==null || list.isEmpty() ){
+        if(CollectionUtils.isEmpty(list)){
             logger.error("the server:{} has no provider", appName);
         }
         for (String string : list) {
             String[] parts = string.split(":");
             instances.add(new ServiceInstance(appName, parts[0], parts[1]));
         }
-        if (instances == null || instances.isEmpty()) {
+        if (CollectionUtils.isEmpty(instances)) {
             logger.error("the server:{} has no provider", appName);
             return Collections.emptyList();
         }
@@ -67,7 +68,7 @@ public class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         String path = properties.getDiscoveryPrefix() + "/" + appName;
         List<String> hosts = getChildren(path);
         List<ServiceInstance> instances = new ArrayList<>();
-        if (hosts == null && hosts.isEmpty()) {
+        if (CollectionUtils.isEmpty(hosts)) {
             logger.error("the server:{} has no provider", appName);
             return;
         }
@@ -75,7 +76,7 @@ public class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
             String[] parts = string.split(":");
             instances.add(new ServiceInstance(appName, parts[0], parts[1]));
         }
-        if (instances == null || instances.isEmpty()) {
+        if (CollectionUtils.isEmpty(instances)) {
             logger.error("the server:{} has no provider", appName);
             return;
         }
