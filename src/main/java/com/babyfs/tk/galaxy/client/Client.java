@@ -4,6 +4,5 @@ import java.io.IOException;
 
 public interface Client {
 
-
-    public String execute(String uri, String body) throws IOException;
+    public byte[] execute(String uri, byte[] body) throws IOException;
 }

@@ -1,17 +1,13 @@
 package com.babyfs.tk.galaxy;
 
-/**
- * RPC Request
- * @author huangyong
- */
-public class RpcRequest {
+import java.io.Serializable;
+
+public class RpcRequest implements Serializable {
 
     private String className;
     private String methodName;
     private Class<?>[] parameterTypes;
     private Object[] parameters;
-
-
 
     public String getClassName() {
         return className;

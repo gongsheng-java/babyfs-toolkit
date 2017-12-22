@@ -4,6 +4,7 @@ package com.babyfs.tk.galaxy.client;
 
 import com.babyfs.tk.galaxy.codec.Decoder;
 import com.babyfs.tk.galaxy.codec.Encoder;
+import com.babyfs.tk.galaxy.register.LoadBalance;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -105,11 +106,13 @@ public class ReflectiveGalaxy extends Galaxy {
     private final Decoder decoder;
     private final SynchronousMethodHandler.Factory factory;
     private final Client client;
+    private final LoadBalance loadBalance;
 
     ParseHandlersByName( Encoder encoder, Decoder decoder,Client client,
-                         SynchronousMethodHandler.Factory factory) {
+                         SynchronousMethodHandler.Factory factory,LoadBalance loadBalance) {
       this.factory = factory;
       this.client = client;
+      this.loadBalance = loadBalance;
       this.encoder = Util.checkNotNull(encoder, "encoder");
       this.decoder = Util.checkNotNull(decoder, "decoder");
     }
@@ -120,7 +123,7 @@ public class ReflectiveGalaxy extends Galaxy {
       List<MethodMetadata> metadata = parseAndValidatateMetadata(key.type());
       for (MethodMetadata md : metadata) {
         result.put(md.configKey(),
-                   factory.create(key, encoder,decoder,client,md));
+                   factory.create(key, encoder,decoder,client,md,loadBalance));
       }
       return result;
     }

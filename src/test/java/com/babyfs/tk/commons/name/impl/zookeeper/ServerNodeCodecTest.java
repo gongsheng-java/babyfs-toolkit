@@ -6,6 +6,7 @@ import com.babyfs.tk.commons.name.model.gen.NamingServices;
 import com.babyfs.tk.commons.utils.ListUtil;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -15,6 +16,8 @@ import java.util.UUID;
 
 /**
  */
+
+@Ignore
 public class ServerNodeCodecTest {
     private NamingServices.NSServer server;
 

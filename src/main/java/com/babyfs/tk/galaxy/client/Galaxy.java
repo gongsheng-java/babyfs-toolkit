@@ -2,9 +2,9 @@
 package com.babyfs.tk.galaxy.client;
 
 
-
 import com.babyfs.tk.galaxy.codec.Decoder;
 import com.babyfs.tk.galaxy.codec.Encoder;
+import com.babyfs.tk.galaxy.register.LoadBalance;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -45,6 +45,7 @@ public abstract class Galaxy {
     private Encoder encoder = new Encoder.Default();
     private Decoder decoder = new Decoder.Default();
     private Client  client  = RpcHttpClient.http;
+    private LoadBalance loadBalance = null;
 
     private InvocationHandlerFactory invocationHandlerFactory =
         new InvocationHandlerFactory.Default();
@@ -63,6 +64,11 @@ public abstract class Galaxy {
     public Builder cient(Client client){
 
       this.client = client;
+      return this;
+    }
+
+    public Builder loadBalance(LoadBalance loadBalance){
+      this.loadBalance = loadBalance;
       return this;
     }
 
@@ -85,7 +91,7 @@ public abstract class Galaxy {
           new SynchronousMethodHandler.Factory();
       ReflectiveGalaxy.ParseHandlersByName handlersByName =
           new ReflectiveGalaxy.ParseHandlersByName( encoder, decoder,client,
-                                  synchronousMethodHandlerFactory);
+                                  synchronousMethodHandlerFactory,loadBalance);
       return new ReflectiveGalaxy(handlersByName, invocationHandlerFactory);
     }
   }

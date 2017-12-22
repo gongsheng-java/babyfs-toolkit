@@ -86,29 +86,29 @@ public enum RpcHttpClient implements Client {
     }
 
 
-    private CloseableHttpResponse internalDoHttpRequest(String uri, String body) throws IOException {
+    private CloseableHttpResponse internalDoHttpRequest(String uri, byte[] body) throws IOException {
 
         RequestBuilder requestBuilder = RequestBuilder.post();
         requestBuilder.setUri(uri);
-        HttpEntity entity = EntityBuilder.create().setContentType(ContentType.APPLICATION_JSON).setText(body).build();
+        HttpEntity entity = EntityBuilder.create().setContentType(ContentType.DEFAULT_BINARY).setBinary(body).setContentEncoding("utf-8").build();
         requestBuilder.setEntity(entity);
         return httpClient.execute(requestBuilder.build());
     }
 
-    public String execute(String uri,String body) throws IOException {
+    public byte[] execute(String uri,byte[] body) throws IOException {
 
         CloseableHttpResponse response = internalDoHttpRequest(uri, body);
         return handlerResponse(response);
     }
 
-    private String handlerResponse(CloseableHttpResponse response) throws ParseException, IOException {
+    private byte[] handlerResponse(CloseableHttpResponse response) throws ParseException, IOException {
 
         try {
             int status = response.getStatusLine().getStatusCode();
             if (status != 200) {
                 throw new RpcException(format("error status(%s) ", status));
             }
-            return EntityUtils.toString(response.getEntity());
+            return EntityUtils.toByteArray(response.getEntity());
 
         } finally {
             IOUtils.closeQuietly(response);
