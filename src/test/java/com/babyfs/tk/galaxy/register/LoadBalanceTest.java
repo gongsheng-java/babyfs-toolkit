@@ -5,6 +5,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.KeeperException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,9 +45,8 @@ public class LoadBalanceTest {
        Thread.sleep(2000);
        ServiceInstance serviceInstance =   loadBalance.getServerByAppName(appName);
        logger.error(serviceInstance.getHost());
-       while (true){
-          Thread.sleep(100000);
-       }
+       Assert.assertTrue(serviceInstance!=null);
+
     }
 
 
