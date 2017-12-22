@@ -123,7 +123,6 @@ public class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
             public void run() {
                 logger.error("deRegister ......");
                 String path = properties.getDiscoveryPrefix() + "/" + properties.getAppName() + "/" + properties.getHostname() + ":" + properties.getPort();
-
                 delete(path);
             }
         }));

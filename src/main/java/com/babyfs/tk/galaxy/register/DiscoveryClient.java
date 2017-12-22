@@ -10,5 +10,4 @@ public interface DiscoveryClient {
 
     List<ServiceInstance> getInstances(String serverId) ;
 
-
 }

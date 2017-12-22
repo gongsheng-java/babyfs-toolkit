@@ -1,6 +1,7 @@
 package com.babyfs.tk.galaxy.register;
 
 
+import com.babyfs.tk.galaxy.client.Util;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
@@ -43,6 +44,7 @@ public class LoadBalance {
 
         public LoadBalance build()  {
 
+            Util.checkNotNull(discoveryProperties, "discoveryProperties");
             ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(1000, 3);
             CuratorFramework curatorFramework =  CuratorFrameworkFactory.builder()
                     .connectString(discoveryProperties.getRegisterUrl())

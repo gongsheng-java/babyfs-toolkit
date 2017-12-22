@@ -46,7 +46,6 @@ public class LoadBalanceTest {
        ServiceInstance serviceInstance =   loadBalance.getServerByAppName(appName);
        logger.error(serviceInstance.getHost());
        Assert.assertTrue(serviceInstance!=null);
-
     }
 
 
