@@ -40,37 +40,22 @@ public class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
     }
 
     @Override
-    public List<ServiceInstance> getInstances(String appName)  {
+    public List<ServiceInstance> getInstances(String appName) {
 
         if (!providerMapList.isEmpty() && providerMapList.containsKey(appName)) {
             return providerMapList.get(appName);
         }
-        List<ServiceInstance> instances = new ArrayList<>();
-        String path = properties.getDiscoveryPrefix() + "/" + appName;
-        List<String> list = getChildren(path);
-        if(CollectionUtils.isEmpty(list)){
-            logger.error("the server:{} has no provider", appName);
-        }
-        for (String string : list) {
-            String[] parts = string.split(":");
-            instances.add(new ServiceInstance(appName, parts[0], parts[1]));
-        }
-        if (CollectionUtils.isEmpty(instances)) {
-            logger.error("the server:{} has no provider", appName);
-            return Collections.emptyList();
-        }
-        return instances;
-
+        return refreshAndGet(appName);
     }
 
-    private void refresh(String appName)  {
+    private List<ServiceInstance> refreshAndGet(String appName) {
 
         String path = properties.getDiscoveryPrefix() + "/" + appName;
         List<String> hosts = getChildren(path);
         List<ServiceInstance> instances = new ArrayList<>();
         if (CollectionUtils.isEmpty(hosts)) {
             logger.error("the server:{} has no provider", appName);
-            return;
+            return Collections.EMPTY_LIST;
         }
         for (String string : hosts) {
             String[] parts = string.split(":");
@@ -78,13 +63,14 @@ public class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         }
         if (CollectionUtils.isEmpty(instances)) {
             logger.error("the server:{} has no provider", appName);
-            return;
+            return Collections.EMPTY_LIST;
         }
         providerMapList.put(appName, instances);
+        return instances;
     }
 
 
-    public List<String> getChildren(String path)  {
+    public List<String> getChildren(String path) {
         try {
             return curator.getChildren().forPath(path);
         } catch (Exception e) {
@@ -111,8 +97,8 @@ public class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
                     .creatingParentContainersIfNeeded()
                     .withMode(CreateMode.EPHEMERAL)
                     .forPath(path);
-        }catch (Exception e){
-            logger.error("create zk node  fail path:{}",path,e);
+        } catch (Exception e) {
+            logger.error("create zk node  fail path:{}", path, e);
         }
     }
 
@@ -143,7 +129,7 @@ public class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         try {
             curator.delete().forPath(path);
         } catch (Exception e) {
-            logger.error("zk delete node fail path:{}", path,e);
+            logger.error("zk delete node fail path:{}", path, e);
         }
     }
 
@@ -157,8 +143,8 @@ public class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
             if (treeCacheEvent.getData() != null) {
                 String path = treeCacheEvent.getData().getPath();
                 String[] strings = path.split("/");
-                if(strings.length==4) {
-                    refresh(strings[3]);
+                if (strings.length == 4) {
+                    refreshAndGet(strings[3]);
                 }
             }
         };
