@@ -7,27 +7,27 @@ public interface DiscoveryProperties {
 
     public String getDiscoveryPrefix();
 
-    public boolean isPreferIpAddress() ;
+    public boolean isPreferIpAddress();
 
-    public int getTtl() ;
+    public int getTtl();
 
-    public int getHeartbeatInterval() ;
+    public int getHeartbeatInterval();
 
-    public String getRegisterUrl() ;
-
-
-    public int getConnectTimeOut() ;
+    public String getRegisterUrl();
 
 
-    public int getSessionTimeOut() ;
+    public int getConnectTimeOut();
 
 
-    public String getPort() ;
+    public int getSessionTimeOut();
 
 
-    public String getAppName() ;
+    public String getPort();
 
 
-    public String getHostname() ;
+    public String getAppName();
+
+
+    public String getHostname();
 
 }

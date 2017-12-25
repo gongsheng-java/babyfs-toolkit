@@ -10,15 +10,15 @@ import java.lang.reflect.Type;
 public interface Encoder {
 
 
-  byte[] encode(Object object, Type bodyType);
+    byte[] encode(Object object, Type bodyType);
 
 
-  class Default implements Encoder {
+    class Default implements Encoder {
 
 
-    @Override
-    public byte[] encode(Object object, Type bodyType) {
-      return HessianCodecUtil.encode(object);
+        @Override
+        public byte[] encode(Object object, Type bodyType) {
+            return HessianCodecUtil.encode(object);
+        }
     }
-  }
 }

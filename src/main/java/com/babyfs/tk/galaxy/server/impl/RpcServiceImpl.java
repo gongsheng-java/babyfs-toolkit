@@ -20,19 +20,19 @@ public class RpcServiceImpl implements IRpcService {
     Logger logger = LoggerFactory.getLogger("RpcServiceImpl");
 
     @Inject
-    public RpcServiceImpl(Injector injector){
+    public RpcServiceImpl(Injector injector) {
         this.injector = injector;
     }
 
     @Override
     public Object invoke(String className, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws ClassNotFoundException, NoSuchMethodException {
 
-        if(Strings.isNullOrEmpty(className) || Strings.isNullOrEmpty(methodName )|| parameters == null || parameterTypes==null){
-            logger.error("error para,className:{},methodName:{},parameterType:{},parameters",className,methodName,parameterTypes,parameters);
+        if (Strings.isNullOrEmpty(className) || Strings.isNullOrEmpty(methodName) || parameters == null || parameterTypes == null) {
+            logger.error("error para,className:{},methodName:{},parameterType:{},parameters", className, methodName, parameterTypes, parameters);
             throw new RpcException("error parameter");
         }
         Class<?> bean = Class.forName(className);
-        Object object =  injector.getInstance(bean);
+        Object object = injector.getInstance(bean);
         Method method = bean.getMethod(methodName, parameterTypes);
         Object returnObj = ReflectionUtils.invokeMethod(method, object, parameters);
         return returnObj;

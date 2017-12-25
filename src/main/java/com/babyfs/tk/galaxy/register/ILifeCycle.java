@@ -10,5 +10,5 @@ public interface ILifeCycle {
 
     public void deRegister() throws KeeperException, InterruptedException;
 
-    public void  watch() throws Exception;
+    public void watch() throws Exception;
 }

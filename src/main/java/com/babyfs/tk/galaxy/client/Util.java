@@ -15,192 +15,193 @@ import static java.lang.String.format;
 public class Util {
 
 
-  public static final Charset UTF_8 = Charset.forName("UTF-8");
+    public static final Charset UTF_8 = Charset.forName("UTF-8");
 
-  private static final int BUF_SIZE = 0x800;
+    private static final int BUF_SIZE = 0x800;
 
 
-  private Util() {
-  }
-
-  public static void checkArgument(boolean expression,
-                                   String errorMessageTemplate,
-                                   Object... errorMessageArgs) {
-    if (!expression) {
-      throw new IllegalArgumentException(
-          format(errorMessageTemplate, errorMessageArgs));
+    private Util() {
     }
-  }
 
-
-  public static <T> T checkNotNull(T reference,
-                                   String errorMessageTemplate,
-                                   Object... errorMessageArgs) {
-    if (reference == null) {
-      throw new NullPointerException(
-          format(errorMessageTemplate, errorMessageArgs));
+    public static void checkArgument(boolean expression,
+                                     String errorMessageTemplate,
+                                     Object... errorMessageArgs) {
+        if (!expression) {
+            throw new IllegalArgumentException(
+                    format(errorMessageTemplate, errorMessageArgs));
+        }
     }
-    return reference;
-  }
 
-  public static void checkState(boolean expression,
-                                String errorMessageTemplate,
-                                Object... errorMessageArgs) {
-    if (!expression) {
-      throw new IllegalStateException(
-          format(errorMessageTemplate, errorMessageArgs));
+
+    public static <T> T checkNotNull(T reference,
+                                     String errorMessageTemplate,
+                                     Object... errorMessageArgs) {
+        if (reference == null) {
+            throw new NullPointerException(
+                    format(errorMessageTemplate, errorMessageArgs));
+        }
+        return reference;
     }
-  }
 
-
-  public static boolean isDefault(Method method) {
-
-    final int SYNTHETIC = 0x00001000;
-    return ((method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC | SYNTHETIC)) ==
-            Modifier.PUBLIC) && method.getDeclaringClass().isInterface();
-  }
-
-
-  public static String emptyToNull(String string) {
-    return string == null || string.isEmpty() ? null : string;
-  }
-
-
-  @SuppressWarnings("unchecked")
-  public static <T> T[] toArray(Iterable<? extends T> iterable, Class<T> type) {
-    Collection<T> collection;
-    if (iterable instanceof Collection) {
-      collection = (Collection<T>) iterable;
-    } else {
-      collection = new ArrayList<T>();
-      for (T element : iterable) {
-        collection.add(element);
-      }
+    public static void checkState(boolean expression,
+                                  String errorMessageTemplate,
+                                  Object... errorMessageArgs) {
+        if (!expression) {
+            throw new IllegalStateException(
+                    format(errorMessageTemplate, errorMessageArgs));
+        }
     }
-    T[] array = (T[]) Array.newInstance(type, collection.size());
-    return collection.toArray(array);
-  }
 
 
-  public static <T> Collection<T> valuesOrEmpty(Map<String, Collection<T>> map, String key) {
-    return map.containsKey(key) && map.get(key) != null ? map.get(key) : Collections.<T>emptyList();
-  }
+    public static boolean isDefault(Method method) {
 
-  public static void ensureClosed(Closeable closeable) {
-    if (closeable != null) {
-      try {
-        closeable.close();
-      } catch (IOException ignored) { // NOPMD
-      }
+        final int SYNTHETIC = 0x00001000;
+        return ((method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC | SYNTHETIC)) ==
+                Modifier.PUBLIC) && method.getDeclaringClass().isInterface();
     }
-  }
 
 
-  public static Type resolveLastTypeParameter(Type genericContext, Class<?> supertype)
-      throws IllegalStateException {
-    Type resolvedSuperType =
-        Types.getSupertype(genericContext, Types.getRawType(genericContext), supertype);
-    checkState(resolvedSuperType instanceof ParameterizedType,
-               "could not resolve %s into a parameterized type %s",
-               genericContext, supertype);
-    Type[] types = ParameterizedType.class.cast(resolvedSuperType).getActualTypeArguments();
-    for (int i = 0; i < types.length; i++) {
-      Type type = types[i];
-      if (type instanceof WildcardType) {
-        types[i] = ((WildcardType) type).getUpperBounds()[0];
-      }
+    public static String emptyToNull(String string) {
+        return string == null || string.isEmpty() ? null : string;
     }
-    return types[types.length - 1];
-  }
 
 
-  public static Object emptyValueOf(Type type) {
-    return EMPTIES.get(Types.getRawType(type));
-  }
-
-  private static final Map<Class<?>, Object> EMPTIES;
-  static {
-    Map<Class<?>, Object> empties = new LinkedHashMap<Class<?>, Object>();
-    empties.put(boolean.class, false);
-    empties.put(Boolean.class, false);
-    empties.put(byte[].class, new byte[0]);
-    empties.put(Collection.class, Collections.emptyList());
-    empties.put(Iterator.class, new Iterator<Object>() { // Collections.emptyIterator is a 1.7 api
-      public boolean hasNext() {
-        return false;
-      }
-
-      public Object next() {
-        throw new NoSuchElementException();
-      }
-
-      public void remove() {
-        throw new IllegalStateException();
-      }
-    });
-    empties.put(List.class, Collections.emptyList());
-    empties.put(Map.class, Collections.emptyMap());
-    empties.put(Set.class, Collections.emptySet());
-    EMPTIES = Collections.unmodifiableMap(empties);
-  }
-
-
-  public static String toString(Reader reader) throws IOException {
-    if (reader == null) {
-      return null;
+    @SuppressWarnings("unchecked")
+    public static <T> T[] toArray(Iterable<? extends T> iterable, Class<T> type) {
+        Collection<T> collection;
+        if (iterable instanceof Collection) {
+            collection = (Collection<T>) iterable;
+        } else {
+            collection = new ArrayList<T>();
+            for (T element : iterable) {
+                collection.add(element);
+            }
+        }
+        T[] array = (T[]) Array.newInstance(type, collection.size());
+        return collection.toArray(array);
     }
-    try {
-      StringBuilder to = new StringBuilder();
-      CharBuffer buf = CharBuffer.allocate(BUF_SIZE);
-      while (reader.read(buf) != -1) {
-        buf.flip();
-        to.append(buf);
-        buf.clear();
-      }
-      return to.toString();
-    } finally {
-      ensureClosed(reader);
-    }
-  }
-
-  public static byte[] toByteArray(InputStream in) throws IOException {
-    checkNotNull(in, "in");
-    try {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      copy(in, out);
-      return out.toByteArray();
-    } finally {
-      ensureClosed(in);
-    }
-  }
 
 
-  private static long copy(InputStream from, OutputStream to)
-      throws IOException {
-    checkNotNull(from, "from");
-    checkNotNull(to, "to");
-    byte[] buf = new byte[BUF_SIZE];
-    long total = 0;
-    while (true) {
-      int r = from.read(buf);
-      if (r == -1) {
-        break;
-      }
-      to.write(buf, 0, r);
-      total += r;
+    public static <T> Collection<T> valuesOrEmpty(Map<String, Collection<T>> map, String key) {
+        return map.containsKey(key) && map.get(key) != null ? map.get(key) : Collections.<T>emptyList();
     }
-    return total;
-  }
 
-  public static String decodeOrDefault(byte[] data, Charset charset, String defaultValue) {
-    if (data == null) {
-      return defaultValue;
+    public static void ensureClosed(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException ignored) { // NOPMD
+            }
+        }
     }
-    checkNotNull(charset, "charset");
-    try {
-      return charset.newDecoder().decode(ByteBuffer.wrap(data)).toString();
-    } catch (CharacterCodingException ex) {
-      return defaultValue;
+
+
+    public static Type resolveLastTypeParameter(Type genericContext, Class<?> supertype)
+            throws IllegalStateException {
+        Type resolvedSuperType =
+                Types.getSupertype(genericContext, Types.getRawType(genericContext), supertype);
+        checkState(resolvedSuperType instanceof ParameterizedType,
+                "could not resolve %s into a parameterized type %s",
+                genericContext, supertype);
+        Type[] types = ParameterizedType.class.cast(resolvedSuperType).getActualTypeArguments();
+        for (int i = 0; i < types.length; i++) {
+            Type type = types[i];
+            if (type instanceof WildcardType) {
+                types[i] = ((WildcardType) type).getUpperBounds()[0];
+            }
+        }
+        return types[types.length - 1];
     }
-  }
+
+
+    public static Object emptyValueOf(Type type) {
+        return EMPTIES.get(Types.getRawType(type));
+    }
+
+    private static final Map<Class<?>, Object> EMPTIES;
+
+    static {
+        Map<Class<?>, Object> empties = new LinkedHashMap<Class<?>, Object>();
+        empties.put(boolean.class, false);
+        empties.put(Boolean.class, false);
+        empties.put(byte[].class, new byte[0]);
+        empties.put(Collection.class, Collections.emptyList());
+        empties.put(Iterator.class, new Iterator<Object>() { // Collections.emptyIterator is a 1.7 api
+            public boolean hasNext() {
+                return false;
+            }
+
+            public Object next() {
+                throw new NoSuchElementException();
+            }
+
+            public void remove() {
+                throw new IllegalStateException();
+            }
+        });
+        empties.put(List.class, Collections.emptyList());
+        empties.put(Map.class, Collections.emptyMap());
+        empties.put(Set.class, Collections.emptySet());
+        EMPTIES = Collections.unmodifiableMap(empties);
+    }
+
+
+    public static String toString(Reader reader) throws IOException {
+        if (reader == null) {
+            return null;
+        }
+        try {
+            StringBuilder to = new StringBuilder();
+            CharBuffer buf = CharBuffer.allocate(BUF_SIZE);
+            while (reader.read(buf) != -1) {
+                buf.flip();
+                to.append(buf);
+                buf.clear();
+            }
+            return to.toString();
+        } finally {
+            ensureClosed(reader);
+        }
+    }
+
+    public static byte[] toByteArray(InputStream in) throws IOException {
+        checkNotNull(in, "in");
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            copy(in, out);
+            return out.toByteArray();
+        } finally {
+            ensureClosed(in);
+        }
+    }
+
+
+    private static long copy(InputStream from, OutputStream to)
+            throws IOException {
+        checkNotNull(from, "from");
+        checkNotNull(to, "to");
+        byte[] buf = new byte[BUF_SIZE];
+        long total = 0;
+        while (true) {
+            int r = from.read(buf);
+            if (r == -1) {
+                break;
+            }
+            to.write(buf, 0, r);
+            total += r;
+        }
+        return total;
+    }
+
+    public static String decodeOrDefault(byte[] data, Charset charset, String defaultValue) {
+        if (data == null) {
+            return defaultValue;
+        }
+        checkNotNull(charset, "charset");
+        try {
+            return charset.newDecoder().decode(ByteBuffer.wrap(data)).toString();
+        } catch (CharacterCodingException ex) {
+            return defaultValue;
+        }
+    }
 }

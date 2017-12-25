@@ -6,11 +6,11 @@ import com.google.inject.Injector;
 
 import java.util.function.Function;
 
-public   class RpcSuppler implements Function<Class<?>, Object> {
+public class RpcSuppler implements Function<Class<?>, Object> {
     private final String url;
     private Injector injector;
 
-  public RpcSuppler(String url) {
+    public RpcSuppler(String url) {
         this.url = url;
     }
 
@@ -22,6 +22,6 @@ public   class RpcSuppler implements Function<Class<?>, Object> {
     @Override
     public Object apply(Class<?> aClass) {
 
-        return Galaxy.builder().target(aClass,url);
+        return Galaxy.builder().target(aClass, url);
     }
 }

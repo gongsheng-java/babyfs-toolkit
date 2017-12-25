@@ -18,7 +18,7 @@ final class SynchronousMethodHandler implements InvocationHandlerFactory.MethodH
     private final LoadBalance loadBalance;
 
     private SynchronousMethodHandler(Target<?> target, Encoder encoder,
-                                     Decoder decoder, Client client,MethodMetadata metadata,LoadBalance loadBalance) {
+                                     Decoder decoder, Client client, MethodMetadata metadata, LoadBalance loadBalance) {
         this.target = Util.checkNotNull(target, "target");
         this.decoder = Util.checkNotNull(decoder, "decoder for %s", target);
         this.metadata = metadata;
@@ -31,12 +31,12 @@ final class SynchronousMethodHandler implements InvocationHandlerFactory.MethodH
     public Object invoke(Object[] argv) throws Throwable {
 
         byte[] body = encoder.encode(createRequest(argv), RpcRequest.class);
-        String url ;
+        String url;
         String path = "/rpc/invoke";
-        if(loadBalance !=null){
+        if (loadBalance != null) {
             ServiceInstance serviceInstance = loadBalance.getServerByAppName(target.name());
-            url = "http://" + serviceInstance.getHost() +":" + serviceInstance.getPort() + path;
-        }else {
+            url = "http://" + serviceInstance.getHost() + ":" + serviceInstance.getPort() + path;
+        } else {
             url = target.url() + path;
         }
         byte[] content = client.execute(url, body);
@@ -55,8 +55,8 @@ final class SynchronousMethodHandler implements InvocationHandlerFactory.MethodH
 
     static class Factory {
 
-        public InvocationHandlerFactory.MethodHandler create(Target<?> target, Encoder encoder, Decoder decoder,Client client, MethodMetadata md,LoadBalance loadBalance) {
-            return new SynchronousMethodHandler(target, encoder, decoder,client,md,loadBalance);
+        public InvocationHandlerFactory.MethodHandler create(Target<?> target, Encoder encoder, Decoder decoder, Client client, MethodMetadata md, LoadBalance loadBalance) {
+            return new SynchronousMethodHandler(target, encoder, decoder, client, md, loadBalance);
         }
     }
 }

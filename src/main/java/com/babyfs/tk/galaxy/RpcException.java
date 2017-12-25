@@ -3,7 +3,7 @@ package com.babyfs.tk.galaxy;
 
 import com.babyfs.tk.galaxy.client.Util;
 
-public class RpcException extends RuntimeException{
+public class RpcException extends RuntimeException {
 
 
     private static final long serialVersionUID = 1L;

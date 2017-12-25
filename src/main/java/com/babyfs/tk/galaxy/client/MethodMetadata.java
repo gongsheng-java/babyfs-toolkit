@@ -7,56 +7,55 @@ import java.lang.reflect.Type;
 
 public final class MethodMetadata implements Serializable {
 
-  private static final long serialVersionUID = 1L;
-  private String configKey;
-  private transient Type returnType;
-  private String methodName;
-  private Class<?>[] parameterTypes;
+    private static final long serialVersionUID = 1L;
+    private String configKey;
+    private transient Type returnType;
+    private String methodName;
+    private Class<?>[] parameterTypes;
 
-  MethodMetadata() {
-  }
+    MethodMetadata() {
+    }
 
 
-  public String configKey() {
-    return configKey;
-  }
+    public String configKey() {
+        return configKey;
+    }
 
-  public MethodMetadata configKey(String configKey) {
-    this.configKey = configKey;
-    return this;
-  }
+    public MethodMetadata configKey(String configKey) {
+        this.configKey = configKey;
+        return this;
+    }
 
-  public MethodMetadata methodName(String methodName){
+    public MethodMetadata methodName(String methodName) {
 
-    this.methodName = methodName;
-    return this;
-  }
+        this.methodName = methodName;
+        return this;
+    }
 
-  public MethodMetadata parameterTypes(Class<?>[] parameterTypes){
+    public MethodMetadata parameterTypes(Class<?>[] parameterTypes) {
 
-    this.parameterTypes = parameterTypes;
-    return this;
-  }
+        this.parameterTypes = parameterTypes;
+        return this;
+    }
 
-  public String methodName(){
+    public String methodName() {
 
-    return methodName;
-  }
+        return methodName;
+    }
 
-  public Class<?>[]  parameterTypes(){
+    public Class<?>[] parameterTypes() {
 
-    return parameterTypes;
-  }
+        return parameterTypes;
+    }
 
-  public Type returnType() {
-    return returnType;
-  }
+    public Type returnType() {
+        return returnType;
+    }
 
-  public MethodMetadata returnType(Type returnType) {
-    this.returnType = returnType;
-    return this;
-  }
-
+    public MethodMetadata returnType(Type returnType) {
+        this.returnType = returnType;
+        return this;
+    }
 
 
 }

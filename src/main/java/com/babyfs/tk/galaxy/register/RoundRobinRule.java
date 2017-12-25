@@ -6,9 +6,10 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RoundRobinRule implements IRule{
+public class RoundRobinRule implements IRule {
 
-   private   AtomicInteger nextIndexAI = new AtomicInteger(0);;
+    private AtomicInteger nextIndexAI = new AtomicInteger(0);
+    ;
 
 
     private Logger log = LoggerFactory.getLogger("RoundRobinRule");
@@ -26,7 +27,7 @@ public class RoundRobinRule implements IRule{
         while (server == null && count++ < 10) {
 
             int serverCount = list.size();
-            if ( serverCount == 0) {
+            if (serverCount == 0) {
                 log.warn("No up servers available from load balancer: " + list);
                 return null;
             }
@@ -35,7 +36,7 @@ public class RoundRobinRule implements IRule{
             if (server == null) {
                 Thread.yield();
                 continue;
-            }else {
+            } else {
                 return server;
             }
         }

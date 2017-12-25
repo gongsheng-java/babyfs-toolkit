@@ -8,6 +8,6 @@ public interface DiscoveryClient {
 
     ServiceInstance getLocalServiceInstance();
 
-    List<ServiceInstance> getInstances(String serverId) ;
+    List<ServiceInstance> getInstances(String serverId);
 
 }

@@ -5,7 +5,7 @@ public class ServiceInstance {
 
     private String appName;
 
-    private String  port;
+    private String port;
 
     private String host;
 
@@ -47,7 +47,6 @@ public class ServiceInstance {
     public void setPort(String port) {
         this.port = port;
     }
-
 
 
 }

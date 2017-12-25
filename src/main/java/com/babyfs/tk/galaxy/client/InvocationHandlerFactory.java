@@ -7,18 +7,18 @@ import java.util.Map;
 
 public interface InvocationHandlerFactory {
 
-  InvocationHandler create(Target target, Map<Method, MethodHandler> dispatch);
+    InvocationHandler create(Target target, Map<Method, MethodHandler> dispatch);
 
-  interface MethodHandler {
+    interface MethodHandler {
 
-    Object invoke(Object[] argv) throws Throwable;
-  }
-
-  static final class Default implements InvocationHandlerFactory {
-
-    @Override
-    public InvocationHandler create(Target target, Map<Method, MethodHandler> dispatch) {
-      return new ReflectiveGalaxy.RpcInvocationHandler(target, dispatch);
+        Object invoke(Object[] argv) throws Throwable;
     }
-  }
+
+    static final class Default implements InvocationHandlerFactory {
+
+        @Override
+        public InvocationHandler create(Target target, Map<Method, MethodHandler> dispatch) {
+            return new ReflectiveGalaxy.RpcInvocationHandler(target, dispatch);
+        }
+    }
 }

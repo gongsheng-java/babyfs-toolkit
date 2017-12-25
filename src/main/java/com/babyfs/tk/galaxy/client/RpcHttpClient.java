@@ -45,6 +45,7 @@ public enum RpcHttpClient implements Client {
     private static final int DEFAULT_MAX_CONNECT_PER_ROUTE = 50;
     private static final long DEFAULT_TIME_TO_LIVE = 10000l;
     private CloseableHttpClient httpClient;
+
     private RpcHttpClient() {
         init();
     }
@@ -95,7 +96,7 @@ public enum RpcHttpClient implements Client {
         return httpClient.execute(requestBuilder.build());
     }
 
-    public byte[] execute(String uri,byte[] body) throws IOException {
+    public byte[] execute(String uri, byte[] body) throws IOException {
 
         CloseableHttpResponse response = internalDoHttpRequest(uri, body);
         return handlerResponse(response);

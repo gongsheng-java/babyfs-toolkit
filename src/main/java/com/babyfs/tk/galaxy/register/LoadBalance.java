@@ -17,14 +17,14 @@ public class LoadBalance {
 
     private DiscoveryClient discoveryClient;
 
-    private IRule  rule = new RoundRobinRule();
+    private IRule rule = new RoundRobinRule();
 
-    public LoadBalance(DiscoveryClient discoveryClient, IRule rule){
+    public LoadBalance(DiscoveryClient discoveryClient, IRule rule) {
         this.discoveryClient = discoveryClient;
         this.rule = rule;
     }
 
-    public ServiceInstance  getServerByAppName(String appName) throws ExecutionException, InterruptedException, KeeperException {
+    public ServiceInstance getServerByAppName(String appName) throws ExecutionException, InterruptedException, KeeperException {
         return rule.choose(discoveryClient.getInstances(appName));
     }
 
@@ -37,16 +37,16 @@ public class LoadBalance {
             return this;
         }
 
-        public LoadBalance.Builder  discoveryProperties(DiscoveryProperties discoveryProperties){
+        public LoadBalance.Builder discoveryProperties(DiscoveryProperties discoveryProperties) {
             this.discoveryProperties = discoveryProperties;
             return this;
         }
 
-        public LoadBalance build()  {
+        public LoadBalance build() {
 
             Util.checkNotNull(discoveryProperties, "discoveryProperties");
             ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(1000, 3);
-            CuratorFramework curatorFramework =  CuratorFrameworkFactory.builder()
+            CuratorFramework curatorFramework = CuratorFrameworkFactory.builder()
                     .connectString(discoveryProperties.getRegisterUrl())
                     .retryPolicy(retryPolicy)
                     .connectionTimeoutMs(discoveryProperties.getConnectTimeOut())
@@ -54,8 +54,8 @@ public class LoadBalance {
                     .build();
             curatorFramework.start();
             ZkDiscoveryClient zkDiscoveryClient = null;
-            zkDiscoveryClient = new ZkDiscoveryClient(discoveryProperties,curatorFramework);
-            return new LoadBalance(zkDiscoveryClient,rule);
+            zkDiscoveryClient = new ZkDiscoveryClient(discoveryProperties, curatorFramework);
+            return new LoadBalance(zkDiscoveryClient, rule);
         }
     }
 
