@@ -11,7 +11,9 @@ import java.util.*;
 
 import static java.lang.String.format;
 
-
+/**
+ * 工具类
+ */
 public class Util {
 
 
@@ -66,57 +68,15 @@ public class Util {
     }
 
 
-    @SuppressWarnings("unchecked")
-    public static <T> T[] toArray(Iterable<? extends T> iterable, Class<T> type) {
-        Collection<T> collection;
-        if (iterable instanceof Collection) {
-            collection = (Collection<T>) iterable;
-        } else {
-            collection = new ArrayList<T>();
-            for (T element : iterable) {
-                collection.add(element);
-            }
-        }
-        T[] array = (T[]) Array.newInstance(type, collection.size());
-        return collection.toArray(array);
-    }
-
-
-    public static <T> Collection<T> valuesOrEmpty(Map<String, Collection<T>> map, String key) {
-        return map.containsKey(key) && map.get(key) != null ? map.get(key) : Collections.<T>emptyList();
-    }
-
     public static void ensureClosed(Closeable closeable) {
         if (closeable != null) {
             try {
                 closeable.close();
-            } catch (IOException ignored) { // NOPMD
+            } catch (IOException ignored) {
             }
         }
     }
 
-
-    public static Type resolveLastTypeParameter(Type genericContext, Class<?> supertype)
-            throws IllegalStateException {
-        Type resolvedSuperType =
-                Types.getSupertype(genericContext, Types.getRawType(genericContext), supertype);
-        checkState(resolvedSuperType instanceof ParameterizedType,
-                "could not resolve %s into a parameterized type %s",
-                genericContext, supertype);
-        Type[] types = ParameterizedType.class.cast(resolvedSuperType).getActualTypeArguments();
-        for (int i = 0; i < types.length; i++) {
-            Type type = types[i];
-            if (type instanceof WildcardType) {
-                types[i] = ((WildcardType) type).getUpperBounds()[0];
-            }
-        }
-        return types[types.length - 1];
-    }
-
-
-    public static Object emptyValueOf(Type type) {
-        return EMPTIES.get(Types.getRawType(type));
-    }
 
     private static final Map<Class<?>, Object> EMPTIES;
 
@@ -191,17 +151,5 @@ public class Util {
             total += r;
         }
         return total;
-    }
-
-    public static String decodeOrDefault(byte[] data, Charset charset, String defaultValue) {
-        if (data == null) {
-            return defaultValue;
-        }
-        checkNotNull(charset, "charset");
-        try {
-            return charset.newDecoder().decode(ByteBuffer.wrap(data)).toString();
-        } catch (CharacterCodingException ex) {
-            return defaultValue;
-        }
     }
 }

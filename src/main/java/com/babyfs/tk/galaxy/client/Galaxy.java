@@ -9,7 +9,10 @@ import com.babyfs.tk.galaxy.register.LoadBalance;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-
+/**
+ * rpc client端构建的核心类
+ * 采用builder的方式构建rpc的client,encoder,decoder,loadBalance
+ */
 public abstract class Galaxy {
 
     public static Builder builder() {
@@ -71,7 +74,6 @@ public abstract class Galaxy {
             this.loadBalance = loadBalance;
             return this;
         }
-
 
         public Builder invocationHandlerFactory(InvocationHandlerFactory invocationHandlerFactory) {
             this.invocationHandlerFactory = invocationHandlerFactory;

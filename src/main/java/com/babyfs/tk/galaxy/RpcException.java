@@ -3,6 +3,9 @@ package com.babyfs.tk.galaxy;
 
 import com.babyfs.tk.galaxy.client.Util;
 
+/**
+ * rpc调用exception
+ */
 public class RpcException extends RuntimeException {
 
 

@@ -1,5 +1,8 @@
 package com.babyfs.tk.galaxy.register;
 
+/**
+ * 服务发现配置接口
+ */
 public interface DiscoveryProperties {
 
 

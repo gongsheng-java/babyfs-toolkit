@@ -8,6 +8,10 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 
+/**
+ * 用OKHttpclient实现的http调用client
+ * 枚举实现单例模式
+ */
 public enum RpcOkHttpClient implements Client {
 
 

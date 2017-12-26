@@ -31,7 +31,10 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 
-
+/**
+ * 用ApacheHttpclient实现的http调用client
+ * 枚举实现单例模式
+ */
 public enum RpcHttpClient implements Client {
 
     http;

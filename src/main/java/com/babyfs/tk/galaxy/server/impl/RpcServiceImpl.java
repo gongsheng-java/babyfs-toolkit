@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 
+/**
+ * rpc server接口实现
+ */
 public class RpcServiceImpl implements IRpcService {
 
 

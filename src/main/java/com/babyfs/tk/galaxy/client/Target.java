@@ -5,6 +5,11 @@ package com.babyfs.tk.galaxy.client;
 import static com.babyfs.tk.galaxy.client.Util.checkNotNull;
 import static com.babyfs.tk.galaxy.client.Util.emptyToNull;
 
+/**
+ * rpc接口的代理对像接口
+ *
+ * @param <T>
+ */
 public interface Target<T> {
 
     Class<T> type();
@@ -13,6 +18,11 @@ public interface Target<T> {
 
     String url();
 
+    /**
+     * rpc接口的代理对像的实现类
+     *
+     * @param <T>
+     */
     public static class HardCodedTarget<T> implements Target<T> {
 
         private final Class<T> type;
@@ -26,7 +36,7 @@ public interface Target<T> {
         public HardCodedTarget(Class<T> type, String name, String url) {
             this.type = checkNotNull(type, "type");
             this.name = checkNotNull(emptyToNull(name), "name");
-            this.url = checkNotNull(emptyToNull(url), "url");
+            this.url = url;
         }
 
         @Override

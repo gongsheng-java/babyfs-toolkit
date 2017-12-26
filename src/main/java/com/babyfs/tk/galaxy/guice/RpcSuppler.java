@@ -6,6 +6,9 @@ import com.google.inject.Injector;
 
 import java.util.function.Function;
 
+/**
+ * 将target加入guice容器的function
+ */
 public class RpcSuppler implements Function<Class<?>, Object> {
     private final String url;
     private Injector injector;

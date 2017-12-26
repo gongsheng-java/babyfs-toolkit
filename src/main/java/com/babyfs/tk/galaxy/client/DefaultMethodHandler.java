@@ -6,7 +6,9 @@ import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-
+/**
+ * 执行代理类的默认方法的MethodHander
+ */
 final class DefaultMethodHandler implements InvocationHandlerFactory.MethodHandler {
 
     private final MethodHandle unboundHandle;
@@ -19,7 +21,6 @@ final class DefaultMethodHandler implements InvocationHandlerFactory.MethodHandl
             Field field = Lookup.class.getDeclaredField("IMPL_LOOKUP");
             field.setAccessible(true);
             Lookup lookup = (Lookup) field.get(null);
-
             this.unboundHandle = lookup.unreflectSpecial(defaultMethod, declaringClass);
         } catch (NoSuchFieldException ex) {
             throw new IllegalStateException(ex);

@@ -2,14 +2,22 @@
 package com.babyfs.tk.galaxy.client;
 
 
+import com.babyfs.tk.commons.model.ServiceResponse;
+import com.babyfs.tk.galaxy.RpcException;
 import com.babyfs.tk.galaxy.RpcRequest;
 import com.babyfs.tk.galaxy.codec.Decoder;
 import com.babyfs.tk.galaxy.codec.Encoder;
 import com.babyfs.tk.galaxy.register.LoadBalance;
 import com.babyfs.tk.galaxy.register.ServiceInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * 执行代理类的远程方法的MethodHandler
+ */
 final class SynchronousMethodHandler implements InvocationHandlerFactory.MethodHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(SynchronousMethodHandler.class);
     private final Target<?> target;
     private final Decoder decoder;
     private final Encoder encoder;
@@ -27,6 +35,13 @@ final class SynchronousMethodHandler implements InvocationHandlerFactory.MethodH
         this.loadBalance = loadBalance;
     }
 
+    /**
+     * 执行编码，远程调用，解码
+     *
+     * @param argv
+     * @return
+     * @throws Throwable
+     */
     @Override
     public Object invoke(Object[] argv) throws Throwable {
 
@@ -39,10 +54,21 @@ final class SynchronousMethodHandler implements InvocationHandlerFactory.MethodH
         } else {
             url = target.url() + path;
         }
-        byte[] content = client.execute(url, body);
-        return decoder.decode(content, metadata.returnType());
+        try {
+            byte[] content = client.execute(url, body);
+            return decoder.decode(content, metadata.returnType());
+        } catch (RpcException e) {
+            logger.error("rpc invoke remote method fail", e);
+            return ServiceResponse.failResponse();
+        }
     }
 
+    /**
+     * 根据方法传入的实际参数，与方法元数据pojo构造RpcRequest
+     *
+     * @param argv
+     * @return
+     */
     public RpcRequest createRequest(Object[] argv) {
 
         RpcRequest rpcRequest = new RpcRequest();
@@ -53,6 +79,9 @@ final class SynchronousMethodHandler implements InvocationHandlerFactory.MethodH
         return rpcRequest;
     }
 
+    /**
+     * SynchronousMethodHandler工厂类
+     */
     static class Factory {
 
         public InvocationHandlerFactory.MethodHandler create(Target<?> target, Encoder encoder, Decoder decoder, Client client, MethodMetadata md, LoadBalance loadBalance) {

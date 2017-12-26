@@ -12,7 +12,9 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.*;
 
-
+/**
+ * galaxy实现类
+ */
 public class ReflectiveGalaxy extends Galaxy {
 
     private final ParseHandlersByName targetToHandlersByName;
@@ -23,7 +25,13 @@ public class ReflectiveGalaxy extends Galaxy {
         this.factory = factory;
     }
 
-
+    /**
+     * 用jdk的动态代理生成代理对象
+     *
+     * @param target
+     * @param <T>
+     * @return
+     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T newInstance(Target<T> target) {
@@ -51,6 +59,10 @@ public class ReflectiveGalaxy extends Galaxy {
         return proxy;
     }
 
+    /**
+     * InvocationHandler实现类
+     * 找到method,执行代理方法
+     */
     static class RpcInvocationHandler implements InvocationHandler {
 
         private final Target target;
@@ -100,6 +112,9 @@ public class ReflectiveGalaxy extends Galaxy {
         }
     }
 
+    /**
+     * 解析代理对象的方法的内部类
+     */
     static final class ParseHandlersByName {
 
         private final Encoder encoder;
@@ -117,6 +132,12 @@ public class ReflectiveGalaxy extends Galaxy {
             this.decoder = Util.checkNotNull(decoder, "decoder");
         }
 
+        /**
+         * 得到Map  map key 为方法标识，value 为方法的SynchronousMethodHandler
+         *
+         * @param key
+         * @return
+         */
         public Map<String, InvocationHandlerFactory.MethodHandler> apply(Target key) {
 
             Map<String, InvocationHandlerFactory.MethodHandler> result = new LinkedHashMap<String, InvocationHandlerFactory.MethodHandler>();
@@ -128,6 +149,12 @@ public class ReflectiveGalaxy extends Galaxy {
             return result;
         }
 
+        /**
+         * 解析代理接口得到方法元数据列表
+         *
+         * @param targetType
+         * @return
+         */
         public List<MethodMetadata> parseAndValidatateMetadata(Class<?> targetType) {
             Util.checkState(targetType.getTypeParameters().length == 0, "Parameterized types unsupported: %s",
                     targetType.getSimpleName());
@@ -153,6 +180,13 @@ public class ReflectiveGalaxy extends Galaxy {
             return new ArrayList<MethodMetadata>(result.values());
         }
 
+        /**
+         * 解析方法得到方法元数据
+         *
+         * @param targetType
+         * @param method
+         * @return
+         */
         private MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
             MethodMetadata data = new MethodMetadata();
             data.returnType(Types.resolve(targetType, targetType, method.getGenericReturnType()));

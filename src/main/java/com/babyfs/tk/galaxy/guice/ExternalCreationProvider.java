@@ -4,6 +4,12 @@ import com.google.inject.Provider;
 
 import java.util.function.Function;
 
+/**
+ * guice provider
+ * 目的代理接口加入guice容器
+ *
+ * @param <T>
+ */
 public class ExternalCreationProvider<T> implements Provider<T> {
     private final Function<Class<?>, ?> supplier;
     private final Class<? super T> clazz;

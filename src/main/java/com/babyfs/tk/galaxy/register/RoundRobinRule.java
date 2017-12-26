@@ -6,15 +6,21 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 基于轮询的负载均衡规则
+ */
 public class RoundRobinRule implements IRule {
 
     private AtomicInteger nextIndexAI = new AtomicInteger(0);
-    ;
-
 
     private Logger log = LoggerFactory.getLogger("RoundRobinRule");
 
-
+    /**
+     * 根据传入的ServiceInstance列表，轮询出一个ServiceInstance实例
+     *
+     * @param list
+     * @return
+     */
     public ServiceInstance choose(List<ServiceInstance> list) {
         if (list == null) {
             log.warn("no load balancer");

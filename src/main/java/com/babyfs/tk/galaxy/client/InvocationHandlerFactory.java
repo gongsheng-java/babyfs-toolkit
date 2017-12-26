@@ -5,6 +5,9 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 
+/**
+ * Handler工厂类
+ */
 public interface InvocationHandlerFactory {
 
     InvocationHandler create(Target target, Map<Method, MethodHandler> dispatch);
@@ -14,6 +17,9 @@ public interface InvocationHandlerFactory {
         Object invoke(Object[] argv) throws Throwable;
     }
 
+    /**
+     * handler工厂类的默认实现，创建RpcInvocationHandler
+     */
     static final class Default implements InvocationHandlerFactory {
 
         @Override

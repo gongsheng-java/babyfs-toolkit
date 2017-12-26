@@ -5,6 +5,9 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 反射工具类
+ */
 public abstract class ReflectionUtils {
     private static final String CGLIB_RENAMED_METHOD_PREFIX = "CGLIB$";
     private static final Map<Class<?>, Method[]> declaredMethodsCache = new ConcurrentHashMap<>(256);
@@ -94,6 +97,15 @@ public abstract class ReflectionUtils {
         return invokeMethod(method, target);
     }
 
+
+    /**
+     * 根据传入的Method,java bean,参数，执行此方法
+     *
+     * @param method
+     * @param target
+     * @param args
+     * @return
+     */
     public static Object invokeMethod(Method method, Object target, Object... args) {
         try {
             return method.invoke(target, args);

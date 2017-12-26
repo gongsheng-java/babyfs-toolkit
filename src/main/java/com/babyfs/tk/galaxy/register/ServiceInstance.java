@@ -1,5 +1,8 @@
 package com.babyfs.tk.galaxy.register;
 
+/**
+ * 服务实例pojo
+ */
 public class ServiceInstance {
 
 

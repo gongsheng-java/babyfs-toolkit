@@ -9,6 +9,11 @@ import org.apache.zookeeper.KeeperException;
 
 import java.util.concurrent.ExecutionException;
 
+/**
+ * 负载均衡器
+ * 用builder模式构建负载均衡器对象
+ * 默认用ZkDiscoveryClient
+ */
 public class LoadBalance {
 
     public static LoadBalance.Builder builder() {

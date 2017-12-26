@@ -2,6 +2,9 @@ package com.babyfs.tk.galaxy;
 
 import java.io.Serializable;
 
+/**
+ * rpc调用过程客户端传递到服务端的pojo对象
+ */
 public class RpcRequest implements Serializable {
 
     private String className;
