@@ -46,18 +46,18 @@ final class SynchronousMethodHandler implements InvocationHandlerFactory.MethodH
     public Object invoke(Object[] argv) throws Throwable {
 
         byte[] body = encoder.encode(createRequest(argv), RpcRequest.class);
-        String url;
-        String path = "/rpc/invoke";
+        StringBuilder stringBuilder = new StringBuilder();
         if (loadBalance != null) {
             ServiceInstance serviceInstance = loadBalance.getServerByAppName(target.name());
-            url = "http://" + serviceInstance.getHost() + ":" + serviceInstance.getPort() + path;
+            stringBuilder.append("http://").append(serviceInstance.getHost()).append(":").append(serviceInstance.getPort());
         } else {
-            url = target.url() + path;
+            stringBuilder.append(target.url());
         }
+        String url = stringBuilder.append("/rpc/invoke").toString();
         try {
             byte[] content = client.execute(url, body);
             return decoder.decode(content, metadata.returnType());
-        } catch (RpcException e) {
+        } catch (Exception e) {
             logger.error("rpc invoke remote method fail", e);
             return ServiceResponse.failResponse();
         }
