@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 基于zk的服务发现客户端
  */
-public class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
+final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
 
     private final DiscoveryProperties properties;
 
