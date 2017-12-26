@@ -3,7 +3,6 @@ package com.babyfs.tk.galaxy.client;
 
 
 import com.babyfs.tk.commons.model.ServiceResponse;
-import com.babyfs.tk.galaxy.RpcException;
 import com.babyfs.tk.galaxy.RpcRequest;
 import com.babyfs.tk.galaxy.codec.Decoder;
 import com.babyfs.tk.galaxy.codec.Encoder;
