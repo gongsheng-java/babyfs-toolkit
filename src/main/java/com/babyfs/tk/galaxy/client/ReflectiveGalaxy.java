@@ -5,7 +5,6 @@ package com.babyfs.tk.galaxy.client;
 import com.babyfs.tk.galaxy.codec.Decoder;
 import com.babyfs.tk.galaxy.codec.Encoder;
 import com.babyfs.tk.galaxy.register.LoadBalance;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
