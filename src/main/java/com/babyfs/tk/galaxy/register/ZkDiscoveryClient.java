@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * 基于zk的服务发现客户端
@@ -53,7 +54,7 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
 
         String path = properties.getDiscoveryPrefix() + "/" + appName;
         List<String> hosts = getChildren(path);
-        List<ServiceInstance> instances = new ArrayList<>();
+        List<ServiceInstance> instances = new CopyOnWriteArrayList<>();
         if (CollectionUtils.isEmpty(hosts)) {
             logger.error("the server:{} has no provider", appName);
             return Collections.EMPTY_LIST;

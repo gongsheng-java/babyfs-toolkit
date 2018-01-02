@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -14,6 +15,8 @@ public class RoundRobinRule implements IRule {
     private AtomicLong nextIndexAI = new AtomicLong(0);
 
     private Logger log = LoggerFactory.getLogger("RoundRobinRule");
+
+    private static final int RETRY_TIME = 5;
 
     /**
      * 根据传入的ServiceInstance列表，轮询出一个ServiceInstance实例
@@ -28,15 +31,24 @@ public class RoundRobinRule implements IRule {
         }
         ServiceInstance server = null;
         int index = 0;
-        int serverCount = list.size();
-        if (serverCount == 0) {
-            log.warn("No up servers available from load balancer: " + list);
-            return null;
+        int count = 0;
+        // 因为list中的可用服务实例可能发生变化,所以此处增加重试机制
+        while (server == null && count++ < RETRY_TIME) {
+            int serverCount = list.size();
+            if (serverCount == 0) {
+                log.warn("No up servers available from load balancer: " + list);
+                return null;
+            }
+            index = (int) (nextIndexAI.incrementAndGet() % serverCount);
+            server = list.get(index);
+            if (server == null) {
+                continue;
+            } else {
+                return server;
+            }
         }
-        index = (int) (nextIndexAI.incrementAndGet() % serverCount);
-        server = list.get(index);
-        if (server == null) {
-            log.warn("No available alive servers"
+        if (count >= RETRY_TIME) {
+            log.warn("No available alive servers after 10 tries from load balancer: "
                     + list);
         }
         return server;

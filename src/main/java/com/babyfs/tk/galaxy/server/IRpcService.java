@@ -13,5 +13,5 @@ public interface IRpcService {
      * @param parameters
      * @return
      */
-    public Object invoke(String className, String methodName, String methodSign, Object[] parameters);
+    Object invoke(String className, String methodName, String methodSign, Object[] parameters);
 }

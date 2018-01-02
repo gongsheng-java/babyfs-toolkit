@@ -2,15 +2,14 @@
 package com.babyfs.tk.galaxy.client;
 
 
+import com.babyfs.tk.galaxy.ProxyUtils;
 import com.babyfs.tk.galaxy.codec.Decoder;
 import com.babyfs.tk.galaxy.codec.Encoder;
 import com.babyfs.tk.galaxy.register.LoadBalance;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.*;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -46,7 +45,7 @@ public class ReflectiveGalaxyClient extends GalaxyClientProxy {
         Map<String, IInvocationHandlerFactory.IMethodHandler> nameToHandler = targetToHandlersByName.apply(target);
         Map<Method, IInvocationHandlerFactory.IMethodHandler> methodToHandler = new LinkedHashMap<Method, IInvocationHandlerFactory.IMethodHandler>();
         for (Method method : target.type().getMethods()) {
-            methodToHandler.put(method, nameToHandler.get(GalaxyClientProxy.configKey(target.type(), method)));
+            methodToHandler.put(method, nameToHandler.get(ProxyUtils.configKey(target.type(), method)));
         }
         InvocationHandler handler = factory.create(target, methodToHandler);
         T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(), new Class<?>[]{target.type()}, handler);
@@ -164,7 +163,7 @@ public class ReflectiveGalaxyClient extends GalaxyClientProxy {
         private MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
             MethodMetadata data = new MethodMetadata();
             data.returnType(method.getReturnType());
-            data.configKey(GalaxyClientProxy.configKey(targetType, method));
+            data.configKey(ProxyUtils.configKey(targetType, method));
             data.parameterTypes(method.getParameterTypes());
             data.methodName(method.getName());
             return data;

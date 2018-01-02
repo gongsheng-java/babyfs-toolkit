@@ -37,7 +37,6 @@ final class GalaxyMethodHandler implements IInvocationHandlerFactory.IMethodHand
         this.client = client;
         this.loadBalance = loadBalance;
     }
-
     /**
      * 执行编码，远程调用，解码
      *
@@ -56,6 +55,7 @@ final class GalaxyMethodHandler implements IInvocationHandlerFactory.IMethodHand
         } else {
             stringBuilder.append(target.url());
         }
+        // TODO: 2018/1/2 此处需要卸载配置文件里
         String url = stringBuilder.append("/rpc/invoke").toString();
         try {
             byte[] content = client.execute(url, body);
