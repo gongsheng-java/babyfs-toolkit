@@ -50,7 +50,7 @@ public class GalaxyClientProxyBuilder {
 
     /**
      * appName信息的Target对象
-     * @param apiType Class对象
+     * @param apiType Class对
      * @param appName 应用名称
      * @param <T>
      * @return 代理对象(HardCodedTarget)
