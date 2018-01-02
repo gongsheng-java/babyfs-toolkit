@@ -3,6 +3,7 @@ package com.babyfs.tk.galaxy.codec;
 
 
 import com.babyfs.tk.commons.codec.util.HessianCodecUtil;
+
 import java.io.IOException;
 
 /**
@@ -11,6 +12,7 @@ import java.io.IOException;
 public interface Decoder {
 
     Object decode(byte[] response) throws IOException;
+
     /**
      * 默认的Hessian解码器
      */

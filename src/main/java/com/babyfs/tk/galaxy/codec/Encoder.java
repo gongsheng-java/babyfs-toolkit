@@ -12,6 +12,7 @@ import java.lang.reflect.Type;
 public interface Encoder {
 
     byte[] encode(Object object, Type bodyType);
+
     /**
      * 默认的Hessian编码器
      */

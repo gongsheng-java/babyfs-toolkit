@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * 用builder模式构建负载均衡器对象
  * 默认用ZkDiscoveryClient
  */
-public class LoadBalance implements ILoadBalance{
+public class LoadBalance implements ILoadBalance {
 
     public static LoadBalance.Builder builder() {
         return new LoadBalance.Builder();
@@ -31,14 +31,13 @@ public class LoadBalance implements ILoadBalance{
     }
 
     /**
-     *
      * @param appName
      * @return
      * @throws ExecutionException
      * @throws InterruptedException
      * @throws KeeperException
      */
-    public ServiceInstance getServerByAppName(String appName){
+    public ServiceInstance getServerByAppName(String appName) {
         return rule.choose(discoveryClient.getInstances(appName));
     }
 

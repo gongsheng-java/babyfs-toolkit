@@ -32,6 +32,7 @@ public final class MethodMetadata implements Serializable {
         this.methodName = methodName;
         return this;
     }
+
     public MethodMetadata returnType(Type returnType) {
         this.returnType = returnType;
         return this;

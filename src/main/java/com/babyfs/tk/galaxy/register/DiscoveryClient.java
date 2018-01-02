@@ -11,12 +11,14 @@ public interface DiscoveryClient {
 
     /**
      * 获取本服务的ServerInstance
+     *
      * @return
      */
     ServiceInstance getLocalServiceInstance();
 
     /**
      * 根据传入的appName获取ServiceInstance列表
+     *
      * @param appName
      * @return
      */

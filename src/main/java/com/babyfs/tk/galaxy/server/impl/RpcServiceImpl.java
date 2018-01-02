@@ -40,9 +40,9 @@ public class RpcServiceImpl implements IRpcService {
             Method method = bean.getMethod(methodName, parameterTypes);
             Object returnObj = ReflectionUtils.invokeMethod(method, object, parameters);
             return returnObj;
-        }catch (Exception e){
-            logger.error("rpc server invoke error",e);
-            throw new RpcException("rpc server invoke error",e);
+        } catch (Exception e) {
+            logger.error("rpc server invoke error", e);
+            throw new RpcException("rpc server invoke error", e);
         }
     }
 }

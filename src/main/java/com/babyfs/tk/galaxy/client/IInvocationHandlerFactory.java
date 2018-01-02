@@ -13,7 +13,8 @@ public interface IInvocationHandlerFactory {
 
     /**
      * 创建InvocationHandler方法
-     * @param target 代理的目标
+     *
+     * @param target   代理的目标
      * @param dispatch key为Method，value为MethodHandler的map
      * @return InvocationHandler
      */
@@ -27,6 +28,7 @@ public interface IInvocationHandlerFactory {
 
         /**
          * 执行被代理对象的方法实际执行过程
+         *
          * @param argv 方法实际传入的参数
          * @return 方法执行结果
          * @throws Throwable

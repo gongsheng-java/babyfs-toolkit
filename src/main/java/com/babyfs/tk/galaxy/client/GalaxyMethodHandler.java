@@ -10,6 +10,7 @@ import com.babyfs.tk.galaxy.register.LoadBalance;
 import com.babyfs.tk.galaxy.register.ServiceInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -39,6 +40,7 @@ final class GalaxyMethodHandler implements IInvocationHandlerFactory.IMethodHand
 
     /**
      * 执行编码，远程调用，解码
+     *
      * @param argv
      * @return
      * @throws Throwable
@@ -66,6 +68,7 @@ final class GalaxyMethodHandler implements IInvocationHandlerFactory.IMethodHand
 
     /**
      * 根据方法传入的实际参数，与方法元数据pojo构造RpcRequest
+     *
      * @param argv
      * @return
      */
@@ -86,6 +89,7 @@ final class GalaxyMethodHandler implements IInvocationHandlerFactory.IMethodHand
     static class Factory {
         /**
          * create方法创建GalaxyMethodHandler
+         *
          * @param target
          * @param encoder
          * @param decoder

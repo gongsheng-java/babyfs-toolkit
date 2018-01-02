@@ -16,7 +16,7 @@ public class RpcSuppler implements Function<Class<?>, Object> {
     private Injector injector;
     private GalaxyClientProxyBuilder clientProxyBuilder;
 
-    public RpcSuppler(String appName,GalaxyClientProxyBuilder clientProxyBuilder) {
+    public RpcSuppler(String appName, GalaxyClientProxyBuilder clientProxyBuilder) {
         this.appName = appName;
         this.clientProxyBuilder = clientProxyBuilder;
     }

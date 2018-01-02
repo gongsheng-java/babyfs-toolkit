@@ -5,10 +5,12 @@ package com.babyfs.tk.galaxy.client;
 import com.babyfs.tk.galaxy.codec.Decoder;
 import com.babyfs.tk.galaxy.codec.Encoder;
 import com.babyfs.tk.galaxy.register.LoadBalance;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.*;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -33,6 +35,7 @@ public class ReflectiveGalaxyClient extends GalaxyClientProxy {
      * 1.解析被代理对象
      * 2.创建InvocationHandler
      * 3.创建代理类
+     *
      * @param target 被代理对象
      * @param <T>
      * @return 代理类
@@ -89,7 +92,8 @@ public class ReflectiveGalaxyClient extends GalaxyClientProxy {
         }
     }
 
-    /**类的作用:
+    /**
+     * 类的作用:
      * 1.解析代理对象元数据
      * 2.生成代理对象的方法的method handler
      */
@@ -113,6 +117,7 @@ public class ReflectiveGalaxyClient extends GalaxyClientProxy {
         /**
          * ParseHandlersByName暴露给其他类调用的方法
          * 创建被代理类的方法签名方法handler映射对象
+         *
          * @param key 被代理对象
          * @return 方法签名方法handler映射map
          */
@@ -129,7 +134,8 @@ public class ReflectiveGalaxyClient extends GalaxyClientProxy {
 
         /**
          * 解析并且验证被代理对象的元数据
-         * @param  targetType
+         *
+         * @param targetType
          * @return 被代理对象方法元数据列表
          */
         private List<MethodMetadata> parseAndValidatateMetadata(Class<?> targetType) {
@@ -150,6 +156,7 @@ public class ReflectiveGalaxyClient extends GalaxyClientProxy {
 
         /**
          * 解析方法得到方法元数据
+         *
          * @param targetType
          * @param method
          * @return

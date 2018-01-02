@@ -8,6 +8,7 @@ import java.util.List;
 public interface IRule {
     /**
      * 从传入的服务实例列表中根据规则选择出一个ServiceInstance
+     *
      * @param list
      * @return
      */

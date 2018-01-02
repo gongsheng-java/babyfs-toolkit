@@ -14,6 +14,7 @@ public abstract class GalaxyClientProxy {
 
     /**
      * 创建GalaxyClientBuilder方法
+     *
      * @return
      */
     public static GalaxyClientProxyBuilder builder() {
@@ -22,6 +23,7 @@ public abstract class GalaxyClientProxy {
 
     /**
      * 生成代理对象的方法签名
+     *
      * @param targetType
      * @param method
      * @return
@@ -43,8 +45,9 @@ public abstract class GalaxyClientProxy {
 
     /**
      * 生成代理对象的方法
+     *
      * @param target 被代理对象
-     * @return  生成的代理对象
+     * @return 生成的代理对象
      */
     public abstract <T> T newInstance(ITarget<T> target);
 

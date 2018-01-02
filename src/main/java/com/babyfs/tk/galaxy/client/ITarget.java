@@ -6,19 +6,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.emptyToNull;
 
 /**
- *rpc代理对象接口
- *HardCodedTarget为ITarget的默认实现
+ * rpc代理对象接口
+ * HardCodedTarget为ITarget的默认实现
  */
 public interface ITarget<T> {
 
     /**
      * 获取被代理对象的类型
+     *
      * @return
      */
     Class<T> type();
 
     /**
      * 获取调用服务的名称
+     *
      * @return
      */
     String name();
@@ -28,7 +30,7 @@ public interface ITarget<T> {
     /**
      * ITarget接口的默认实现
      */
-     class HardCodedTarget<T> implements ITarget<T> {
+    class HardCodedTarget<T> implements ITarget<T> {
 
         private final Class<T> type;
         private final String name;
