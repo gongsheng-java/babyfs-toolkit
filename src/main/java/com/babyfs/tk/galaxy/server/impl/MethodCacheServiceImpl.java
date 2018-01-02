@@ -2,7 +2,6 @@ package com.babyfs.tk.galaxy.server.impl;
 
 import com.babyfs.tk.commons.service.ServiceEnrty;
 import com.babyfs.tk.galaxy.ProxyUtils;
-import com.babyfs.tk.galaxy.client.GalaxyClientProxy;
 import com.babyfs.tk.galaxy.server.IMethodCacheService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -19,7 +18,6 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
 
     private Injector injector;
 
-
     @Inject
     public MethodCacheServiceImpl(Injector injector) {
         this.injector = injector;
@@ -27,14 +25,13 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
 
     @Override
     public Method getMethodBySign(String sign) {
-
         if (methodMap.containsKey(sign)) {
             return methodMap.get(sign);
         }
         return null;
     }
 
-    public void initMethodCache() {
+    public void init() {
         Set<ServiceEnrty> allServices = ServiceEnrty.getAllServices(injector);
         for (ServiceEnrty entry : allServices) {
             Key<?> key = entry.getGuiceKey();

@@ -6,5 +6,5 @@ public interface IMethodCacheService {
 
     Method getMethodBySign(String sign);
 
-    void initMethodCache();
+    void init();
 }

@@ -8,7 +8,7 @@ import com.babyfs.tk.galaxy.register.LoadBalance;
  * GalaxyClientProxyBuilder
  * builder模式创建GalaxyClientProxy
  */
-public class GalaxyClientProxyBuilder {
+public class ClientProxyBuilder {
 
     //编码器
     private Encoder encoder = new Encoder.Default();
@@ -23,27 +23,27 @@ public class GalaxyClientProxyBuilder {
             new IInvocationHandlerFactory.Default();
 
 
-    public GalaxyClientProxyBuilder encoder(Encoder encoder) {
+    public ClientProxyBuilder encoder(Encoder encoder) {
         this.encoder = encoder;
         return this;
     }
 
-    public GalaxyClientProxyBuilder decoder(Decoder decoder) {
+    public ClientProxyBuilder decoder(Decoder decoder) {
         this.decoder = decoder;
         return this;
     }
 
-    public GalaxyClientProxyBuilder client(IClient client) {
+    public ClientProxyBuilder client(IClient client) {
         this.client = client;
         return this;
     }
 
-    public GalaxyClientProxyBuilder loadBalance(LoadBalance loadBalance) {
+    public ClientProxyBuilder loadBalance(LoadBalance loadBalance) {
         this.loadBalance = loadBalance;
         return this;
     }
 
-    public GalaxyClientProxyBuilder invocationHandlerFactory(IInvocationHandlerFactory invocationHandlerFactory) {
+    public ClientProxyBuilder invocationHandlerFactory(IInvocationHandlerFactory invocationHandlerFactory) {
         this.invocationHandlerFactory = invocationHandlerFactory;
         return this;
     }
@@ -64,9 +64,9 @@ public class GalaxyClientProxyBuilder {
         return build().newInstance(target);
     }
 
-    public GalaxyClientProxy build() {
-        GalaxyMethodHandler.Factory synchronousMethodHandlerFactory =
-                new GalaxyMethodHandler.Factory();
+    public ClientProxy build() {
+        MethodHandler.Factory synchronousMethodHandlerFactory =
+                new MethodHandler.Factory();
         ReflectiveGalaxyClient.ParseHandlersByName handlersByName =
                 new ReflectiveGalaxyClient.ParseHandlersByName(encoder, decoder, client,
                         synchronousMethodHandlerFactory, loadBalance);

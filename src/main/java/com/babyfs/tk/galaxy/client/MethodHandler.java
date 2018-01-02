@@ -18,9 +18,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * 被代理对象方法的实际执行handler
  * 提供了工厂类实现
  */
-final class GalaxyMethodHandler implements IInvocationHandlerFactory.IMethodHandler {
+final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(GalaxyMethodHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandler.class);
     private final ITarget<?> target;
     private final Decoder decoder;
     private final Encoder encoder;
@@ -28,8 +28,8 @@ final class GalaxyMethodHandler implements IInvocationHandlerFactory.IMethodHand
     private final IClient client;
     private final LoadBalance loadBalance;
 
-    private GalaxyMethodHandler(ITarget<?> target, Encoder encoder,
-                                Decoder decoder, IClient client, MethodMetadata metadata, LoadBalance loadBalance) {
+    private MethodHandler(ITarget<?> target, Encoder encoder,
+                          Decoder decoder, IClient client, MethodMetadata metadata, LoadBalance loadBalance) {
         this.target = checkNotNull(target, "target");
         this.decoder = checkNotNull(decoder, "decoder for %s", target);
         this.metadata = metadata;
@@ -47,7 +47,7 @@ final class GalaxyMethodHandler implements IInvocationHandlerFactory.IMethodHand
     @Override
     public Object invoke(Object[] argv) throws Throwable {
 
-        byte[] body = encoder.encode(createRequest(argv), RpcRequest.class);
+        byte[] body = encoder.encode(createRequest(argv));
         StringBuilder stringBuilder = new StringBuilder();
         if (loadBalance != null) {
             ServiceInstance serviceInstance = loadBalance.getServerByAppName(target.name());
@@ -99,7 +99,7 @@ final class GalaxyMethodHandler implements IInvocationHandlerFactory.IMethodHand
          * @return
          */
         public IInvocationHandlerFactory.IMethodHandler create(ITarget<?> target, Encoder encoder, Decoder decoder, IClient client, MethodMetadata md, LoadBalance loadBalance) {
-            return new GalaxyMethodHandler(target, encoder, decoder, client, md, loadBalance);
+            return new MethodHandler(target, encoder, decoder, client, md, loadBalance);
         }
     }
 }

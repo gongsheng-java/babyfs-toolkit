@@ -2,23 +2,20 @@
 package com.babyfs.tk.galaxy.client;
 
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-
 /**
  * 创建客户端被代理对象的抽象类
  * newInstance方法为创建代理对象方法
  * 此类的子类是通过GalaxyClientBuilder创建完成
  */
-public abstract class GalaxyClientProxy {
+public abstract class ClientProxy {
 
     /**
      * 创建GalaxyClientBuilder方法
      *
      * @return
      */
-    public static GalaxyClientProxyBuilder builder() {
-        return new GalaxyClientProxyBuilder();
+    public static ClientProxyBuilder builder() {
+        return new ClientProxyBuilder();
     }
 
     /**

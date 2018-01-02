@@ -18,7 +18,7 @@ import static com.google.common.base.Preconditions.checkState;
  * RpcInvocationHandler内部类用于分发代理对象的method到对应的method handler
  * ParseHandlersByName内部类用于解析代理对象
  */
-public class ReflectiveGalaxyClient extends GalaxyClientProxy {
+public class ReflectiveGalaxyClient extends ClientProxy {
 
     private final ParseHandlersByName targetToHandlersByName;
     private final IInvocationHandlerFactory factory;
@@ -100,12 +100,12 @@ public class ReflectiveGalaxyClient extends GalaxyClientProxy {
 
         private final Encoder encoder;
         private final Decoder decoder;
-        private final GalaxyMethodHandler.Factory factory;
+        private final MethodHandler.Factory factory;
         private final IClient client;
         private final LoadBalance loadBalance;
 
         ParseHandlersByName(Encoder encoder, Decoder decoder, IClient client,
-                            GalaxyMethodHandler.Factory factory, LoadBalance loadBalance) {
+                            MethodHandler.Factory factory, LoadBalance loadBalance) {
             this.factory = factory;
             this.client = client;
             this.loadBalance = loadBalance;
