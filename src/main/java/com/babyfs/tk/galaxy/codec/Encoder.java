@@ -11,15 +11,11 @@ import java.lang.reflect.Type;
  */
 public interface Encoder {
 
-
     byte[] encode(Object object, Type bodyType);
-
     /**
-     * 默认的hession编码器
+     * 默认的Hessian编码器
      */
     class Default implements Encoder {
-
-
         @Override
         public byte[] encode(Object object, Type bodyType) {
             return HessianCodecUtil.encode(object);

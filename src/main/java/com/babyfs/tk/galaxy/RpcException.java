@@ -1,7 +1,7 @@
 package com.babyfs.tk.galaxy;
 
 
-import com.babyfs.tk.galaxy.client.Util;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * rpc调用exception
@@ -15,7 +15,7 @@ public class RpcException extends RuntimeException {
      * @param message the reason for the failure.
      */
     public RpcException(String message) {
-        super(Util.checkNotNull(message, "message"));
+        super(checkNotNull(message, "message"));
     }
 
     /**
@@ -23,7 +23,7 @@ public class RpcException extends RuntimeException {
      * @param cause   the cause of the error.
      */
     public RpcException(String message, Throwable cause) {
-        super(message, Util.checkNotNull(cause, "cause"));
+        super(message, checkNotNull(cause, "cause"));
     }
 
 }

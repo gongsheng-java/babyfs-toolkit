@@ -1,6 +1,6 @@
 package com.babyfs.tk.galaxy.guice;
 
-import com.babyfs.tk.galaxy.client.Galaxy;
+import com.babyfs.tk.galaxy.client.GalaxyClientProxy;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -25,6 +25,6 @@ public class RpcSuppler implements Function<Class<?>, Object> {
     @Override
     public Object apply(Class<?> aClass) {
 
-        return Galaxy.builder().target(aClass, url);
+        return GalaxyClientProxy.builder().target(aClass, url);
     }
 }

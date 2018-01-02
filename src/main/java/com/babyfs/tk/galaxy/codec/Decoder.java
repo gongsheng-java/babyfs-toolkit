@@ -3,25 +3,20 @@ package com.babyfs.tk.galaxy.codec;
 
 
 import com.babyfs.tk.commons.codec.util.HessianCodecUtil;
-
 import java.io.IOException;
-import java.lang.reflect.Type;
 
 /**
- * 解码接口
+ * 解码器接口
  */
 public interface Decoder {
 
-
-    Object decode(byte[] response, Type type) throws IOException;
-
+    Object decode(byte[] response) throws IOException;
     /**
-     * 默认的hession解码器
+     * 默认的Hessian解码器
      */
-    public class Default implements Decoder {
-
+    class Default implements Decoder {
         @Override
-        public Object decode(byte[] response, Type type) throws IOException {
+        public Object decode(byte[] response) throws IOException {
             return HessianCodecUtil.decode(response);
         }
     }

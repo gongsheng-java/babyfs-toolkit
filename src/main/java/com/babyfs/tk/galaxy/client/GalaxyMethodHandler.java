@@ -11,23 +11,27 @@ import com.babyfs.tk.galaxy.register.ServiceInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * 执行代理类的远程方法的MethodHandler
- */
-final class SynchronousMethodHandler implements InvocationHandlerFactory.MethodHandler {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    private static final Logger logger = LoggerFactory.getLogger(SynchronousMethodHandler.class);
-    private final Target<?> target;
+/**
+ * GalaxyMethodHandler
+ * 被代理对象方法的实际执行handler
+ * 提供了工厂类实现
+ */
+final class GalaxyMethodHandler implements IInvocationHandlerFactory.IMethodHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GalaxyMethodHandler.class);
+    private final ITarget<?> target;
     private final Decoder decoder;
     private final Encoder encoder;
     private final MethodMetadata metadata;
-    private final Client client;
+    private final IClient client;
     private final LoadBalance loadBalance;
 
-    private SynchronousMethodHandler(Target<?> target, Encoder encoder,
-                                     Decoder decoder, Client client, MethodMetadata metadata, LoadBalance loadBalance) {
-        this.target = Util.checkNotNull(target, "target");
-        this.decoder = Util.checkNotNull(decoder, "decoder for %s", target);
+    private GalaxyMethodHandler(ITarget<?> target, Encoder encoder,
+                                Decoder decoder, IClient client, MethodMetadata metadata, LoadBalance loadBalance) {
+        this.target = checkNotNull(target, "target");
+        this.decoder = checkNotNull(decoder, "decoder for %s", target);
         this.metadata = metadata;
         this.encoder = encoder;
         this.client = client;
@@ -54,7 +58,7 @@ final class SynchronousMethodHandler implements InvocationHandlerFactory.MethodH
         String url = stringBuilder.append("/rpc/invoke").toString();
         try {
             byte[] content = client.execute(url, body);
-            return decoder.decode(content, metadata.returnType());
+            return decoder.decode(content);
         } catch (Exception e) {
             logger.error("rpc invoke remote method fail", e);
             return ServiceResponse.failResponse();
@@ -77,12 +81,22 @@ final class SynchronousMethodHandler implements InvocationHandlerFactory.MethodH
     }
 
     /**
-     * SynchronousMethodHandler工厂类
+     * MethodHandler工厂类
+     * 创建GalaxyMethodHandler对象
      */
     static class Factory {
-
-        public InvocationHandlerFactory.MethodHandler create(Target<?> target, Encoder encoder, Decoder decoder, Client client, MethodMetadata md, LoadBalance loadBalance) {
-            return new SynchronousMethodHandler(target, encoder, decoder, client, md, loadBalance);
+        /**
+         * create方法创建GalaxyMethodHandler
+         * @param target
+         * @param encoder
+         * @param decoder
+         * @param client
+         * @param md
+         * @param loadBalance
+         * @return
+         */
+        public IInvocationHandlerFactory.IMethodHandler create(ITarget<?> target, Encoder encoder, Decoder decoder, IClient client, MethodMetadata md, LoadBalance loadBalance) {
+            return new GalaxyMethodHandler(target, encoder, decoder, client, md, loadBalance);
         }
     }
 }

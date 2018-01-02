@@ -1,6 +1,6 @@
 package com.babyfs.tk.galaxy;
 
-import com.babyfs.tk.galaxy.client.Galaxy;
+import com.babyfs.tk.galaxy.client.GalaxyClientProxy;
 import com.babyfs.tk.galaxy.demo.Health;
 import com.babyfs.tk.galaxy.demo.model.PostModel;
 import com.babyfs.tk.galaxy.demo.DemoDiscoveryProperties;
@@ -16,7 +16,7 @@ public class ClientTest {
     public void test(){
 
         LoadBalance loadBalance = LoadBalance.builder().discoveryProperties(new DemoDiscoveryProperties()).build();
-        Health health = Galaxy.builder().loadBalance(loadBalance).target(Health.class,"api");
+        Health health = GalaxyClientProxy.builder().loadBalance(loadBalance).target(Health.class,"api");
         PostModel postModel = health.notJsonTest(1l);
         Assert.assertTrue(postModel.getMessage()!=null);
     }

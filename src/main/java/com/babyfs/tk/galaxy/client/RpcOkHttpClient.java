@@ -2,17 +2,14 @@ package com.babyfs.tk.galaxy.client;
 
 import com.babyfs.tk.galaxy.RpcException;
 import okhttp3.*;
-
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-
 import static java.lang.String.format;
 
 /**
  * 用OKHttpclient实现的http调用client
  * 枚举实现单例模式
  */
-public enum RpcOkHttpClient implements Client {
+public enum RpcOkHttpClient implements IClient {
 
 
     http;
@@ -43,7 +40,7 @@ public enum RpcOkHttpClient implements Client {
     }
 
     @Override
-    public byte[] execute(String uri, byte[] body) throws IOException {
+    public byte[] execute(String uri, byte[] body)  {
 
         Request request = new Request.Builder()
                 .url(uri)
@@ -54,6 +51,8 @@ public enum RpcOkHttpClient implements Client {
                 throw new RpcException(format("error status(%s) ", response.code()));
             }
             return response.body().bytes();
+        }catch (Exception e){
+            throw new RpcException("OkHttpCLient invoke error",e);
         }
     }
 }

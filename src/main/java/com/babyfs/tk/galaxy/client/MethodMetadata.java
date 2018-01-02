@@ -11,17 +11,16 @@ import java.lang.reflect.Type;
 public final class MethodMetadata implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    //方法签名
     private String configKey;
+    //方法返回值类型
     private transient Type returnType;
+    //方法名称
     private String methodName;
+    //方法入参数类型
     private Class<?>[] parameterTypes;
 
     MethodMetadata() {
-    }
-
-
-    public String configKey() {
-        return configKey;
     }
 
     public MethodMetadata configKey(String configKey) {
@@ -30,24 +29,24 @@ public final class MethodMetadata implements Serializable {
     }
 
     public MethodMetadata methodName(String methodName) {
-
         this.methodName = methodName;
+        return this;
+    }
+    public MethodMetadata returnType(Type returnType) {
+        this.returnType = returnType;
         return this;
     }
 
     public MethodMetadata parameterTypes(Class<?>[] parameterTypes) {
-
         this.parameterTypes = parameterTypes;
         return this;
     }
 
     public String methodName() {
-
         return methodName;
     }
 
     public Class<?>[] parameterTypes() {
-
         return parameterTypes;
     }
 
@@ -55,10 +54,8 @@ public final class MethodMetadata implements Serializable {
         return returnType;
     }
 
-    public MethodMetadata returnType(Type returnType) {
-        this.returnType = returnType;
-        return this;
+    public String configKey() {
+        return configKey;
     }
-
 
 }
