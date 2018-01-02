@@ -76,8 +76,8 @@ final class GalaxyMethodHandler implements IInvocationHandlerFactory.IMethodHand
 
         RpcRequest rpcRequest = new RpcRequest();
         rpcRequest.setParameters(argv);
-        rpcRequest.setParameterTypes(metadata.parameterTypes());
-        rpcRequest.setClassName(target.type().getName());
+        rpcRequest.setMethodSign(metadata.configKey());
+        rpcRequest.setInterfaceName(target.type().getName());
         rpcRequest.setMethodName(metadata.methodName());
         return rpcRequest;
     }

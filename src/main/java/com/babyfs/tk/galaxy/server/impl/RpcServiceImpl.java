@@ -2,14 +2,13 @@ package com.babyfs.tk.galaxy.server.impl;
 
 
 import com.babyfs.tk.galaxy.RpcException;
-import com.babyfs.tk.galaxy.proxy.ReflectionUtils;
+import com.babyfs.tk.galaxy.server.IMethodCacheService;
 import com.babyfs.tk.galaxy.server.IRpcService;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Method;
 
 /**
@@ -20,26 +19,29 @@ public class RpcServiceImpl implements IRpcService {
 
     private Injector injector;
 
+    private IMethodCacheService methodCacheService;
+
     Logger logger = LoggerFactory.getLogger("RpcServiceImpl");
 
     @Inject
-    public RpcServiceImpl(Injector injector) {
+    public RpcServiceImpl(Injector injector, IMethodCacheService methodCacheService) {
         this.injector = injector;
+        this.methodCacheService = methodCacheService;
     }
 
     @Override
-    public Object invoke(String className, String methodName, Class<?>[] parameterTypes, Object[] parameters) {
+    public Object invoke(String className, String methodName, String methodSign, Object[] parameters) {
 
-        if (Strings.isNullOrEmpty(className) || Strings.isNullOrEmpty(methodName) || parameters == null || parameterTypes == null) {
-            logger.error("error para,className:{},methodName:{},parameterType:{},parameters", className, methodName, parameterTypes, parameters);
+        if (Strings.isNullOrEmpty(className) || Strings.isNullOrEmpty(methodName) || parameters == null || Strings.isNullOrEmpty(methodSign)) {
+            logger.error("error para,className:{},methodName:{},parameterType:{},parameters", className, methodName, methodSign, parameters);
             throw new RpcException("error parameter");
         }
         try {
             Class<?> bean = Class.forName(className);
             Object object = injector.getInstance(bean);
-            Method method = bean.getMethod(methodName, parameterTypes);
-            Object returnObj = ReflectionUtils.invokeMethod(method, object, parameters);
-            return returnObj;
+            Method method = methodCacheService.getMethodBySign(methodSign);
+            Object obj = method.invoke(object, parameters);
+            return obj;
         } catch (Exception e) {
             logger.error("rpc server invoke error", e);
             throw new RpcException("rpc server invoke error", e);

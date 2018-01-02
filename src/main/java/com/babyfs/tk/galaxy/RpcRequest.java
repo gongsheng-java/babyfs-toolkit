@@ -8,17 +8,18 @@ import java.util.Arrays;
  */
 public class RpcRequest implements Serializable {
 
-    private String className;
+    private String interfaceName;
     private String methodName;
-    private Class<?>[] parameterTypes;
+    private String methodSign;
+
     private Object[] parameters;
 
-    public String getClassName() {
-        return className;
+    public String getInterfaceName() {
+        return interfaceName;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public void setInterfaceName(String interfaceName) {
+        this.interfaceName = interfaceName;
     }
 
     public String getMethodName() {
@@ -29,13 +30,6 @@ public class RpcRequest implements Serializable {
         this.methodName = methodName;
     }
 
-    public Class<?>[] getParameterTypes() {
-        return parameterTypes;
-    }
-
-    public void setParameterTypes(Class<?>[] parameterTypes) {
-        this.parameterTypes = parameterTypes;
-    }
 
     public Object[] getParameters() {
         return parameters;
@@ -45,13 +39,24 @@ public class RpcRequest implements Serializable {
         this.parameters = parameters;
     }
 
+    public String getMethodSign() {
+        return methodSign;
+    }
+
+    public void setMethodSign(String methodSign) {
+        this.methodSign = methodSign;
+    }
+
     @Override
     public String toString() {
         return "RpcRequest{" +
-                "className='" + className + '\'' +
+                "interfaceName='" + interfaceName + '\'' +
                 ", methodName='" + methodName + '\'' +
-                ", parameterTypes=" + Arrays.toString(parameterTypes) +
+                ", methodSign='" + methodSign + '\'' +
                 ", parameters=" + Arrays.toString(parameters) +
                 '}';
     }
+
+
+
 }
