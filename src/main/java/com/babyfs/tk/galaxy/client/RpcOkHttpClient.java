@@ -25,7 +25,7 @@ public enum RpcOkHttpClient implements IClient {
 
     private OkHttpClient client;
 
-    private RpcOkHttpClient() {
+    RpcOkHttpClient() {
         init();
     }
 
@@ -52,7 +52,7 @@ public enum RpcOkHttpClient implements IClient {
             }
             return response.body().bytes();
         }catch (Exception e){
-            throw new RpcException("OkHttpCLient invoke error",e);
+            throw new RpcException("OkHttpClient invoke error",e);
         }
     }
 }

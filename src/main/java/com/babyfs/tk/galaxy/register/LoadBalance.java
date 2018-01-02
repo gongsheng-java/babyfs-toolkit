@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * 用builder模式构建负载均衡器对象
  * 默认用ZkDiscoveryClient
  */
-public class LoadBalance {
+public class LoadBalance implements ILoadBalance{
 
     public static LoadBalance.Builder builder() {
         return new LoadBalance.Builder();
@@ -30,7 +30,15 @@ public class LoadBalance {
         this.rule = rule;
     }
 
-    public ServiceInstance getServerByAppName(String appName) throws ExecutionException, InterruptedException, KeeperException {
+    /**
+     *
+     * @param appName
+     * @return
+     * @throws ExecutionException
+     * @throws InterruptedException
+     * @throws KeeperException
+     */
+    public ServiceInstance getServerByAppName(String appName){
         return rule.choose(discoveryClient.getInstances(appName));
     }
 
@@ -59,8 +67,8 @@ public class LoadBalance {
                     .sessionTimeoutMs(discoveryProperties.getSessionTimeOut())
                     .build();
             curatorFramework.start();
-            ZkDiscoveryClient zkDiscoveryClient = null;
-            zkDiscoveryClient = new ZkDiscoveryClient(discoveryProperties, curatorFramework);
+            ZkDiscoveryClient zkDiscoveryClient = new ZkDiscoveryClient(discoveryProperties, curatorFramework);
+            zkDiscoveryClient.start();
             return new LoadBalance(zkDiscoveryClient, rule);
         }
     }

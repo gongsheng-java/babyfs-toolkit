@@ -10,7 +10,6 @@ import com.babyfs.tk.galaxy.register.LoadBalance;
 import com.babyfs.tk.galaxy.register.ServiceInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**

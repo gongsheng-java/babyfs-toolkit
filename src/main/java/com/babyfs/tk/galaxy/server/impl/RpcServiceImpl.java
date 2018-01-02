@@ -28,16 +28,21 @@ public class RpcServiceImpl implements IRpcService {
     }
 
     @Override
-    public Object invoke(String className, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws ClassNotFoundException, NoSuchMethodException {
+    public Object invoke(String className, String methodName, Class<?>[] parameterTypes, Object[] parameters) {
 
         if (Strings.isNullOrEmpty(className) || Strings.isNullOrEmpty(methodName) || parameters == null || parameterTypes == null) {
             logger.error("error para,className:{},methodName:{},parameterType:{},parameters", className, methodName, parameterTypes, parameters);
             throw new RpcException("error parameter");
         }
-        Class<?> bean = Class.forName(className);
-        Object object = injector.getInstance(bean);
-        Method method = bean.getMethod(methodName, parameterTypes);
-        Object returnObj = ReflectionUtils.invokeMethod(method, object, parameters);
-        return returnObj;
+        try {
+            Class<?> bean = Class.forName(className);
+            Object object = injector.getInstance(bean);
+            Method method = bean.getMethod(methodName, parameterTypes);
+            Object returnObj = ReflectionUtils.invokeMethod(method, object, parameters);
+            return returnObj;
+        }catch (Exception e){
+            logger.error("rpc server invoke error",e);
+            throw new RpcException("rpc server invoke error",e);
+        }
     }
 }

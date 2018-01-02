@@ -5,7 +5,6 @@ package com.babyfs.tk.galaxy.register;
  */
 public class ServiceInstance {
 
-
     private String appName;
 
     private String port;
@@ -18,13 +17,8 @@ public class ServiceInstance {
         this.port = port;
     }
 
-    @Override
-    public String toString() {
-        return "ServiceInstance{" +
-                "appName='" + appName + '\'' +
-                ", host='" + host + '\'' +
-                ", port=" + port +
-                '}';
+    public void setPort(String port) {
+        this.port = port;
     }
 
     public String getAppName() {
@@ -47,9 +41,12 @@ public class ServiceInstance {
         return port;
     }
 
-    public void setPort(String port) {
-        this.port = port;
+    @Override
+    public String toString() {
+        return "ServiceInstance{" +
+                "appName='" + appName + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
+                '}';
     }
-
-
 }

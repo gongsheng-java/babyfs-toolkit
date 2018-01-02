@@ -24,16 +24,14 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
 
     private final Map<String, List<ServiceInstance>> providerMapList = new ConcurrentHashMap<>();
 
-    private Logger logger = LoggerFactory.getLogger(ZkDiscoveryClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(ZkDiscoveryClient.class);
 
     public ZkDiscoveryClient(DiscoveryProperties discoveryProperties, CuratorFramework curator) {
 
         this.properties = discoveryProperties;
         this.curator = curator;
-        watch();
-        register();
-        deRegister();
     }
+
 
     @Override
     public ServiceInstance getLocalServiceInstance() {
@@ -104,18 +102,6 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         }
     }
 
-    @Override
-    public void deRegister() {
-
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                logger.error("deRegister ......");
-                String path = properties.getDiscoveryPrefix() + "/" + properties.getAppName() + "/" + properties.getHostname() + ":" + properties.getPort();
-                delete(path);
-            }
-        }));
-    }
 
     @Override
     public void watch() {
@@ -125,6 +111,20 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         } catch (Exception e) {
             logger.error("zk add watch fail", e);
         }
+    }
+
+    @Override
+    public void start() {
+        watch();
+        register();
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                logger.error("deRegister ......");
+                String path = properties.getDiscoveryPrefix() + "/" + properties.getAppName() + "/" + properties.getHostname() + ":" + properties.getPort();
+                delete(path);
+            }
+        }));
     }
 
     public void delete(String path) {

@@ -5,9 +5,9 @@ import com.google.inject.Provider;
 import java.util.function.Function;
 
 /**
- * guice provider
- * 目的代理接口加入guice容器
- *
+ * ExternalCreationProvider
+ * 目的：
+ *   将rpc生成的代理对象加入guice容器管理
  * @param <T>
  */
 public class ExternalCreationProvider<T> implements Provider<T> {

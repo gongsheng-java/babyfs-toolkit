@@ -1,6 +1,7 @@
 package com.babyfs.tk.galaxy;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * rpc调用过程客户端传递到服务端的pojo对象
@@ -42,5 +43,15 @@ public class RpcRequest implements Serializable {
 
     public void setParameters(Object[] parameters) {
         this.parameters = parameters;
+    }
+
+    @Override
+    public String toString() {
+        return "RpcRequest{" +
+                "className='" + className + '\'' +
+                ", methodName='" + methodName + '\'' +
+                ", parameterTypes=" + Arrays.toString(parameterTypes) +
+                ", parameters=" + Arrays.toString(parameters) +
+                '}';
     }
 }

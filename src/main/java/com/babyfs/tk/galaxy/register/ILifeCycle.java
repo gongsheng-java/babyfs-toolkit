@@ -9,9 +9,20 @@ import java.util.concurrent.ExecutionException;
  */
 public interface ILifeCycle {
 
+    /**
+     * 将本服务注册到注册中心
+     * @throws ExecutionException
+     * @throws InterruptedException
+     * @throws KeeperException
+     */
     public void register() throws ExecutionException, InterruptedException, KeeperException;
 
-    public void deRegister() throws KeeperException, InterruptedException;
-
+    /**
+     * 监听注册中心的节点变化
+     * @throws Exception
+     */
     public void watch() throws Exception;
+
+
+    public void start();
 }

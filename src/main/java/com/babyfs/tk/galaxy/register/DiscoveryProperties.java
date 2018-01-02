@@ -18,18 +18,13 @@ public interface DiscoveryProperties {
 
     public String getRegisterUrl();
 
-
     public int getConnectTimeOut();
-
 
     public int getSessionTimeOut();
 
-
     public String getPort();
 
-
     public String getAppName();
-
 
     public String getHostname();
 
