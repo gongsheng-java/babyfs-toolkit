@@ -12,4 +12,6 @@ public interface ILoadBalance {
      * @return
      */
     ServiceInstance getServerByAppName(String appName);
+
+    DiscoveryProperties getDiscoveryProperties();
 }

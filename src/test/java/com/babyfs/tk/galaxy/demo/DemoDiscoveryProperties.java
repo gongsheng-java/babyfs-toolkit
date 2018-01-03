@@ -71,6 +71,11 @@ public class DemoDiscoveryProperties implements DiscoveryProperties {
 		return this.preferIpAddress ? this.ipAddress : this.hostname;
 	}
 
+	@Override
+	public String getUrlPrefix() {
+		return null;
+	}
+
 	private HostInfo initHostInfo() {
 		InetAddress ipAddress = getIpAddress();
 		return new HostInfo(ipAddress.getHostAddress(), ipAddress.getHostName());

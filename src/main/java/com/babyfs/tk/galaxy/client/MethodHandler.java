@@ -39,7 +39,6 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
 
     /**
      * 执行编码，远程调用，解码
-     *
      * @param argv
      * @return
      * @throws Throwable
@@ -49,14 +48,9 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
 
         byte[] body = encoder.encode(createRequest(argv));
         StringBuilder stringBuilder = new StringBuilder();
-        if (loadBalance != null) {
-            ServiceInstance serviceInstance = loadBalance.getServerByAppName(target.name());
-            stringBuilder.append("http://").append(serviceInstance.getHost()).append(":").append(serviceInstance.getPort());
-        } else {
-            stringBuilder.append(target.url());
-        }
-        // TODO: 2018/1/2 此处需要卸载配置文件里
-        String url = stringBuilder.append("/rpc/invoke").toString();
+        ServiceInstance serviceInstance = loadBalance.getServerByAppName(target.name());
+        stringBuilder.append("http://").append(serviceInstance.getHost()).append(":").append(serviceInstance.getPort());
+        String url = stringBuilder.append(loadBalance.getDiscoveryProperties().getUrlPrefix()).toString();
         try {
             byte[] content = client.execute(url, body);
             return decoder.decode(content);
@@ -88,7 +82,6 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
     static class Factory {
         /**
          * create方法创建GalaxyMethodHandler
-         *
          * @param target
          * @param encoder
          * @param decoder

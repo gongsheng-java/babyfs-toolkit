@@ -20,4 +20,6 @@ public interface DiscoveryProperties {
      //本服务的ip地址
      String getHostname();
 
+     String getUrlPrefix();
+
 }

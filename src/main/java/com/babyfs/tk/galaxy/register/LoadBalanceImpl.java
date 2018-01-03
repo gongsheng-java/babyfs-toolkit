@@ -21,11 +21,14 @@ public class LoadBalanceImpl implements ILoadBalance {
 
     private DiscoveryClient discoveryClient;
 
+    private  DiscoveryProperties discoveryProperties;
+
     private IRule rule = new RoundRobinRule();
 
-    public LoadBalanceImpl(DiscoveryClient discoveryClient, IRule rule) {
+    public LoadBalanceImpl(DiscoveryClient discoveryClient, IRule rule,DiscoveryProperties discoveryProperties) {
         this.discoveryClient = discoveryClient;
         this.rule = rule;
+        this.discoveryProperties = discoveryProperties;
     }
 
     /**
@@ -38,6 +41,12 @@ public class LoadBalanceImpl implements ILoadBalance {
     public ServiceInstance getServerByAppName(String appName) {
         return rule.choose(discoveryClient.getInstances(appName));
     }
+
+    @Override
+    public DiscoveryProperties getDiscoveryProperties() {
+        return discoveryProperties;
+    }
+
     //LoadBalance的构建类
     public static class Builder {
         private IRule rule = new RoundRobinRule();
@@ -67,7 +76,7 @@ public class LoadBalanceImpl implements ILoadBalance {
             curatorFramework.start();
             ZkDiscoveryClient zkDiscoveryClient = new ZkDiscoveryClient(discoveryProperties, curatorFramework);
             zkDiscoveryClient.start();
-            return new LoadBalanceImpl(zkDiscoveryClient, rule);
+            return new LoadBalanceImpl(zkDiscoveryClient, rule,discoveryProperties);
         }
     }
 }
