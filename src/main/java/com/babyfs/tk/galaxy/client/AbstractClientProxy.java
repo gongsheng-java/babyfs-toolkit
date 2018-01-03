@@ -10,8 +10,7 @@ package com.babyfs.tk.galaxy.client;
 public abstract class AbstractClientProxy {
 
     /**
-     * 创建GalaxyClientBuilder方法
-     *
+     * 创建ClientProxyBuilder方法
      * @return
      */
     public static ClientProxyBuilder builder() {
@@ -20,7 +19,6 @@ public abstract class AbstractClientProxy {
 
     /**
      * 生成代理对象的方法
-     *
      * @param target 被代理对象
      * @return 生成的代理对象
      */

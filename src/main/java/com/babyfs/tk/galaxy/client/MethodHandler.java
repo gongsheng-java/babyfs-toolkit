@@ -10,7 +10,6 @@ import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
 import com.babyfs.tk.galaxy.register.ServiceInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -79,7 +78,6 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
         rpcRequest.setParameters(argv);
         rpcRequest.setMethodSign(metadata.configKey());
         rpcRequest.setInterfaceName(target.type().getName());
-        rpcRequest.setMethodName(metadata.methodName());
         return rpcRequest;
     }
 

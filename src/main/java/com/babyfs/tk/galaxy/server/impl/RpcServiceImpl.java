@@ -10,6 +10,7 @@ import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -30,20 +31,15 @@ public class RpcServiceImpl implements IRpcService {
     }
 
     @Override
-    public Object invoke(String interfaceName, String methodName, String methodSign, Object[] parameters) {
-        if (Strings.isNullOrEmpty(interfaceName) || Strings.isNullOrEmpty(methodName) || parameters == null || Strings.isNullOrEmpty(methodSign)) {
-            logger.error("error para,className:{},methodName:{},parameterType:{},parameters", interfaceName, methodName, methodSign, parameters);
+    public Object invoke(String interfaceName,String methodSign, Object[] parameters) throws ClassNotFoundException, InvocationTargetException, IllegalAccessException {
+        if (Strings.isNullOrEmpty(interfaceName) || parameters == null || Strings.isNullOrEmpty(methodSign)) {
+            logger.error("error para,interfaceName:{},methodSign:{},parameters：{}", interfaceName, methodSign, parameters);
             throw new RpcException("error parameter");
         }
-        try {
-            Class<?> bean = Class.forName(interfaceName);
-            Object object = injector.getInstance(bean);
-            Method method = methodCacheService.getMethodBySign(methodSign);
-            Object obj = method.invoke(object, parameters);
-            return obj;
-        } catch (Exception e) {
-            logger.error("rpc server invoke error", e);
-            throw new RpcException("rpc server invoke error", e);
-        }
+        Class<?> bean = Class.forName(interfaceName);
+        Object object = injector.getInstance(bean);
+        Method method = methodCacheService.getMethodBySign(methodSign);
+        Object obj = method.invoke(object, parameters);
+        return obj;
     }
 }

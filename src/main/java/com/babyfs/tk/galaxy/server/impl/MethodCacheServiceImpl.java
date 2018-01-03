@@ -2,6 +2,7 @@ package com.babyfs.tk.galaxy.server.impl;
 
 import com.babyfs.tk.commons.service.ServiceEnrty;
 import com.babyfs.tk.galaxy.ProxyUtils;
+import com.babyfs.tk.galaxy.RpcException;
 import com.babyfs.tk.galaxy.server.IMethodCacheService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -25,10 +26,10 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
     }
     @Override
     public Method getMethodBySign(String sign) {
-        if (methodMap.containsKey(sign)) {
-            return methodMap.get(sign);
+        if(!methodMap.containsKey(sign)){
+            throw new RpcException("invalid method sign");
         }
-        return null;
+        return methodMap.get(sign);
     }
     public void init() {
         Set<ServiceEnrty> allServices = ServiceEnrty.getAllServices(injector);

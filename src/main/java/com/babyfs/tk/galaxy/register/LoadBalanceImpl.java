@@ -38,7 +38,7 @@ public class LoadBalanceImpl implements ILoadBalance {
     public ServiceInstance getServerByAppName(String appName) {
         return rule.choose(discoveryClient.getInstances(appName));
     }
-
+    //LoadBalance的构建类
     public static class Builder {
         private IRule rule = new RoundRobinRule();
         private DiscoveryProperties discoveryProperties;
@@ -50,8 +50,13 @@ public class LoadBalanceImpl implements ILoadBalance {
             this.discoveryProperties = discoveryProperties;
             return this;
         }
+        //构建LoadBalance的方法
         public LoadBalanceImpl build() {
             checkNotNull(discoveryProperties, "discoveryProperties");
+            /**
+             * @param baseSleepTimeMs initial amount of time to wait between retries
+             * @param maxRetries max number of times to retry
+             */
             ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(1000, 3);
             CuratorFramework curatorFramework = CuratorFrameworkFactory.builder()
                     .connectString(discoveryProperties.getRegisterUrl())

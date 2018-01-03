@@ -17,7 +17,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * GalaxyClientProxy的实现类
+ * ReflectiveClientProxy
  * RpcInvocationHandler内部类用于分发代理对象的method到对应的method handler
  * ParseHandlersByName内部类用于解析代理对象
  */

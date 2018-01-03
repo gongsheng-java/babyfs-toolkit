@@ -9,7 +9,6 @@ import java.util.Arrays;
 public class RpcRequest implements Serializable {
 
     private String interfaceName;
-    private String methodName;
     private String methodSign;
     private Object[] parameters;
 
@@ -19,14 +18,6 @@ public class RpcRequest implements Serializable {
 
     public void setInterfaceName(String interfaceName) {
         this.interfaceName = interfaceName;
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
     }
 
     public Object[] getParameters() {
@@ -49,7 +40,6 @@ public class RpcRequest implements Serializable {
     public String toString() {
         return "RpcRequest{" +
                 "interfaceName='" + interfaceName + '\'' +
-                ", methodName='" + methodName + '\'' +
                 ", methodSign='" + methodSign + '\'' +
                 ", parameters=" + Arrays.toString(parameters) +
                 '}';

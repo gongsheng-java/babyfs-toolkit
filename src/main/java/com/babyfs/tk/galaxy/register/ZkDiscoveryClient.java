@@ -1,5 +1,6 @@
 package com.babyfs.tk.galaxy.register;
 
+import com.babyfs.tk.galaxy.RpcException;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
@@ -49,6 +50,11 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         return refreshAndGet(appName);
     }
 
+    /**
+     * 刷新并且返回指定应用的可用实例列表
+     * @param appName 应用名称
+     * @return
+     */
     private List<ServiceInstance> refreshAndGet(String appName) {
         String path = properties.getDiscoveryPrefix() + "/" + appName;
         List<String> hosts = getChildren(path);
@@ -69,14 +75,18 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         return instances;
     }
 
-
-    public List<String> getChildren(String path) {
+    /**
+     * 获取指定path的子节点
+     * @param path
+     * @return
+     */
+    private List<String> getChildren(String path) {
         try {
             return curator.getChildren().forPath(path);
         } catch (Exception e) {
             logger.error("ZkDiscoveryClient@getChildren fail", e);
         }
-        return null;
+        return Collections.EMPTY_LIST;
     }
 
     @Override
@@ -89,7 +99,12 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         }
     }
 
-    public void create(String path) throws Exception {
+    /**
+     * 在指定路径下创建节点
+     * @param path
+     * @throws Exception
+     */
+    private void create(String path) throws Exception {
         try {
             curator.create()
                     .creatingParentContainersIfNeeded()
@@ -97,6 +112,7 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
                     .forPath(path);
         } catch (Exception e) {
             logger.error("create zk node  fail path:{}", path, e);
+            throw new RpcException("create zk node fail .path:"+path,e);
         }
     }
 
@@ -124,7 +140,11 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         }));
     }
 
-    public void delete(String path) {
+    /**
+     * 删除指定path下的节点
+     * @param path
+     */
+    private void delete(String path) {
         try {
             curator.delete().forPath(path);
         } catch (Exception e) {
@@ -132,7 +152,12 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         }
     }
 
-    public void connect(final String PATH) throws Exception {
+    /**
+     * zk监听指定path
+     * @param PATH 监听的地址
+     * @throws Exception
+     */
+    private void connect(final String PATH) throws Exception {
 
         TreeCache cache = new TreeCache(curator, PATH);
         TreeCacheListener listener = (curatorFramework, treeCacheEvent) -> {
