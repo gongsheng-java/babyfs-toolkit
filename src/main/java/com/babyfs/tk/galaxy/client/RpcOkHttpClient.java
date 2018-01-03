@@ -2,42 +2,29 @@ package com.babyfs.tk.galaxy.client;
 
 import com.babyfs.tk.galaxy.RpcException;
 import okhttp3.*;
-
 import java.util.concurrent.TimeUnit;
-
 import static java.lang.String.format;
 
 /**
  * 用OKHttpclient实现的http调用client
  * 枚举实现单例模式
  */
-public enum RpcOkHttpClient implements IClient {
+public class RpcOkHttpClient implements IClient {
 
-
-    http;
-
-    private static final long CONNECT_TIMEOUT = 5;
-
-    private static final long READ_TIMEOUT = 5;
-
-    private static final long WRITE_TIMEOUT = 5;
 
     public static final MediaType BINARY
             = MediaType.parse("application/octet-stream; charset=utf-8");
 
     private OkHttpClient client;
 
-    RpcOkHttpClient() {
-        init();
-    }
 
-    private void init() {
+    public void init(long connectTimeOut,long readTimeOut,long writeTimeOut) {
 
         ConnectionPool connectionPool = new ConnectionPool();
         client = new OkHttpClient.Builder().connectionPool(connectionPool)
-                .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
-                .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+                .connectTimeout(connectTimeOut, TimeUnit.SECONDS)
+                .readTimeout(readTimeOut, TimeUnit.SECONDS)
+                .writeTimeout(writeTimeOut, TimeUnit.SECONDS)
                 .build();
     }
 

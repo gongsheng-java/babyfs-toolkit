@@ -21,11 +21,11 @@ public class LoadBalanceImpl implements ILoadBalance {
 
     private DiscoveryClient discoveryClient;
 
-    private  DiscoveryProperties discoveryProperties;
+    private IDiscoveryProperties discoveryProperties;
 
     private IRule rule = new RoundRobinRule();
 
-    public LoadBalanceImpl(DiscoveryClient discoveryClient, IRule rule,DiscoveryProperties discoveryProperties) {
+    public LoadBalanceImpl(DiscoveryClient discoveryClient, IRule rule,IDiscoveryProperties discoveryProperties) {
         this.discoveryClient = discoveryClient;
         this.rule = rule;
         this.discoveryProperties = discoveryProperties;
@@ -43,19 +43,19 @@ public class LoadBalanceImpl implements ILoadBalance {
     }
 
     @Override
-    public DiscoveryProperties getDiscoveryProperties() {
+    public IDiscoveryProperties getDiscoveryProperties() {
         return discoveryProperties;
     }
 
     //LoadBalance的构建类
     public static class Builder {
         private IRule rule = new RoundRobinRule();
-        private DiscoveryProperties discoveryProperties;
+        private IDiscoveryProperties discoveryProperties;
         public LoadBalanceImpl.Builder rule(IRule rule) {
             this.rule = rule;
             return this;
         }
-        public LoadBalanceImpl.Builder discoveryProperties(DiscoveryProperties discoveryProperties) {
+        public LoadBalanceImpl.Builder discoveryProperties(IDiscoveryProperties discoveryProperties) {
             this.discoveryProperties = discoveryProperties;
             return this;
         }

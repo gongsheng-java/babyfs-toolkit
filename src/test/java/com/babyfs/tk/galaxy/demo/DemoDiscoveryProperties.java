@@ -1,7 +1,7 @@
 
 package com.babyfs.tk.galaxy.demo;
 
-import com.babyfs.tk.galaxy.register.DiscoveryProperties;
+import com.babyfs.tk.galaxy.register.IDiscoveryProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 
 
-public class DemoDiscoveryProperties implements DiscoveryProperties {
+public class DemoDiscoveryProperties implements IDiscoveryProperties {
 
 	private static final Log log = LogFactory.getLog(DemoDiscoveryProperties.class);
 

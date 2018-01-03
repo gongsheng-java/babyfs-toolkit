@@ -3,7 +3,7 @@ package com.babyfs.tk.galaxy.register;
 /**
  * 服务发现配置接口
  */
-public interface DiscoveryProperties {
+public interface IDiscoveryProperties {
 
      //服务发现client监听的注册节点的前缀
      String getDiscoveryPrefix();

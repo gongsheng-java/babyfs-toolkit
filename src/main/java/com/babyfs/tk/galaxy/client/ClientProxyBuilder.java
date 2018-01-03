@@ -15,7 +15,7 @@ public class ClientProxyBuilder {
     //解码器
     private Decoder decoder = new Decoder.Default();
     //传输层采用的Client
-    private IClient client = RpcOkHttpClient.http;
+    private IClient client =  null;
     //负载均衡器
     private LoadBalanceImpl loadBalance = null;
     //InvocationHandler工厂类

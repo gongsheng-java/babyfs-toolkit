@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
 
-    private final DiscoveryProperties properties;
+    private final IDiscoveryProperties properties;
 
     private final CuratorFramework curator;
 
@@ -29,7 +28,7 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
 
     private static final Logger logger = LoggerFactory.getLogger(ZkDiscoveryClient.class);
 
-    public ZkDiscoveryClient(DiscoveryProperties discoveryProperties, CuratorFramework curator) {
+    public ZkDiscoveryClient(IDiscoveryProperties discoveryProperties, CuratorFramework curator) {
 
         this.properties = discoveryProperties;
         this.curator = curator;

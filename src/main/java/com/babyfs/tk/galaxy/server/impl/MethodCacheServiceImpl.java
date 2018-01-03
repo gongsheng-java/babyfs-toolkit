@@ -24,6 +24,7 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
     public MethodCacheServiceImpl(Injector injector) {
         this.injector = injector;
     }
+
     @Override
     public Method getMethodBySign(String sign) {
         if(!methodMap.containsKey(sign)){
