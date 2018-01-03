@@ -2,7 +2,7 @@ package com.babyfs.tk.galaxy.client;
 
 import com.babyfs.tk.galaxy.codec.Decoder;
 import com.babyfs.tk.galaxy.codec.Encoder;
-import com.babyfs.tk.galaxy.register.LoadBalance;
+import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
 
 /**
  * GalaxyClientProxyBuilder
@@ -17,7 +17,7 @@ public class ClientProxyBuilder {
     //传输层采用的Client
     private IClient client = RpcOkHttpClient.http;
     //负载均衡器
-    private LoadBalance loadBalance = null;
+    private LoadBalanceImpl loadBalance = null;
     //InvocationHandler工厂类
     private IInvocationHandlerFactory invocationHandlerFactory =
             new IInvocationHandlerFactory.Default();
@@ -38,7 +38,7 @@ public class ClientProxyBuilder {
         return this;
     }
 
-    public ClientProxyBuilder loadBalance(LoadBalance loadBalance) {
+    public ClientProxyBuilder loadBalance(LoadBalanceImpl loadBalance) {
         this.loadBalance = loadBalance;
         return this;
     }
@@ -50,7 +50,6 @@ public class ClientProxyBuilder {
 
     /**
      * appName信息的Target对象
-     *
      * @param apiType Class对
      * @param appName 应用名称
      * @param <T>
@@ -64,12 +63,12 @@ public class ClientProxyBuilder {
         return build().newInstance(target);
     }
 
-    public ClientProxy build() {
+    public AbstractClientProxy build() {
         MethodHandler.Factory synchronousMethodHandlerFactory =
                 new MethodHandler.Factory();
-        ReflectiveGalaxyClient.ParseHandlersByName handlersByName =
-                new ReflectiveGalaxyClient.ParseHandlersByName(encoder, decoder, client,
+        ReflectiveClientProxy.ParseHandlersByName handlersByName =
+                new ReflectiveClientProxy.ParseHandlersByName(encoder, decoder, client,
                         synchronousMethodHandlerFactory, loadBalance);
-        return new ReflectiveGalaxyClient(handlersByName, invocationHandlerFactory);
+        return new ReflectiveClientProxy(handlersByName, invocationHandlerFactory);
     }
 }

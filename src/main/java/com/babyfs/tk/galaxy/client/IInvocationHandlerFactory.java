@@ -43,7 +43,7 @@ public interface IInvocationHandlerFactory {
 
         @Override
         public InvocationHandler create(ITarget target, Map<Method, IMethodHandler> dispatch) {
-            return new ReflectiveGalaxyClient.RpcInvocationHandler(target, dispatch);
+            return new ReflectiveClientProxy.RpcInvocationHandler(target, dispatch);
         }
     }
 }

@@ -6,11 +6,12 @@ import com.babyfs.tk.galaxy.server.IMethodCacheService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static com.babyfs.tk.galaxy.ProxyUtils.FORBIDDEN_METHODS;
 
 public class MethodCacheServiceImpl implements IMethodCacheService {
 
@@ -22,7 +23,6 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
     public MethodCacheServiceImpl(Injector injector) {
         this.injector = injector;
     }
-
     @Override
     public Method getMethodBySign(String sign) {
         if (methodMap.containsKey(sign)) {
@@ -30,7 +30,6 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
         }
         return null;
     }
-
     public void init() {
         Set<ServiceEnrty> allServices = ServiceEnrty.getAllServices(injector);
         for (ServiceEnrty entry : allServices) {
@@ -38,6 +37,9 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
             Object obj = injector.getInstance(key);
             Method[] methods = obj.getClass().getMethods();
             for (Method method : methods) {
+                if(FORBIDDEN_METHODS.contains(method)){
+                    continue;
+                }
                 String methodSign = ProxyUtils.configKey(obj.getClass(), method);
                 methodMap.put(methodSign, method);
             }

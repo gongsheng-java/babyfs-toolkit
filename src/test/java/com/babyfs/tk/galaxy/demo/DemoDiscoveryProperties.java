@@ -1,7 +1,6 @@
 
 package com.babyfs.tk.galaxy.demo;
 
-import com.babyfs.tk.galaxy.proxy.ReflectionUtils;
 import com.babyfs.tk.galaxy.register.DiscoveryProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,7 +94,6 @@ public class DemoDiscoveryProperties implements DiscoveryProperties {
 			}
 			return InetAddress.getLocalHost();
 		} catch (UnknownHostException e){
-			ReflectionUtils.rethrowRuntimeException(e);
 			return null;
 		} catch (IOException e) {
 			log.warn("Unable to find non-loopback address", e);

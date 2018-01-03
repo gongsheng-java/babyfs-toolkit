@@ -11,7 +11,6 @@ public class RpcRequest implements Serializable {
     private String interfaceName;
     private String methodName;
     private String methodSign;
-
     private Object[] parameters;
 
     public String getInterfaceName() {
@@ -29,7 +28,6 @@ public class RpcRequest implements Serializable {
     public void setMethodName(String methodName) {
         this.methodName = methodName;
     }
-
 
     public Object[] getParameters() {
         return parameters;
@@ -56,6 +54,4 @@ public class RpcRequest implements Serializable {
                 ", parameters=" + Arrays.toString(parameters) +
                 '}';
     }
-
-
 }

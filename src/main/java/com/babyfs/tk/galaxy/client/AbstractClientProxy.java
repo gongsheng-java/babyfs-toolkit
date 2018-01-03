@@ -7,7 +7,7 @@ package com.babyfs.tk.galaxy.client;
  * newInstance方法为创建代理对象方法
  * 此类的子类是通过GalaxyClientBuilder创建完成
  */
-public abstract class ClientProxy {
+public abstract class AbstractClientProxy {
 
     /**
      * 创建GalaxyClientBuilder方法

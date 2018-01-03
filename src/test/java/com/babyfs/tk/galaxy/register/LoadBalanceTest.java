@@ -41,7 +41,7 @@ public class LoadBalanceTest {
     public void  testLoadBalance() throws InterruptedException, ExecutionException, KeeperException {
 
        String appName = "appName";
-       LoadBalance loadBalance =  LoadBalance.builder().build();
+       LoadBalanceImpl loadBalance =  LoadBalanceImpl.builder().build();
        Thread.sleep(2000);
        ServiceInstance serviceInstance =   loadBalance.getServerByAppName(appName);
        logger.error(serviceInstance.getHost());

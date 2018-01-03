@@ -6,7 +6,7 @@ import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.galaxy.RpcRequest;
 import com.babyfs.tk.galaxy.codec.Decoder;
 import com.babyfs.tk.galaxy.codec.Encoder;
-import com.babyfs.tk.galaxy.register.LoadBalance;
+import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
 import com.babyfs.tk.galaxy.register.ServiceInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +26,10 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
     private final Encoder encoder;
     private final MethodMetadata metadata;
     private final IClient client;
-    private final LoadBalance loadBalance;
+    private final LoadBalanceImpl loadBalance;
 
     private MethodHandler(ITarget<?> target, Encoder encoder,
-                          Decoder decoder, IClient client, MethodMetadata metadata, LoadBalance loadBalance) {
+                          Decoder decoder, IClient client, MethodMetadata metadata, LoadBalanceImpl loadBalance) {
         this.target = checkNotNull(target, "target");
         this.decoder = checkNotNull(decoder, "decoder for %s", target);
         this.metadata = metadata;
@@ -37,6 +37,7 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
         this.client = client;
         this.loadBalance = loadBalance;
     }
+
     /**
      * 执行编码，远程调用，解码
      *
@@ -98,7 +99,7 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
          * @param loadBalance
          * @return
          */
-        public IInvocationHandlerFactory.IMethodHandler create(ITarget<?> target, Encoder encoder, Decoder decoder, IClient client, MethodMetadata md, LoadBalance loadBalance) {
+        public IInvocationHandlerFactory.IMethodHandler create(ITarget<?> target, Encoder encoder, Decoder decoder, IClient client, MethodMetadata md, LoadBalanceImpl loadBalance) {
             return new MethodHandler(target, encoder, decoder, client, md, loadBalance);
         }
     }

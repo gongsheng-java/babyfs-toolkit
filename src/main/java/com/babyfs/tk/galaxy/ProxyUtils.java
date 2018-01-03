@@ -1,9 +1,18 @@
 package com.babyfs.tk.galaxy;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 public class ProxyUtils {
+
+
+    /**
+     * 禁止代理的方法集合:
+     * {@link Object}中的方法都不代理
+     */
+    public static final ImmutableSet<Method> FORBIDDEN_METHODS = new ImmutableSet.Builder<Method>().add(Object.class.getMethods()).build();
 
     /**
      * 生成代理对象的方法签名

@@ -43,7 +43,6 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
 
     @Override
     public List<ServiceInstance> getInstances(String appName) {
-
         if (!providerMapList.isEmpty() && providerMapList.containsKey(appName)) {
             return providerMapList.get(appName);
         }
@@ -51,7 +50,6 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
     }
 
     private List<ServiceInstance> refreshAndGet(String appName) {
-
         String path = properties.getDiscoveryPrefix() + "/" + appName;
         List<String> hosts = getChildren(path);
         List<ServiceInstance> instances = new CopyOnWriteArrayList<>();
@@ -83,7 +81,6 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
 
     @Override
     public void register() {
-
         String path = properties.getDiscoveryPrefix() + "/" + properties.getAppName() + "/" + properties.getHostname() + ":" + properties.getPort();
         try {
             create(path);
@@ -93,7 +90,6 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
     }
 
     public void create(String path) throws Exception {
-
         try {
             curator.create()
                     .creatingParentContainersIfNeeded()
@@ -107,7 +103,6 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
 
     @Override
     public void watch() {
-
         try {
             connect(properties.getDiscoveryPrefix());
         } catch (Exception e) {
@@ -136,7 +131,6 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
             logger.error("zk delete node fail path:{}", path, e);
         }
     }
-
 
     public void connect(final String PATH) throws Exception {
 

@@ -17,7 +17,6 @@ import java.lang.reflect.Method;
  */
 public class RpcServiceImpl implements IRpcService {
 
-
     private Injector injector;
 
     private IMethodCacheService methodCacheService;
@@ -31,14 +30,13 @@ public class RpcServiceImpl implements IRpcService {
     }
 
     @Override
-    public Object invoke(String className, String methodName, String methodSign, Object[] parameters) {
-
-        if (Strings.isNullOrEmpty(className) || Strings.isNullOrEmpty(methodName) || parameters == null || Strings.isNullOrEmpty(methodSign)) {
-            logger.error("error para,className:{},methodName:{},parameterType:{},parameters", className, methodName, methodSign, parameters);
+    public Object invoke(String interfaceName, String methodName, String methodSign, Object[] parameters) {
+        if (Strings.isNullOrEmpty(interfaceName) || Strings.isNullOrEmpty(methodName) || parameters == null || Strings.isNullOrEmpty(methodSign)) {
+            logger.error("error para,className:{},methodName:{},parameterType:{},parameters", interfaceName, methodName, methodSign, parameters);
             throw new RpcException("error parameter");
         }
         try {
-            Class<?> bean = Class.forName(className);
+            Class<?> bean = Class.forName(interfaceName);
             Object object = injector.getInstance(bean);
             Method method = methodCacheService.getMethodBySign(methodSign);
             Object obj = method.invoke(object, parameters);

@@ -1,6 +1,5 @@
 package com.babyfs.tk.galaxy.guice;
 
-import com.babyfs.tk.galaxy.client.ClientProxy;
 import com.babyfs.tk.galaxy.client.ClientProxyBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Injector;

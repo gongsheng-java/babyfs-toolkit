@@ -5,11 +5,14 @@ package com.babyfs.tk.galaxy.client;
 import com.babyfs.tk.galaxy.ProxyUtils;
 import com.babyfs.tk.galaxy.codec.Decoder;
 import com.babyfs.tk.galaxy.codec.Encoder;
-import com.babyfs.tk.galaxy.register.LoadBalance;
+import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.*;
+
+import static com.babyfs.tk.galaxy.ProxyUtils.FORBIDDEN_METHODS;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -18,12 +21,12 @@ import static com.google.common.base.Preconditions.checkState;
  * RpcInvocationHandler内部类用于分发代理对象的method到对应的method handler
  * ParseHandlersByName内部类用于解析代理对象
  */
-public class ReflectiveGalaxyClient extends ClientProxy {
+public class ReflectiveClientProxy extends AbstractClientProxy {
 
     private final ParseHandlersByName targetToHandlersByName;
     private final IInvocationHandlerFactory factory;
 
-    ReflectiveGalaxyClient(ParseHandlersByName targetToHandlersByName, IInvocationHandlerFactory factory) {
+    ReflectiveClientProxy(ParseHandlersByName targetToHandlersByName, IInvocationHandlerFactory factory) {
         this.targetToHandlersByName = targetToHandlersByName;
         this.factory = factory;
     }
@@ -45,6 +48,9 @@ public class ReflectiveGalaxyClient extends ClientProxy {
         Map<String, IInvocationHandlerFactory.IMethodHandler> nameToHandler = targetToHandlersByName.apply(target);
         Map<Method, IInvocationHandlerFactory.IMethodHandler> methodToHandler = new LinkedHashMap<Method, IInvocationHandlerFactory.IMethodHandler>();
         for (Method method : target.type().getMethods()) {
+            if(FORBIDDEN_METHODS.contains(method)){
+                continue;
+            }
             methodToHandler.put(method, nameToHandler.get(ProxyUtils.configKey(target.type(), method)));
         }
         InvocationHandler handler = factory.create(target, methodToHandler);
@@ -102,10 +108,10 @@ public class ReflectiveGalaxyClient extends ClientProxy {
         private final Decoder decoder;
         private final MethodHandler.Factory factory;
         private final IClient client;
-        private final LoadBalance loadBalance;
+        private final LoadBalanceImpl loadBalance;
 
         ParseHandlersByName(Encoder encoder, Decoder decoder, IClient client,
-                            MethodHandler.Factory factory, LoadBalance loadBalance) {
+                            MethodHandler.Factory factory, LoadBalanceImpl loadBalance) {
             this.factory = factory;
             this.client = client;
             this.loadBalance = loadBalance;
@@ -116,7 +122,6 @@ public class ReflectiveGalaxyClient extends ClientProxy {
         /**
          * ParseHandlersByName暴露给其他类调用的方法
          * 创建被代理类的方法签名方法handler映射对象
-         *
          * @param key 被代理对象
          * @return 方法签名方法handler映射map
          */
@@ -133,7 +138,6 @@ public class ReflectiveGalaxyClient extends ClientProxy {
 
         /**
          * 解析并且验证被代理对象的元数据
-         *
          * @param targetType
          * @return 被代理对象方法元数据列表
          */
@@ -145,6 +149,9 @@ public class ReflectiveGalaxyClient extends ClientProxy {
                     targetType.getSimpleName());
             Map<String, MethodMetadata> result = new LinkedHashMap<String, MethodMetadata>();
             for (Method method : targetType.getMethods()) {
+                if(FORBIDDEN_METHODS.contains(method)){
+                    continue;
+                }
                 MethodMetadata metadata = parseAndValidateMetadata(targetType, method);
                 checkState(!result.containsKey(metadata.configKey()), "Overrides unsupported: %s",
                         metadata.configKey());
@@ -155,7 +162,6 @@ public class ReflectiveGalaxyClient extends ClientProxy {
 
         /**
          * 解析方法得到方法元数据
-         *
          * @param targetType
          * @param method
          * @return

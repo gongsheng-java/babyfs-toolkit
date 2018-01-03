@@ -5,9 +5,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.KeeperException;
-
 import java.util.concurrent.ExecutionException;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -15,17 +13,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * 用builder模式构建负载均衡器对象
  * 默认用ZkDiscoveryClient
  */
-public class LoadBalance implements ILoadBalance {
+public class LoadBalanceImpl implements ILoadBalance {
 
-    public static LoadBalance.Builder builder() {
-        return new LoadBalance.Builder();
+    public static LoadBalanceImpl.Builder builder() {
+        return new LoadBalanceImpl.Builder();
     }
 
     private DiscoveryClient discoveryClient;
 
     private IRule rule = new RoundRobinRule();
 
-    public LoadBalance(DiscoveryClient discoveryClient, IRule rule) {
+    public LoadBalanceImpl(DiscoveryClient discoveryClient, IRule rule) {
         this.discoveryClient = discoveryClient;
         this.rule = rule;
     }
@@ -44,19 +42,15 @@ public class LoadBalance implements ILoadBalance {
     public static class Builder {
         private IRule rule = new RoundRobinRule();
         private DiscoveryProperties discoveryProperties;
-
-        public LoadBalance.Builder rule(IRule rule) {
+        public LoadBalanceImpl.Builder rule(IRule rule) {
             this.rule = rule;
             return this;
         }
-
-        public LoadBalance.Builder discoveryProperties(DiscoveryProperties discoveryProperties) {
+        public LoadBalanceImpl.Builder discoveryProperties(DiscoveryProperties discoveryProperties) {
             this.discoveryProperties = discoveryProperties;
             return this;
         }
-
-        public LoadBalance build() {
-
+        public LoadBalanceImpl build() {
             checkNotNull(discoveryProperties, "discoveryProperties");
             ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(1000, 3);
             CuratorFramework curatorFramework = CuratorFrameworkFactory.builder()
@@ -68,9 +62,7 @@ public class LoadBalance implements ILoadBalance {
             curatorFramework.start();
             ZkDiscoveryClient zkDiscoveryClient = new ZkDiscoveryClient(discoveryProperties, curatorFramework);
             zkDiscoveryClient.start();
-            return new LoadBalance(zkDiscoveryClient, rule);
+            return new LoadBalanceImpl(zkDiscoveryClient, rule);
         }
     }
-
-
 }
