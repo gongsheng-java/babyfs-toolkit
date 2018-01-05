@@ -3,6 +3,11 @@ package com.babyfs.tk.service.biz;
 import com.babyfs.tk.commons.service.IVersion;
 import com.babyfs.tk.commons.service.ServiceModule;
 import com.babyfs.tk.commons.service.VersionModule;
+import com.babyfs.tk.galaxy.guice.ClientProxyBuilderModel;
+import com.babyfs.tk.galaxy.guice.MethodCacheServiceModel;
+import com.babyfs.tk.galaxy.guice.RpcOkHttpClientModel;
+import com.babyfs.tk.galaxy.server.IRpcService;
+import com.babyfs.tk.galaxy.server.impl.RpcServiceImpl;
 import com.babyfs.tk.http.guice.HttpClientModule;
 import com.babyfs.tk.service.basic.es.guice.ESClientModule;
 import com.babyfs.tk.service.biz.constants.Const;
@@ -137,6 +142,12 @@ public final class Modules {
 
             //一般的后台任务Executor,用于非关键的业务场景
             install(new ExecutorServiceModule(Const.NAME_BACKGROUND_EXECUTOR));
+
+            //rpc module
+            install(new RpcOkHttpClientModel());
+            bindService(IRpcService.class, RpcServiceImpl.class);
+            install(new ClientProxyBuilderModel());
+            install(new MethodCacheServiceModel());
         }
     }
 }

@@ -13,11 +13,11 @@ import java.util.function.Function;
 public class RpcSuppler implements Function<Class<?>, Object> {
     private final String appName;
     private Injector injector;
-    private ClientProxyBuilder clientProxyBuilder;
+    private Class clazz;
 
-    public RpcSuppler(String appName, ClientProxyBuilder clientProxyBuilder) {
+    public RpcSuppler(String appName,Class clazz) {
         this.appName = appName;
-        this.clientProxyBuilder = clientProxyBuilder;
+        this.clazz = clazz;
     }
 
     @Inject
@@ -27,6 +27,7 @@ public class RpcSuppler implements Function<Class<?>, Object> {
 
     @Override
     public Object apply(Class<?> aClass) {
-        return clientProxyBuilder.target(aClass, appName);
+        ClientProxyBuilder clientProxyBuilder =  injector.getInstance(ClientProxyBuilder.class);
+        return clientProxyBuilder.target(clazz, appName);
     }
 }

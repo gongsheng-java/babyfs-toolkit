@@ -34,8 +34,5 @@ public class RoudRobinTest {
         logger.info(roundRobinRule.choose(serviceInstances).getHost());
         logger.info(roundRobinRule.choose(serviceInstances).getHost());
         logger.info(roundRobinRule.choose(serviceInstances).getHost());
-
-
-
     }
 }

@@ -37,7 +37,6 @@ public class ReflectiveClientProxy extends AbstractClientProxy {
      * 1.解析被代理对象
      * 2.创建InvocationHandler
      * 3.创建代理类
-     *
      * @param target 被代理对象
      * @param <T>
      * @return 代理类
@@ -174,7 +173,6 @@ public class ReflectiveClientProxy extends AbstractClientProxy {
             data.methodName(method.getName());
             return data;
         }
-
     }
 
 

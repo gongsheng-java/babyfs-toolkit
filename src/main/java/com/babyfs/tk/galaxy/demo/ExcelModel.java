@@ -1,4 +1,4 @@
-package com.babyfs.tk.galaxy.demo.model;
+package com.babyfs.tk.galaxy.demo;
 
 
 

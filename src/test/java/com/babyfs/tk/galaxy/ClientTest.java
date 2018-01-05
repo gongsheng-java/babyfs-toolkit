@@ -2,7 +2,7 @@ package com.babyfs.tk.galaxy;
 
 import com.babyfs.tk.galaxy.client.AbstractClientProxy;
 import com.babyfs.tk.galaxy.demo.Health;
-import com.babyfs.tk.galaxy.demo.model.PostModel;
+import com.babyfs.tk.galaxy.demo.PostModel;
 import com.babyfs.tk.galaxy.demo.DemoDiscoveryProperties;
 import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
 import org.junit.Assert;

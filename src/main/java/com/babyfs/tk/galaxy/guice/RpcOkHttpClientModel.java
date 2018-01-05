@@ -28,7 +28,6 @@ public class RpcOkHttpClientModel extends PrivateModule {
 
         @Override
         public RpcOkHttpClient get() {
-
             RpcOkHttpClient rpcOkHttpClient = new RpcOkHttpClient();
             rpcOkHttpClient.init(CONNECT_TIMEOUT,READ_TIMEOUT,WRITE_TIMEOUT);
             return rpcOkHttpClient;
