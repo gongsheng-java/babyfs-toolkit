@@ -17,9 +17,7 @@ public interface IDiscoveryProperties {
      String getPort();
      //本服务的应用名称
      String getAppName();
-     //本服务的ip地址
-     String getHostname();
-
+     //rpc调用的url前缀
      String getUrlPrefix();
 
 }

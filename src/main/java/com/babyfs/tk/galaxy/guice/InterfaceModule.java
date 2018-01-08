@@ -1,7 +1,5 @@
 package com.babyfs.tk.galaxy.guice;
 
-import com.babyfs.tk.galaxy.guice.ExternalCreationProvider;
-import com.babyfs.tk.galaxy.guice.RpcSuppler;
 import com.google.inject.PrivateModule;
 
 import java.util.function.Function;

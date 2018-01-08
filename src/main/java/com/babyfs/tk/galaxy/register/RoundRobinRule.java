@@ -2,9 +2,7 @@ package com.babyfs.tk.galaxy.register;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -20,7 +18,6 @@ public class RoundRobinRule implements IRule {
 
     /**
      * 根据传入的ServiceInstance列表，轮询出一个ServiceInstance实例
-     *
      * @param list
      * @return
      */
