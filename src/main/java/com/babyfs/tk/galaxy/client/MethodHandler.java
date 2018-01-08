@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * GalaxyMethodHandler
+ * MethodHandler
  * 被代理对象方法的实际执行handler
  * 提供了工厂类实现
  */

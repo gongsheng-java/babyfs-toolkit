@@ -13,12 +13,7 @@ public final class MethodMetadata implements Serializable {
     private static final long serialVersionUID = 1L;
     //方法签名
     private String configKey;
-    //方法返回值类型
-    private transient Type returnType;
-    //方法名称
-    private String methodName;
-    //方法入参数类型
-    private Class<?>[] parameterTypes;
+
 
     MethodMetadata() {
     }
@@ -26,33 +21,6 @@ public final class MethodMetadata implements Serializable {
     public MethodMetadata configKey(String configKey) {
         this.configKey = configKey;
         return this;
-    }
-
-    public MethodMetadata methodName(String methodName) {
-        this.methodName = methodName;
-        return this;
-    }
-
-    public MethodMetadata returnType(Type returnType) {
-        this.returnType = returnType;
-        return this;
-    }
-
-    public MethodMetadata parameterTypes(Class<?>[] parameterTypes) {
-        this.parameterTypes = parameterTypes;
-        return this;
-    }
-
-    public String methodName() {
-        return methodName;
-    }
-
-    public Class<?>[] parameterTypes() {
-        return parameterTypes;
-    }
-
-    public Type returnType() {
-        return returnType;
     }
 
     public String configKey() {

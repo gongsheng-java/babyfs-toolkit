@@ -10,6 +10,15 @@ import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
  */
 public class ClientProxyBuilder {
 
+
+    /**
+     * 创建ClientProxyBuilder方法
+     * @return
+     */
+    public static ClientProxyBuilder builder() {
+        return new ClientProxyBuilder();
+    }
+
     //编码器
     private Encoder encoder = new Encoder.Default();
     //解码器
@@ -63,7 +72,7 @@ public class ClientProxyBuilder {
         return build().newInstance(target);
     }
 
-    public AbstractClientProxy build() {
+    public IClientProxy build() {
         MethodHandler.Factory synchronousMethodHandlerFactory =
                 new MethodHandler.Factory();
         ReflectiveClientProxy.ParseHandlersByName handlersByName =

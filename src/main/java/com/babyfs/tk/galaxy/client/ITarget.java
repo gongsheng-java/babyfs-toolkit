@@ -13,14 +13,12 @@ public interface ITarget<T> {
 
     /**
      * 获取被代理对象的类型
-     *
      * @return
      */
     Class<T> type();
 
     /**
      * 获取调用服务的名称
-     *
      * @return
      */
     String name();

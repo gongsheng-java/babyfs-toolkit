@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkState;
  * RpcInvocationHandler内部类用于分发代理对象的method到对应的method handler
  * ParseHandlersByName内部类用于解析代理对象
  */
-public class ReflectiveClientProxy extends AbstractClientProxy {
+public class ReflectiveClientProxy implements IClientProxy {
 
     private final ParseHandlersByName targetToHandlersByName;
     private final IInvocationHandlerFactory factory;
@@ -167,10 +167,7 @@ public class ReflectiveClientProxy extends AbstractClientProxy {
          */
         private MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
             MethodMetadata data = new MethodMetadata();
-            data.returnType(method.getReturnType());
             data.configKey(ProxyUtils.configKey(targetType, method));
-            data.parameterTypes(method.getParameterTypes());
-            data.methodName(method.getName());
             return data;
         }
     }

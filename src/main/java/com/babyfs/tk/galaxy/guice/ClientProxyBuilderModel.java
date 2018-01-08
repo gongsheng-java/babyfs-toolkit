@@ -1,7 +1,6 @@
 package com.babyfs.tk.galaxy.guice;
 
 
-import com.babyfs.tk.galaxy.client.AbstractClientProxy;
 import com.babyfs.tk.galaxy.client.ClientProxyBuilder;
 import com.babyfs.tk.galaxy.client.RpcOkHttpClient;
 import com.babyfs.tk.galaxy.register.IDiscoveryProperties;
@@ -29,7 +28,7 @@ public class ClientProxyBuilderModel extends PrivateModule {
         @Override
         public ClientProxyBuilder get() {
             LoadBalanceImpl loadBalance = LoadBalanceImpl.builder().discoveryProperties(discoveryProperties).build();
-            return AbstractClientProxy.builder().loadBalance(loadBalance).client(rpcOkHttpClient);
+            return ClientProxyBuilder.builder().loadBalance(loadBalance).client(rpcOkHttpClient);
         }
     }
 }
