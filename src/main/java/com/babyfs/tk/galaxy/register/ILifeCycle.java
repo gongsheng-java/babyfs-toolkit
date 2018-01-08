@@ -11,6 +11,7 @@ public interface ILifeCycle {
 
     /**
      * 将本服务注册到注册中心
+     *
      * @throws ExecutionException
      * @throws InterruptedException
      * @throws KeeperException
@@ -19,13 +20,14 @@ public interface ILifeCycle {
 
     /**
      * 监听注册中心的节点变化
+     *
      * @throws Exception
      */
     void watch() throws Exception;
 
 
     /**
-     * DiscoveryClient执行的方法
+     * DiscoveryClient启动执行的方法
      */
     void start();
 }

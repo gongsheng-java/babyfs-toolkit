@@ -5,7 +5,9 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.KeeperException;
+
 import java.util.concurrent.ExecutionException;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -25,7 +27,7 @@ public class LoadBalanceImpl implements ILoadBalance {
 
     private IRule rule = new RoundRobinRule();
 
-    public LoadBalanceImpl(DiscoveryClient discoveryClient, IRule rule,IDiscoveryProperties discoveryProperties) {
+    public LoadBalanceImpl(DiscoveryClient discoveryClient, IRule rule, IDiscoveryProperties discoveryProperties) {
         this.discoveryClient = discoveryClient;
         this.rule = rule;
         this.discoveryProperties = discoveryProperties;
@@ -51,14 +53,17 @@ public class LoadBalanceImpl implements ILoadBalance {
     public static class Builder {
         private IRule rule = new RoundRobinRule();
         private IDiscoveryProperties discoveryProperties;
+
         public LoadBalanceImpl.Builder rule(IRule rule) {
             this.rule = rule;
             return this;
         }
+
         public LoadBalanceImpl.Builder discoveryProperties(IDiscoveryProperties discoveryProperties) {
             this.discoveryProperties = discoveryProperties;
             return this;
         }
+
         //构建LoadBalance的方法
         public LoadBalanceImpl build() {
             checkNotNull(discoveryProperties, "discoveryProperties");
@@ -76,7 +81,7 @@ public class LoadBalanceImpl implements ILoadBalance {
             curatorFramework.start();
             ZkDiscoveryClient zkDiscoveryClient = new ZkDiscoveryClient(discoveryProperties, curatorFramework);
             zkDiscoveryClient.start();
-            return new LoadBalanceImpl(zkDiscoveryClient, rule,discoveryProperties);
+            return new LoadBalanceImpl(zkDiscoveryClient, rule, discoveryProperties);
         }
     }
 }

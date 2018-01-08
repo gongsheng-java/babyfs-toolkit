@@ -10,6 +10,7 @@ import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
 import com.babyfs.tk.galaxy.register.ServiceInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -29,26 +30,28 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
 
     private MethodHandler(ITarget<?> target, Encoder encoder,
                           Decoder decoder, IClient client, MethodMetadata metadata, LoadBalanceImpl loadBalance) {
-        this.target = checkNotNull(target, "target");
-        this.decoder = checkNotNull(decoder, "decoder for %s", target);
-        this.metadata = metadata;
-        this.encoder = encoder;
-        this.client = client;
-        this.loadBalance = loadBalance;
+        this.target = checkNotNull(target, "target for %s", target);
+        this.decoder = checkNotNull(decoder, "decoder for %s", decoder);
+        this.metadata = checkNotNull(metadata, "metadata for %s", metadata);
+        this.encoder = checkNotNull(encoder, "encode for %s", encoder);
+        this.client = checkNotNull(client, "client for %s", client);
+        this.loadBalance = checkNotNull(loadBalance, "loadBalance for %s", loadBalance);
     }
 
     /**
+     * rpc 代理对象的方法实际执行方法
      * 执行编码，远程调用，解码
+     *
      * @param argv
      * @return
      * @throws Throwable
      */
     @Override
-    public Object invoke(Object[] argv) throws Throwable {
+    public Object invoke(Object[] argv) {
 
         byte[] body = encoder.encode(createRequest(argv));
         StringBuilder stringBuilder = new StringBuilder();
-        ServiceInstance serviceInstance = loadBalance.getServerByAppName(target.name());
+        ServiceInstance serviceInstance = loadBalance.getServerByAppName(target.appName());
         stringBuilder.append("http://").append(serviceInstance.getHost()).append(":").append(serviceInstance.getPort());
         String url = stringBuilder.append(loadBalance.getDiscoveryProperties().getUrlPrefix()).toString();
         try {
@@ -82,6 +85,7 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
     static class Factory {
         /**
          * create方法创建GalaxyMethodHandler
+         *
          * @param target
          * @param encoder
          * @param decoder

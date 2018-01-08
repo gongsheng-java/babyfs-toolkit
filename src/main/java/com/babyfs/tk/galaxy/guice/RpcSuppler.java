@@ -15,7 +15,7 @@ public class RpcSuppler implements Function<Class<?>, Object> {
     private Injector injector;
     private Class clazz;
 
-    public RpcSuppler(String appName,Class clazz) {
+    public RpcSuppler(String appName, Class clazz) {
         this.appName = appName;
         this.clazz = clazz;
     }
@@ -27,7 +27,7 @@ public class RpcSuppler implements Function<Class<?>, Object> {
 
     @Override
     public Object apply(Class<?> aClass) {
-        ClientProxyBuilder clientProxyBuilder =  injector.getInstance(ClientProxyBuilder.class);
+        ClientProxyBuilder clientProxyBuilder = injector.getInstance(ClientProxyBuilder.class);
         return clientProxyBuilder.target(clazz, appName);
     }
 }

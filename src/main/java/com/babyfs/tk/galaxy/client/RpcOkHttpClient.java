@@ -2,7 +2,9 @@ package com.babyfs.tk.galaxy.client;
 
 import com.babyfs.tk.galaxy.RpcException;
 import okhttp3.*;
+
 import java.util.concurrent.TimeUnit;
+
 import static java.lang.String.format;
 
 /**
@@ -18,7 +20,7 @@ public class RpcOkHttpClient implements IClient {
     private OkHttpClient client;
 
 
-    public void init(long connectTimeOut,long readTimeOut,long writeTimeOut) {
+    public void init(long connectTimeOut, long readTimeOut, long writeTimeOut) {
 
         ConnectionPool connectionPool = new ConnectionPool();
         client = new OkHttpClient.Builder().connectionPool(connectionPool)

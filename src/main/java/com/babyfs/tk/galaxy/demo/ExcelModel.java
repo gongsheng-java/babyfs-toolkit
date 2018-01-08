@@ -1,11 +1,10 @@
 package com.babyfs.tk.galaxy.demo;
 
 
-
 public class ExcelModel {
 
 
-    private  String en;
+    private String en;
 
     @Override
     public String toString() {
@@ -49,9 +48,9 @@ public class ExcelModel {
         this.ch = ch;
     }
 
-    private  String  ita;
+    private String ita;
 
-    private  String  fra;
+    private String fra;
     private String ch;
 
 }

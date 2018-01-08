@@ -31,7 +31,7 @@ public class RpcServiceImpl implements IRpcService {
     }
 
     @Override
-    public Object invoke(String interfaceName,String methodSign, Object[] parameters) throws ClassNotFoundException, InvocationTargetException, IllegalAccessException {
+    public Object invoke(String interfaceName, String methodSign, Object[] parameters) throws ClassNotFoundException, InvocationTargetException, IllegalAccessException {
         if (Strings.isNullOrEmpty(interfaceName) || parameters == null || Strings.isNullOrEmpty(methodSign)) {
             logger.error("error para,interfaceName:{},methodSign:{},parameters：{}", interfaceName, methodSign, parameters);
             throw new RpcException("error parameter");

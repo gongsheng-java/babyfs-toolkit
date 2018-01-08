@@ -1,11 +1,12 @@
 package com.babyfs.tk.galaxy;
 
 import com.google.common.collect.ImmutableSet;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 /**
- * 代理的工具类
+ * 代理工具类
  */
 public class ProxyUtils {
 
@@ -17,6 +18,7 @@ public class ProxyUtils {
 
     /**
      * 生成代理对象的方法签名
+     *
      * @param targetType
      * @param method
      * @return

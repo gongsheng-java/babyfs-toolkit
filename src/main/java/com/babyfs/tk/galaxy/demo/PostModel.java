@@ -3,7 +3,7 @@ package com.babyfs.tk.galaxy.demo;
 import java.io.Serializable;
 
 
-public class PostModel  implements Serializable {
+public class PostModel implements Serializable {
 
     public String getMessage() {
         return message;
@@ -20,5 +20,5 @@ public class PostModel  implements Serializable {
                 '}';
     }
 
-    private String message ;
+    private String message;
 }

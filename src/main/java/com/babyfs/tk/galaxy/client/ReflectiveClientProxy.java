@@ -27,8 +27,8 @@ public class ReflectiveClientProxy implements IClientProxy {
     private final IInvocationHandlerFactory factory;
 
     ReflectiveClientProxy(ParseHandlersByName targetToHandlersByName, IInvocationHandlerFactory factory) {
-        this.targetToHandlersByName = targetToHandlersByName;
-        this.factory = factory;
+        this.targetToHandlersByName = checkNotNull(targetToHandlersByName, "targetToHandlersByName");
+        this.factory = checkNotNull(factory, "factory");
     }
 
     /**
@@ -37,6 +37,7 @@ public class ReflectiveClientProxy implements IClientProxy {
      * 1.解析被代理对象
      * 2.创建InvocationHandler
      * 3.创建代理类
+     *
      * @param target 被代理对象
      * @param <T>
      * @return 代理类
@@ -46,12 +47,13 @@ public class ReflectiveClientProxy implements IClientProxy {
     public <T> T newInstance(ITarget<T> target) {
         Map<String, IInvocationHandlerFactory.IMethodHandler> nameToHandler = targetToHandlersByName.apply(target);
         Map<Method, IInvocationHandlerFactory.IMethodHandler> methodToHandler = new LinkedHashMap<Method, IInvocationHandlerFactory.IMethodHandler>();
-        for (Method method : target.type().getMethods()) {
-            if(FORBIDDEN_METHODS.contains(method)){
-                continue;
+        if (nameToHandler.isEmpty() || methodToHandler.isEmpty())
+            for (Method method : target.type().getMethods()) {
+                if (FORBIDDEN_METHODS.contains(method)) {
+                    continue;
+                }
+                methodToHandler.put(method, nameToHandler.get(ProxyUtils.configKey(target.type(), method)));
             }
-            methodToHandler.put(method, nameToHandler.get(ProxyUtils.configKey(target.type(), method)));
-        }
         InvocationHandler handler = factory.create(target, methodToHandler);
         T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(), new Class<?>[]{target.type()}, handler);
         return proxy;
@@ -68,7 +70,7 @@ public class ReflectiveClientProxy implements IClientProxy {
 
         RpcInvocationHandler(ITarget target, Map<Method, IInvocationHandlerFactory.IMethodHandler> dispatch) {
             this.target = checkNotNull(target, "target");
-            this.dispatch = checkNotNull(dispatch, "dispatch for %s", target);
+            this.dispatch = checkNotNull(dispatch, "dispatch for %s", dispatch);
         }
 
         @Override
@@ -111,23 +113,24 @@ public class ReflectiveClientProxy implements IClientProxy {
 
         ParseHandlersByName(Encoder encoder, Decoder decoder, IClient client,
                             MethodHandler.Factory factory, LoadBalanceImpl loadBalance) {
-            this.factory = factory;
-            this.client = client;
-            this.loadBalance = loadBalance;
+            this.factory = checkNotNull(factory, "factory");
+            this.client = checkNotNull(client, "client");
+            this.loadBalance = checkNotNull(loadBalance, "loadBalance");
             this.encoder = checkNotNull(encoder, "encoder");
             this.decoder = checkNotNull(decoder, "decoder");
         }
 
         /**
-         * ParseHandlersByName暴露给其他类调用的方法
-         * 创建被代理类的方法签名方法handler映射对象
+         * 暴露给其他类调用的方法
+         * 创建被代理类的方法签名,方法handler映射对象
+         *
          * @param key 被代理对象
          * @return 方法签名方法handler映射map
          */
         public Map<String, IInvocationHandlerFactory.IMethodHandler> apply(ITarget key) {
 
             Map<String, IInvocationHandlerFactory.IMethodHandler> result = new LinkedHashMap<String, IInvocationHandlerFactory.IMethodHandler>();
-            List<MethodMetadata> metadata = parseAndValidatateMetadata(key.type());
+            List<MethodMetadata> metadata = parseAndValidateMetadata(key.type());
             for (MethodMetadata md : metadata) {
                 result.put(md.configKey(),
                         factory.create(key, encoder, decoder, client, md, loadBalance));
@@ -137,21 +140,20 @@ public class ReflectiveClientProxy implements IClientProxy {
 
         /**
          * 解析并且验证被代理对象的元数据
+         *
          * @param targetType
          * @return 被代理对象方法元数据列表
          */
-        private List<MethodMetadata> parseAndValidatateMetadata(Class<?> targetType) {
+        private List<MethodMetadata> parseAndValidateMetadata(Class<?> targetType) {
 
-            checkState(targetType.getTypeParameters().length == 0, "Parameterized types unsupported: %s",
-                    targetType.getSimpleName());
-            checkState(targetType.getInterfaces().length <= 1, "Only single inheritance supported: %s",
-                    targetType.getSimpleName());
             Map<String, MethodMetadata> result = new LinkedHashMap<String, MethodMetadata>();
             for (Method method : targetType.getMethods()) {
-                if(FORBIDDEN_METHODS.contains(method)){
+                //不处理FORBIDDEN_METHODS
+                if (FORBIDDEN_METHODS.contains(method)) {
                     continue;
                 }
                 MethodMetadata metadata = parseAndValidateMetadata(targetType, method);
+                //不容许在一个接口中有两个方法签名相同的方法
                 checkState(!result.containsKey(metadata.configKey()), "Overrides unsupported: %s",
                         metadata.configKey());
                 result.put(metadata.configKey(), metadata);
@@ -160,7 +162,8 @@ public class ReflectiveClientProxy implements IClientProxy {
         }
 
         /**
-         * 解析方法得到方法元数据
+         * 解析方法得到方法签名
+         *
          * @param targetType
          * @param method
          * @return

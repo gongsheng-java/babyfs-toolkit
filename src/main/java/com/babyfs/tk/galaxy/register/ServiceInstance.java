@@ -6,7 +6,6 @@ package com.babyfs.tk.galaxy.register;
 public class ServiceInstance {
 
 
-
     //应用名称
     private String appName;
     //应用启动的端口号

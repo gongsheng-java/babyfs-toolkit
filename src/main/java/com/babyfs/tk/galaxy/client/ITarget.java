@@ -13,17 +13,17 @@ public interface ITarget<T> {
 
     /**
      * 获取被代理对象的类型
+     *
      * @return
      */
     Class<T> type();
 
     /**
      * 获取调用服务的名称
+     *
      * @return
      */
-    String name();
-
-    String url();
+    String appName();
 
     /**
      * ITarget接口的默认实现
@@ -31,17 +31,12 @@ public interface ITarget<T> {
     class HardCodedTarget<T> implements ITarget<T> {
 
         private final Class<T> type;
-        private final String name;
-        private final String url;
+        private final String appName;
+
 
         public HardCodedTarget(Class<T> type, String appName) {
-            this(type, appName, null);
-        }
-
-        public HardCodedTarget(Class<T> type, String name, String url) {
             this.type = checkNotNull(type, "type");
-            this.name = checkNotNull(emptyToNull(name), "name");
-            this.url = url;
+            this.appName = checkNotNull(emptyToNull(appName), "appName");
         }
 
         @Override
@@ -50,13 +45,8 @@ public interface ITarget<T> {
         }
 
         @Override
-        public String name() {
-            return name;
-        }
-
-        @Override
-        public String url() {
-            return url;
+        public String appName() {
+            return appName;
         }
 
         @Override
@@ -64,8 +54,7 @@ public interface ITarget<T> {
             if (obj instanceof HardCodedTarget) {
                 HardCodedTarget<?> other = (HardCodedTarget) obj;
                 return type.equals(other.type)
-                        && name.equals(other.name)
-                        && url.equals(other.url);
+                        && appName.equals(other.appName);
             }
             return false;
         }
@@ -74,18 +63,13 @@ public interface ITarget<T> {
         public int hashCode() {
             int result = 17;
             result = 31 * result + type.hashCode();
-            result = 31 * result + name.hashCode();
-            result = 31 * result + url.hashCode();
+            result = 31 * result + appName.hashCode();
             return result;
         }
 
         @Override
         public String toString() {
-            if (name.equals(url)) {
-                return "HardCodedTarget(type=" + type.getSimpleName() + ", url=" + url + ")";
-            }
-            return "HardCodedTarget(type=" + type.getSimpleName() + ", name=" + name + ", url=" + url
-                    + ")";
+            return "HardCodedTarget(type=" + type.getSimpleName() + ", appName=" + appName + ")";
         }
     }
 

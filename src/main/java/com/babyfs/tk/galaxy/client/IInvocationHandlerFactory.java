@@ -13,6 +13,7 @@ public interface IInvocationHandlerFactory {
 
     /**
      * 创建InvocationHandler方法
+     *
      * @param target   代理的目标
      * @param dispatch key为Method，value为MethodHandler的map
      * @return InvocationHandler
@@ -26,12 +27,13 @@ public interface IInvocationHandlerFactory {
     interface IMethodHandler {
 
         /**
-         * 执行被代理对象的方法实际执行过程
+         * 被代理对象的方法实际执行方法
+         *
          * @param argv 方法实际传入的参数
          * @return 方法执行结果
          * @throws Throwable
          */
-        Object invoke(Object[] argv) throws Throwable;
+        Object invoke(Object[] argv);
     }
 
     /**
@@ -41,6 +43,7 @@ public interface IInvocationHandlerFactory {
 
         @Override
         public InvocationHandler create(ITarget target, Map<Method, IMethodHandler> dispatch) {
+
             return new ReflectiveClientProxy.RpcInvocationHandler(target, dispatch);
         }
     }

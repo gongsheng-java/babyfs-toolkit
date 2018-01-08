@@ -7,6 +7,7 @@ import com.babyfs.tk.galaxy.server.IMethodCacheService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,11 +28,12 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
 
     @Override
     public Method getMethodBySign(String sign) {
-        if(!methodMap.containsKey(sign)){
+        if (!methodMap.containsKey(sign)) {
             throw new RpcException("invalid method sign");
         }
         return methodMap.get(sign);
     }
+
     public void init() {
         Set<ServiceEnrty> allServices = ServiceEnrty.getAllServices(injector);
         for (ServiceEnrty entry : allServices) {
@@ -39,7 +41,7 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
             Object obj = injector.getInstance(key);
             Method[] methods = obj.getClass().getMethods();
             for (Method method : methods) {
-                if(FORBIDDEN_METHODS.contains(method)){
+                if (FORBIDDEN_METHODS.contains(method)) {
                     continue;
                 }
                 String methodSign = ProxyUtils.configKey(obj.getClass(), method);

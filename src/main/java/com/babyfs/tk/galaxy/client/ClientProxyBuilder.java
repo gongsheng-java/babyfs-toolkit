@@ -4,15 +4,17 @@ import com.babyfs.tk.galaxy.codec.Decoder;
 import com.babyfs.tk.galaxy.codec.Encoder;
 import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * GalaxyClientProxyBuilder
- * builder模式创建GalaxyClientProxy
+ * ClientProxyBuilder
+ * builder模式创建ReflectiveClientProxy
  */
 public class ClientProxyBuilder {
 
-
     /**
      * 创建ClientProxyBuilder方法
+     *
      * @return
      */
     public static ClientProxyBuilder builder() {
@@ -24,7 +26,7 @@ public class ClientProxyBuilder {
     //解码器
     private Decoder decoder = new Decoder.Default();
     //传输层采用的Client
-    private IClient client =  null;
+    private IClient client = null;
     //负载均衡器
     private LoadBalanceImpl loadBalance = null;
     //InvocationHandler工厂类
@@ -52,13 +54,10 @@ public class ClientProxyBuilder {
         return this;
     }
 
-    public ClientProxyBuilder invocationHandlerFactory(IInvocationHandlerFactory invocationHandlerFactory) {
-        this.invocationHandlerFactory = invocationHandlerFactory;
-        return this;
-    }
 
     /**
      * appName信息的Target对象
+     *
      * @param apiType Class对
      * @param appName 应用名称
      * @param <T>
@@ -73,11 +72,13 @@ public class ClientProxyBuilder {
     }
 
     public IClientProxy build() {
-        MethodHandler.Factory synchronousMethodHandlerFactory =
-                new MethodHandler.Factory();
-        ReflectiveClientProxy.ParseHandlersByName handlersByName =
+
+        checkNotNull(client, "client");
+        checkNotNull(loadBalance, "loadBalance");
+        MethodHandler.Factory methodHandlerFactory = new MethodHandler.Factory();
+        ReflectiveClientProxy.ParseHandlersByName parseHandlersByName =
                 new ReflectiveClientProxy.ParseHandlersByName(encoder, decoder, client,
-                        synchronousMethodHandlerFactory, loadBalance);
-        return new ReflectiveClientProxy(handlersByName, invocationHandlerFactory);
+                        methodHandlerFactory, loadBalance);
+        return new ReflectiveClientProxy(parseHandlersByName, invocationHandlerFactory);
     }
 }
