@@ -1,7 +1,9 @@
 package com.babyfs.tk.galaxy.demo;
 
 
-public class ExcelModel {
+import java.io.Serializable;
+
+public class ExcelModel implements Serializable {
 
 
     private String en;

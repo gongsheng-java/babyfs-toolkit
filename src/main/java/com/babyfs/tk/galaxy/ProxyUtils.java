@@ -19,13 +19,13 @@ public class ProxyUtils {
     /**
      * 生成代理对象的方法签名
      *
-     * @param targetType
+     * @param className
      * @param method
      * @return
      */
-    public static String configKey(Class targetType, Method method) {
+    public static String configKey(String className, Method method) {
         StringBuilder builder = new StringBuilder();
-        builder.append(targetType.getSimpleName());
+        builder.append(className);
         builder.append('#').append(method.getName()).append('(');
         for (Type param : method.getGenericParameterTypes()) {
             param = method.getReturnType();

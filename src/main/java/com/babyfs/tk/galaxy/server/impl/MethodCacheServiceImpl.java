@@ -7,7 +7,6 @@ import com.babyfs.tk.galaxy.server.IMethodCacheService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +16,7 @@ import static com.babyfs.tk.galaxy.ProxyUtils.FORBIDDEN_METHODS;
 
 public class MethodCacheServiceImpl implements IMethodCacheService {
 
+    // hashMap key:方法签名，value:方法
     private final Map<String, Method> methodMap = new HashMap();
 
     private Injector injector;
@@ -35,6 +35,7 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
     }
 
     public void init() {
+
         Set<ServiceEnrty> allServices = ServiceEnrty.getAllServices(injector);
         for (ServiceEnrty entry : allServices) {
             Key<?> key = entry.getGuiceKey();
@@ -44,7 +45,7 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
                 if (FORBIDDEN_METHODS.contains(method)) {
                     continue;
                 }
-                String methodSign = ProxyUtils.configKey(obj.getClass(), method);
+                String methodSign = ProxyUtils.configKey(entry.getName(), method);
                 methodMap.put(methodSign, method);
             }
         }

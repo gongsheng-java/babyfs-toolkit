@@ -4,6 +4,8 @@ import com.babyfs.tk.galaxy.RpcException;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
+import org.apache.curator.framework.state.ConnectionState;
+import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,28 +48,29 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
     }
 
     private String getLocalIp() {
-        try {
-            for (Enumeration<NetworkInterface> enumNic = NetworkInterface
-                    .getNetworkInterfaces(); enumNic.hasMoreElements(); ) {
-                NetworkInterface ifc = enumNic.nextElement();
-                if (ifc.isUp()) {
-                    for (Enumeration<InetAddress> enumAddr = ifc
-                            .getInetAddresses(); enumAddr.hasMoreElements(); ) {
-                        InetAddress address = enumAddr.nextElement();
-                        if (address instanceof Inet4Address
-                                && !address.isLoopbackAddress()) {
-                            return address.getHostAddress();
-                        }
-                    }
-                }
-            }
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            return null;
-        } catch (IOException e) {
-            logger.warn("Unable to find non-loopback address", e);
-            return null;
-        }
+//        try {
+//            for (Enumeration<NetworkInterface> enumNic = NetworkInterface
+//                    .getNetworkInterfaces(); enumNic.hasMoreElements(); ) {
+//                NetworkInterface ifc = enumNic.nextElement();
+//                if (ifc.isUp()) {
+//                    for (Enumeration<InetAddress> enumAddr = ifc
+//                            .getInetAddresses(); enumAddr.hasMoreElements(); ) {
+//                        InetAddress address = enumAddr.nextElement();
+//                        if (address instanceof Inet4Address
+//                                && !address.isLoopbackAddress()) {
+//                            return address.getHostAddress();
+//                        }
+//                    }
+//                }
+//            }
+//            return InetAddress.getLocalHost().getHostAddress();
+//        } catch (UnknownHostException e) {
+//            return null;
+//        } catch (IOException e) {
+//            logger.warn("Unable to find non-loopback address", e);
+//            return null;
+//        }
+        return "127.0.0.1";
     }
 
     @Override
@@ -161,6 +164,33 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
     public void start() {
         watch();
         register();
+        //增加ConnectionStateListener
+        ConnectionStateListener connectionStateListener = new ConnectionStateListener() {
+            @Override
+            public void stateChanged(CuratorFramework curatorFramework, ConnectionState connectionState) {
+                if (connectionState == ConnectionState.LOST) {
+                    logger.error("[负载均衡失败]zk session超时");
+                    while (true) {
+                        try {
+                            if (curatorFramework.getZookeeperClient().blockUntilConnectedOrTimedOut()) {
+                                String path = properties.getDiscoveryPrefix() + "/" + properties.getAppName();
+                                List list = getChildren(path);
+                                logger.error(list.toString());
+                                watch();
+                                register();
+                                break;
+                            }
+                        } catch (InterruptedException e) {
+                            break;
+                        } catch (Exception e) {
+
+                        }
+                    }
+                }
+            }
+        };
+        curator.getConnectionStateListenable().addListener(connectionStateListener);
+
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             @Override
             public void run() {

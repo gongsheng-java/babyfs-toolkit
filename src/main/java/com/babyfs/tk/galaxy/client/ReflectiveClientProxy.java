@@ -52,7 +52,7 @@ public class ReflectiveClientProxy implements IClientProxy {
                 if (FORBIDDEN_METHODS.contains(method)) {
                     continue;
                 }
-                methodToHandler.put(method, nameToHandler.get(ProxyUtils.configKey(target.type(), method)));
+                methodToHandler.put(method, nameToHandler.get(ProxyUtils.configKey(target.type().getSimpleName(), method)));
             }
         InvocationHandler handler = factory.create(target, methodToHandler);
         T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(), new Class<?>[]{target.type()}, handler);
@@ -170,7 +170,7 @@ public class ReflectiveClientProxy implements IClientProxy {
          */
         private MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
             MethodMetadata data = new MethodMetadata();
-            data.configKey(ProxyUtils.configKey(targetType, method));
+            data.configKey(ProxyUtils.configKey(targetType.getSimpleName(), method));
             return data;
         }
     }

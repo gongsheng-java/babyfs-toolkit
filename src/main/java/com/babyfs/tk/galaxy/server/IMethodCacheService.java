@@ -16,7 +16,7 @@ public interface IMethodCacheService {
     Method getMethodBySign(String sign);
 
     /**
-     * 初始化方法缓存Service
+     * 初始化方法缓存
      */
     void init();
 }

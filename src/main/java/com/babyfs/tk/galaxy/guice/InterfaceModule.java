@@ -1,16 +1,15 @@
 package com.babyfs.tk.galaxy.guice;
 
-import com.google.inject.PrivateModule;
-
+import com.babyfs.tk.commons.service.ServiceModule;
 import java.util.function.Function;
 
 /**
  * 用于注入需要代理的接口到guice
  */
-public class InterfaceModule extends PrivateModule {
+public class InterfaceModule extends ServiceModule {
 
     private final Function<Class<?>, ?> function;
-    private Class aClass;
+    private Class<?> aClass;
 
     InterfaceModule(Function<Class<?>, ?> function, Class aClass) {
         this.function = function;
@@ -21,7 +20,7 @@ public class InterfaceModule extends PrivateModule {
     protected void configure() {
         //将Injector对象注入function对象
         requestInjection(function);
-        bind(aClass).toProvider(new ExternalCreationProvider(function, aClass)).asEagerSingleton();
+        bindService(aClass, new ExternalCreationProvider(function, aClass));
     }
 
     /**
