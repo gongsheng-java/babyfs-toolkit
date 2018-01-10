@@ -1,6 +1,5 @@
 package com.babyfs.tk.galaxy.register;
 
-import com.babyfs.tk.galaxy.demo.DemoDiscoveryProperties;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
@@ -19,8 +18,6 @@ import java.util.concurrent.ExecutionException;
 public class LoadBalanceTest {
 
     private  Logger logger = LoggerFactory.getLogger(LoadBalanceTest.class);
-
-    private DemoDiscoveryProperties demoDiscoveryProperties = new DemoDiscoveryProperties();
 
     private CuratorFramework curatorFramework;
 
