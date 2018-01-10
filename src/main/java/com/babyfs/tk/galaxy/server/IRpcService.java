@@ -1,6 +1,6 @@
 package com.babyfs.tk.galaxy.server;
 
-import java.lang.reflect.InvocationTargetException;
+import com.babyfs.tk.commons.model.ServiceResponse;
 
 /**
  * rpc server端执行实际方法的service
@@ -14,9 +14,6 @@ public interface IRpcService {
      * @param methodSign    方法签名
      * @param parameters    方法参数
      * @return
-     * @throws ClassNotFoundException
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
      */
-    Object invoke(String interfaceName, String methodSign, Object[] parameters) throws ClassNotFoundException, InvocationTargetException, IllegalAccessException;
+    ServiceResponse invoke(String interfaceName, String methodSign, Object[] parameters);
 }

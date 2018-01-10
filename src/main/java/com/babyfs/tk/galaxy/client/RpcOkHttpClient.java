@@ -3,6 +3,7 @@ package com.babyfs.tk.galaxy.client;
 import com.babyfs.tk.galaxy.RpcException;
 import okhttp3.*;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
@@ -31,7 +32,7 @@ public class RpcOkHttpClient implements IClient {
     }
 
     @Override
-    public byte[] execute(String uri, byte[] body) {
+    public byte[] execute(String uri, byte[] body) throws IOException {
 
         Request request = new Request.Builder()
                 .url(uri)
@@ -39,11 +40,9 @@ public class RpcOkHttpClient implements IClient {
                 .build();
         try (Response response = client.newCall(request).execute()) {
             if (response.code() != 200) {
-                throw new RpcException(format("error status(%s) ", response.code()));
+                throw new RpcException(format("error message(%s) ", response.message()));
             }
             return response.body().bytes();
-        } catch (Exception e) {
-            throw new RpcException("OkHttpClient invoke error", e);
         }
     }
 }

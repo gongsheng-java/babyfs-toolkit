@@ -3,8 +3,8 @@ package com.babyfs.tk.galaxy.client;
 
 
 import com.babyfs.tk.galaxy.ProxyUtils;
-import com.babyfs.tk.galaxy.codec.Decoder;
-import com.babyfs.tk.galaxy.codec.Encoder;
+import com.babyfs.tk.galaxy.codec.IDecoder;
+import com.babyfs.tk.galaxy.codec.IEncoder;
 import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
 
 import java.lang.reflect.InvocationHandler;
@@ -105,13 +105,13 @@ public class ReflectiveClientProxy implements IClientProxy {
      */
     static final class ParseHandlersByName {
 
-        private final Encoder encoder;
-        private final Decoder decoder;
+        private final IEncoder encoder;
+        private final IDecoder decoder;
         private final MethodHandler.Factory factory;
         private final IClient client;
         private final LoadBalanceImpl loadBalance;
 
-        ParseHandlersByName(Encoder encoder, Decoder decoder, IClient client,
+        ParseHandlersByName(IEncoder encoder, IDecoder decoder, IClient client,
                             MethodHandler.Factory factory, LoadBalanceImpl loadBalance) {
             this.factory = checkNotNull(factory, "factory");
             this.client = checkNotNull(client, "client");

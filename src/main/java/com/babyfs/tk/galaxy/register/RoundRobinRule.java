@@ -41,7 +41,6 @@ public class RoundRobinRule implements IRule {
             index = (int) (nextIndexAI.incrementAndGet() % serverCount);
             server = list.get(index);
             if (server == null) {
-
                 continue;
             } else {
                 return server;

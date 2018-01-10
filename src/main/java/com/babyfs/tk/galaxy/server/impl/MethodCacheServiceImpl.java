@@ -1,12 +1,13 @@
 package com.babyfs.tk.galaxy.server.impl;
 
+import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.commons.service.ServiceEnrty;
 import com.babyfs.tk.galaxy.ProxyUtils;
-import com.babyfs.tk.galaxy.RpcException;
 import com.babyfs.tk.galaxy.server.IMethodCacheService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,11 +28,11 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
     }
 
     @Override
-    public Method getMethodBySign(String sign) {
+    public ServiceResponse<Method> getMethodBySign(String sign) {
         if (!methodMap.containsKey(sign)) {
-            throw new RpcException("invalid method sign");
+            return ServiceResponse.createFailResponse("invalid method sign:" + sign);
         }
-        return methodMap.get(sign);
+        return ServiceResponse.createSuccessResponse(methodMap.get(sign));
     }
 
     public void init() {

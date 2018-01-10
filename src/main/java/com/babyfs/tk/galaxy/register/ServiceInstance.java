@@ -5,22 +5,20 @@ package com.babyfs.tk.galaxy.register;
  */
 public class ServiceInstance {
 
-
     //应用名称
     private String appName;
     //应用启动的端口号
-    private String port;
+    private int port;
     //应用的ip地址
     private String host;
 
-
-    public ServiceInstance(String appName, String host, String port) {
+    public ServiceInstance(String appName, String host, int port) {
         this.appName = appName;
         this.host = host;
         this.port = port;
     }
 
-    public void setPort(String port) {
+    public void setPort(int port) {
         this.port = port;
     }
 
@@ -40,7 +38,7 @@ public class ServiceInstance {
         this.host = host;
     }
 
-    public String getPort() {
+    public int getPort() {
         return port;
     }
 

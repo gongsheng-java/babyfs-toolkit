@@ -1,5 +1,7 @@
 package com.babyfs.tk.galaxy.server;
 
+import com.babyfs.tk.commons.model.ServiceResponse;
+
 import java.lang.reflect.Method;
 
 /**
@@ -13,7 +15,7 @@ public interface IMethodCacheService {
      * @param sign
      * @return
      */
-    Method getMethodBySign(String sign);
+    ServiceResponse<Method> getMethodBySign(String sign);
 
     /**
      * 初始化方法缓存

@@ -4,8 +4,8 @@ package com.babyfs.tk.galaxy.client;
 
 import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.galaxy.RpcRequest;
-import com.babyfs.tk.galaxy.codec.Decoder;
-import com.babyfs.tk.galaxy.codec.Encoder;
+import com.babyfs.tk.galaxy.codec.IDecoder;
+import com.babyfs.tk.galaxy.codec.IEncoder;
 import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
 import com.babyfs.tk.galaxy.register.ServiceInstance;
 import org.slf4j.Logger;
@@ -20,16 +20,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandler.class);
     private final ITarget<?> target;
-    private final Decoder decoder;
-    private final Encoder encoder;
+    private final IDecoder decoder;
+    private final IEncoder encoder;
     private final MethodMetadata metadata;
     private final IClient client;
     private final LoadBalanceImpl loadBalance;
 
-    private MethodHandler(ITarget<?> target, Encoder encoder,
-                          Decoder decoder, IClient client, MethodMetadata metadata, LoadBalanceImpl loadBalance) {
+    private MethodHandler(ITarget<?> target, IEncoder encoder,
+                          IDecoder decoder, IClient client, MethodMetadata metadata, LoadBalanceImpl loadBalance) {
         this.target = checkNotNull(target, "target for %s", target);
         this.decoder = checkNotNull(decoder, "decoder for %s", decoder);
         this.metadata = checkNotNull(metadata, "metadata for %s", metadata);
@@ -50,16 +50,20 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
     public Object invoke(Object[] argv) {
 
         byte[] body = encoder.encode(createRequest(argv));
-        StringBuilder stringBuilder = new StringBuilder();
         ServiceInstance serviceInstance = loadBalance.getServerByAppName(target.appName());
+        if (serviceInstance == null) {
+            LOGGER.error("no serviceInstance by appName:" + target.appName());
+            return ServiceResponse.createFailResponse("no serviceInstance by appName:" + target.appName());
+        }
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("http://").append(serviceInstance.getHost()).append(":").append(serviceInstance.getPort());
         String url = stringBuilder.append(loadBalance.getDiscoveryProperties().getUrlPrefix()).toString();
         try {
             byte[] content = client.execute(url, body);
             return decoder.decode(content);
         } catch (Exception e) {
-            logger.error("rpc invoke remote method fail", e);
-            return ServiceResponse.failResponse();
+            LOGGER.error("rpc invoke remote method fail", e);
+            return ServiceResponse.createFailResponse(e.getMessage());
         }
     }
 
@@ -94,7 +98,7 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
          * @param loadBalance
          * @return
          */
-        public IInvocationHandlerFactory.IMethodHandler create(ITarget<?> target, Encoder encoder, Decoder decoder, IClient client, MethodMetadata md, LoadBalanceImpl loadBalance) {
+        public IInvocationHandlerFactory.IMethodHandler create(ITarget<?> target, IEncoder encoder, IDecoder decoder, IClient client, MethodMetadata md, LoadBalanceImpl loadBalance) {
             return new MethodHandler(target, encoder, decoder, client, md, loadBalance);
         }
     }

@@ -1,17 +1,19 @@
 package com.babyfs.tk.galaxy.demo;
 
 
+import com.babyfs.tk.commons.model.ServiceResponse;
+
 import java.util.List;
 import java.util.Map;
 
 
 public interface Health {
 
-    ExcelModel jobHealth(Map<String, Object> queryMap);
+    ServiceResponse<ExcelModel> jobHealth(Map<String, Object> queryMap);
 
-    PostModel login(List list);
+    ServiceResponse<PostModel> login(List list);
 
-    String JsonTest(String string);
+    ServiceResponse<String> JsonTest(String string);
 
-    PostModel notJsonTest(Long id);
+    ServiceResponse<PostModel> notJsonTest(Long id);
 }

@@ -19,5 +19,5 @@ public interface ILoadBalance {
      *
      * @return
      */
-    IDiscoveryProperties getDiscoveryProperties();
+    IRpcConfigService getDiscoveryProperties();
 }

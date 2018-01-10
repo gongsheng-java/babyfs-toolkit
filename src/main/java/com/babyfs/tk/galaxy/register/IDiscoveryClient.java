@@ -7,10 +7,10 @@ import java.util.List;
  * 服务发现接口
  * rpc中负责获取指定appName的服务列表
  */
-public interface DiscoveryClient {
+public interface IDiscoveryClient {
 
     /**
-     * 获取本服务的ServerInstance
+     * 获取本机的ServerInstance
      *
      * @return
      */

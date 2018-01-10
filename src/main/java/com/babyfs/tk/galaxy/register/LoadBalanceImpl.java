@@ -1,14 +1,13 @@
 package com.babyfs.tk.galaxy.register;
 
 
+import com.babyfs.tk.galaxy.RpcException;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.zookeeper.KeeperException;
-
-import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * 负载均衡器
@@ -21,13 +20,13 @@ public class LoadBalanceImpl implements ILoadBalance {
         return new LoadBalanceImpl.Builder();
     }
 
-    private DiscoveryClient discoveryClient;
+    private IDiscoveryClient discoveryClient;
 
-    private IDiscoveryProperties discoveryProperties;
+    private IRpcConfigService discoveryProperties;
 
     private IRule rule = new RoundRobinRule();
 
-    public LoadBalanceImpl(DiscoveryClient discoveryClient, IRule rule, IDiscoveryProperties discoveryProperties) {
+    public LoadBalanceImpl(IDiscoveryClient discoveryClient, IRule rule, IRpcConfigService discoveryProperties) {
         this.discoveryClient = discoveryClient;
         this.rule = rule;
         this.discoveryProperties = discoveryProperties;
@@ -36,52 +35,56 @@ public class LoadBalanceImpl implements ILoadBalance {
     /**
      * @param appName
      * @return
-     * @throws ExecutionException
-     * @throws InterruptedException
-     * @throws KeeperException
      */
     public ServiceInstance getServerByAppName(String appName) {
         return rule.choose(discoveryClient.getInstances(appName));
     }
 
     @Override
-    public IDiscoveryProperties getDiscoveryProperties() {
+    public IRpcConfigService getDiscoveryProperties() {
         return discoveryProperties;
     }
 
     //LoadBalance的构建类
     public static class Builder {
         private IRule rule = new RoundRobinRule();
-        private IDiscoveryProperties discoveryProperties;
+        private IRpcConfigService iRpcConfig;
 
         public LoadBalanceImpl.Builder rule(IRule rule) {
             this.rule = rule;
             return this;
         }
 
-        public LoadBalanceImpl.Builder discoveryProperties(IDiscoveryProperties discoveryProperties) {
-            this.discoveryProperties = discoveryProperties;
+        public LoadBalanceImpl.Builder discoveryProperties(IRpcConfigService discoveryProperties) {
+            this.iRpcConfig = discoveryProperties;
             return this;
         }
 
         //构建LoadBalance的方法
-        public LoadBalanceImpl build() {
-            checkNotNull(discoveryProperties, "discoveryProperties");
+        public LoadBalanceImpl build(String registerUrl, int connectTimeout, int sessionTimeout) {
+            checkNotNull(iRpcConfig, "iRpcConfig");
+            checkNotNull(registerUrl, "registerUrl");
+            checkState(connectTimeout > 0, "connectTimeout > 0");
+            checkState(sessionTimeout > 0, "sessionTimeout > 0");
             /**
              * @param baseSleepTimeMs initial amount of time to wait between retries
              * @param maxRetries max number of times to retry
              */
             ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(1000, 3);
             CuratorFramework curatorFramework = CuratorFrameworkFactory.builder()
-                    .connectString(discoveryProperties.getRegisterUrl())
+                    .connectString(registerUrl)
                     .retryPolicy(retryPolicy)
-                    .connectionTimeoutMs(discoveryProperties.getConnectTimeOut())
-                    .sessionTimeoutMs(discoveryProperties.getSessionTimeOut())
+                    .connectionTimeoutMs(connectTimeout)
+                    .sessionTimeoutMs(sessionTimeout)
                     .build();
             curatorFramework.start();
-            ZkDiscoveryClient zkDiscoveryClient = new ZkDiscoveryClient(discoveryProperties, curatorFramework);
-            zkDiscoveryClient.start();
-            return new LoadBalanceImpl(zkDiscoveryClient, rule, discoveryProperties);
+            ZkDiscoveryClient zkDiscoveryClient = new ZkDiscoveryClient(iRpcConfig, curatorFramework);
+            try {
+                zkDiscoveryClient.start();
+            } catch (Exception e) {
+                throw new RpcException("zkDiscoveryClient start fail", e);
+            }
+            return new LoadBalanceImpl(zkDiscoveryClient, rule, iRpcConfig);
         }
     }
 }

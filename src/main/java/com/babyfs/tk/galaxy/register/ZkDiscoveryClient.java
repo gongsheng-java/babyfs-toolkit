@@ -1,6 +1,7 @@
 package com.babyfs.tk.galaxy.register;
 
 import com.babyfs.tk.galaxy.RpcException;
+import com.babyfs.tk.galaxy.constant.RpcConstant;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
@@ -11,13 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.UnknownHostException;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,17 +21,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * 基于zk的服务发现客户端
  */
-final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
+final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
 
-    private final IDiscoveryProperties properties;
+    private final IRpcConfigService properties;
 
     private final CuratorFramework curator;
 
     private final Map<String, List<ServiceInstance>> providerMapList = new ConcurrentHashMap<>();
 
-    private static final Logger logger = LoggerFactory.getLogger(ZkDiscoveryClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZkDiscoveryClient.class);
 
-    public ZkDiscoveryClient(IDiscoveryProperties discoveryProperties, CuratorFramework curator) {
+    public ZkDiscoveryClient(IRpcConfigService discoveryProperties, CuratorFramework curator) {
         this.properties = discoveryProperties;
         this.curator = curator;
     }
@@ -67,7 +62,7 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
 //        } catch (UnknownHostException e) {
 //            return null;
 //        } catch (IOException e) {
-//            logger.warn("Unable to find non-loopback address", e);
+//            LOGGER.warn("Unable to find non-loopback address", e);
 //            return null;
 //        }
         return "127.0.0.1";
@@ -88,19 +83,19 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
      * @return
      */
     private List<ServiceInstance> refreshAndGet(String appName) {
-        String path = properties.getDiscoveryPrefix() + "/" + appName;
+        String path = RpcConstant.DISCOVERY_PREFIX + "/" + appName;
         List<String> hosts = getChildren(path);
         List<ServiceInstance> instances = new CopyOnWriteArrayList<>();
         if (CollectionUtils.isEmpty(hosts)) {
-            logger.error("the server:{} has no provider", appName);
+            LOGGER.error("the server:{} has no provider", appName);
             return Collections.EMPTY_LIST;
         }
         for (String string : hosts) {
             String[] parts = string.split(":");
-            instances.add(new ServiceInstance(appName, parts[0], parts[1]));
+            instances.add(new ServiceInstance(appName, parts[0], Integer.parseInt(parts[1])));
         }
         if (CollectionUtils.isEmpty(instances)) {
-            logger.error("the server:{} has no provider", appName);
+            LOGGER.error("the server:{} has no provider", appName);
             return Collections.EMPTY_LIST;
         }
         providerMapList.put(appName, instances);
@@ -117,19 +112,15 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         try {
             return curator.getChildren().forPath(path);
         } catch (Exception e) {
-            logger.error("ZkDiscoveryClient@getChildren fail", e);
+            LOGGER.error("ZkDiscoveryClient@getChildren fail", e);
         }
         return Collections.EMPTY_LIST;
     }
 
     @Override
-    public void register() {
-        String path = properties.getDiscoveryPrefix() + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
-        try {
-            create(path);
-        } catch (Exception e) {
-            logger.error("ZkDiscoveryClient@register fail", e);
-        }
+    public void register() throws Exception {
+        String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
+        create(path);
     }
 
     /**
@@ -145,59 +136,47 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
                     .withMode(CreateMode.EPHEMERAL)
                     .forPath(path);
         } catch (Exception e) {
-            logger.error("create zk node  fail path:{}", path, e);
+            LOGGER.error("create zk node  fail path:{}", path, e);
             throw new RpcException("create zk node fail .path:" + path, e);
         }
     }
 
-
     @Override
-    public void watch() {
-        try {
-            connect(properties.getDiscoveryPrefix());
-        } catch (Exception e) {
-            logger.error("zk add watch fail", e);
-        }
+    public void watch() throws Exception {
+        connect(RpcConstant.DISCOVERY_PREFIX);
     }
 
     @Override
-    public void start() {
+    public void start() throws Exception {
         watch();
         register();
         //增加ConnectionStateListener
-        ConnectionStateListener connectionStateListener = new ConnectionStateListener() {
-            @Override
-            public void stateChanged(CuratorFramework curatorFramework, ConnectionState connectionState) {
-                if (connectionState == ConnectionState.LOST) {
-                    logger.error("[负载均衡失败]zk session超时");
-                    while (true) {
-                        try {
-                            if (curatorFramework.getZookeeperClient().blockUntilConnectedOrTimedOut()) {
-                                String path = properties.getDiscoveryPrefix() + "/" + properties.getAppName();
-                                List list = getChildren(path);
-                                logger.error(list.toString());
-                                watch();
-                                register();
-                                break;
-                            }
-                        } catch (InterruptedException e) {
+        ConnectionStateListener connectionStateListener = (curatorFramework, connectionState) -> {
+            if (connectionState == ConnectionState.RECONNECTED) {
+                LOGGER.error("[负载均衡失败]zk连接断开");
+                while (true) {
+                    try {
+                        if (curatorFramework.getZookeeperClient().blockUntilConnectedOrTimedOut()) {
+                            register();
+                            watch();
                             break;
-                        } catch (Exception e) {
-
                         }
+                    } catch (Exception e) {
+                        LOGGER.error("reconnect zookeeper fail", e);
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        LOGGER.error("thread sleep InterruptedException", e);
                     }
                 }
             }
         };
         curator.getConnectionStateListenable().addListener(connectionStateListener);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                logger.error("deRegister ......");
-                String path = properties.getDiscoveryPrefix() + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
-                delete(path);
-            }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOGGER.error("deRegister ......");
+            String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
+            delete(path);
         }));
     }
 
@@ -210,7 +189,7 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
         try {
             curator.delete().forPath(path);
         } catch (Exception e) {
-            logger.error("zk delete node fail path:{}", path, e);
+            LOGGER.error("zk delete node fail path:{}", path, e);
         }
     }
 
@@ -223,7 +202,7 @@ final class ZkDiscoveryClient implements DiscoveryClient, ILifeCycle {
     private void connect(final String PATH) throws Exception {
         TreeCache cache = new TreeCache(curator, PATH);
         TreeCacheListener listener = (curatorFramework, treeCacheEvent) -> {
-            logger.debug("事件类型：" + treeCacheEvent.getType() +
+            LOGGER.debug("事件类型：" + treeCacheEvent.getType() +
                     " | 路径：" + (null != treeCacheEvent.getData() ? treeCacheEvent.getData().getPath() : null));
             if (treeCacheEvent.getData() != null) {
                 String path = treeCacheEvent.getData().getPath();

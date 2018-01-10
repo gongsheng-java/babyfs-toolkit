@@ -1,6 +1,8 @@
 package com.babyfs.tk.galaxy.client;
 
 
+import java.io.IOException;
+
 /**
  * client interface
  * 执行client与server间远程调用的接口
@@ -15,5 +17,5 @@ public interface IClient {
      * @param body rpc调用client端发送的body,为二进制格式
      * @return rpc调用返回的response，二进制格式
      */
-    byte[] execute(String uri, byte[] body);
+    byte[] execute(String uri, byte[] body) throws IOException;
 }

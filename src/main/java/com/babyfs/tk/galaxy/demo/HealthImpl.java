@@ -1,35 +1,37 @@
 package com.babyfs.tk.galaxy.demo;
 
+import com.babyfs.tk.commons.model.ServiceResponse;
+
 import java.util.List;
 import java.util.Map;
 
 public class HealthImpl implements Health {
     @Override
-    public ExcelModel jobHealth(Map<String, Object> queryMap) {
+    public ServiceResponse jobHealth(Map<String, Object> queryMap) {
 
         ExcelModel excelModel = new ExcelModel();
         excelModel.setCh("ch");
         excelModel.setEn("en");
-        return excelModel;
+        return ServiceResponse.createSuccessResponse(excelModel);
     }
 
     @Override
-    public PostModel login(List list) {
+    public ServiceResponse login(List list) {
 
         PostModel postModel = new PostModel();
         postModel.setMessage("i am message");
-        return null;
+        return ServiceResponse.createSuccessResponse(postModel);
     }
 
     @Override
-    public String JsonTest(String string) {
-        return "JsonTest";
+    public ServiceResponse JsonTest(String string) {
+        return ServiceResponse.createSuccessResponse("JsonTest");
     }
 
     @Override
-    public PostModel notJsonTest(Long id) {
+    public ServiceResponse notJsonTest(Long id) {
         PostModel postModel = new PostModel();
         postModel.setMessage("i am notJsonTest");
-        return postModel;
+        return ServiceResponse.createSuccessResponse(postModel);
     }
 }

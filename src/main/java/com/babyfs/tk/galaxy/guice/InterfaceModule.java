@@ -1,6 +1,7 @@
 package com.babyfs.tk.galaxy.guice;
 
 import com.babyfs.tk.commons.service.ServiceModule;
+
 import java.util.function.Function;
 
 /**

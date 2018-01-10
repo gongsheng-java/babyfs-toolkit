@@ -17,10 +17,10 @@ public class RoudRobinTest {
     public void  test(){
 
         RoundRobinRule roundRobinRule = new RoundRobinRule();
-        ServiceInstance serviceInstance01  = new ServiceInstance("app1","10","8080");
-        ServiceInstance serviceInstance02  = new ServiceInstance("app1","11","8081");
-        ServiceInstance serviceInstance03  = new ServiceInstance("app1","12","8082");
-        ServiceInstance serviceInstance04  = new ServiceInstance("app1","13","8083");
+        ServiceInstance serviceInstance01  = new ServiceInstance("app1","10",8080);
+        ServiceInstance serviceInstance02  = new ServiceInstance("app1","11",8081);
+        ServiceInstance serviceInstance03  = new ServiceInstance("app1","12",8082);
+        ServiceInstance serviceInstance04  = new ServiceInstance("app1","13",8083);
         List<ServiceInstance> serviceInstances = new ArrayList<>();
         serviceInstances.add(serviceInstance01);
         serviceInstances.add(serviceInstance02);

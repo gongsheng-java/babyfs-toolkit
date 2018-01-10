@@ -9,14 +9,12 @@ import java.util.concurrent.ExecutionException;
  */
 public interface ILifeCycle {
 
+
     /**
-     * 将本服务注册到注册中心
-     *
-     * @throws ExecutionException
-     * @throws InterruptedException
-     * @throws KeeperException
+     * 将本节点的信息加到注册中心
+     * @throws Exception
      */
-    void register() throws ExecutionException, InterruptedException, KeeperException;
+    void register() throws Exception;
 
     /**
      * 监听注册中心的节点变化
@@ -29,5 +27,5 @@ public interface ILifeCycle {
     /**
      * DiscoveryClient启动执行的方法
      */
-    void start();
+    void start() throws Exception;
 }

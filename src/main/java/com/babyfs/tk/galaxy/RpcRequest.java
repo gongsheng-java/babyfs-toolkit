@@ -8,8 +8,11 @@ import java.util.Arrays;
  */
 public class RpcRequest implements Serializable {
 
+    //接口名称
     private String interfaceName;
+    //方法签名
     private String methodSign;
+    //方法参数
     private Object[] parameters;
 
     public String getInterfaceName() {

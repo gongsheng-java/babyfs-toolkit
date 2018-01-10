@@ -1,7 +1,7 @@
 package com.babyfs.tk.galaxy.client;
 
-import com.babyfs.tk.galaxy.codec.Decoder;
-import com.babyfs.tk.galaxy.codec.Encoder;
+import com.babyfs.tk.galaxy.codec.IDecoder;
+import com.babyfs.tk.galaxy.codec.IEncoder;
 import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -22,9 +22,9 @@ public class ClientProxyBuilder {
     }
 
     //编码器
-    private Encoder encoder = new Encoder.Default();
+    private IEncoder encoder = new IEncoder.Default();
     //解码器
-    private Decoder decoder = new Decoder.Default();
+    private IDecoder decoder = new IDecoder.Default();
     //传输层采用的Client
     private IClient client = null;
     //负载均衡器
@@ -34,12 +34,12 @@ public class ClientProxyBuilder {
             new IInvocationHandlerFactory.Default();
 
 
-    public ClientProxyBuilder encoder(Encoder encoder) {
+    public ClientProxyBuilder encoder(IEncoder encoder) {
         this.encoder = encoder;
         return this;
     }
 
-    public ClientProxyBuilder decoder(Decoder decoder) {
+    public ClientProxyBuilder decoder(IDecoder decoder) {
         this.decoder = decoder;
         return this;
     }

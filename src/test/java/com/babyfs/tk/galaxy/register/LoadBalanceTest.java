@@ -29,10 +29,10 @@ public class LoadBalanceTest {
 
         ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(1000, 3);
         curatorFramework =  CuratorFrameworkFactory.builder()
-                .connectString(demoDiscoveryProperties.getRegisterUrl())
+                .connectString("127.0.0.1:8081")
                 .retryPolicy(retryPolicy)
-                .connectionTimeoutMs(demoDiscoveryProperties.getConnectTimeOut())
-                .sessionTimeoutMs(demoDiscoveryProperties.getSessionTimeOut())
+                .connectionTimeoutMs(20000)
+                .sessionTimeoutMs(20000)
                 .build();
         curatorFramework.start();
     }
@@ -41,7 +41,7 @@ public class LoadBalanceTest {
     public void  testLoadBalance() throws InterruptedException, ExecutionException, KeeperException {
 
        String appName = "appName";
-       LoadBalanceImpl loadBalance =  LoadBalanceImpl.builder().build();
+       LoadBalanceImpl loadBalance =  LoadBalanceImpl.builder().build("127.0.0.1:2181",20000,20000);
        Thread.sleep(2000);
        ServiceInstance serviceInstance =   loadBalance.getServerByAppName(appName);
        logger.error(serviceInstance.getHost());
