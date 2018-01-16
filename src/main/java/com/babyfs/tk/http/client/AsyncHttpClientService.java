@@ -1,19 +1,26 @@
 package com.babyfs.tk.http.client;
 
+import com.babyfs.tk.service.biz.op.user.model.Resource;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.io.CharStreams;
-import com.ning.http.client.*;
+import org.asynchttpclient.*;
 import com.babyfs.tk.commons.Constants;
 import com.babyfs.tk.http.constants.HttpClientConfig;
 import org.apache.http.HttpStatus;
+import org.asynchttpclient.proxy.ProxyServer;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+
+import static org.asynchttpclient.Dsl.*;
 
 
 /**
@@ -74,94 +81,122 @@ public class AsyncHttpClientService {
      * @param proxyConfig   代理配置参数
      */
     public AsyncHttpClientService(final int maxConPerHost, final int conTimeOutMs,
-                                  final int soTimeOutMs, final HttpClientProxyConfig proxyConfig) {
+                                  final int soTimeOutMs, HttpClientProxyConfig proxyConfig) {
 
-        AsyncHttpClientConfig.Builder builder = new AsyncHttpClientConfig.Builder();
-        builder.setMaximumConnectionsPerHost(maxConPerHost)
-                .setConnectionTimeoutInMs(conTimeOutMs)
-                .setRequestTimeoutInMs(soTimeOutMs);
+        DefaultAsyncHttpClientConfig.Builder builder = config();
+        builder.setMaxConnectionsPerHost(maxConPerHost)
+                .setConnectTimeout(conTimeOutMs)
+                .setRequestTimeout(soTimeOutMs);
         if (proxyConfig != null && proxyConfig.isUseProxy()) {
             Preconditions.checkArgument(!Strings.isNullOrEmpty(proxyConfig.getProxyHost()),
                     "proxy host must not be null or empty.");
             Preconditions.checkArgument(proxyConfig.getProxyPort() > 0, "proxy port must be larger than 0.");
-            ProxyServer proxyServer = new ProxyServer(proxyConfig.getProxyHost(), proxyConfig.getProxyPort(), proxyConfig.getProxyAuthUser(), proxyConfig.getProxyAuthPassword());
+            ProxyServer proxyServer = proxyServer(proxyConfig.getProxyHost(), proxyConfig.getProxyPort()).build();
             builder.setUseProxyProperties(proxyConfig.isUseProxy())
                     .setProxyServer(proxyServer);
         }
-        this.httpClient = new AsyncHttpClient(builder.build());
+
+        this.httpClient = asyncHttpClient(builder);
     }
 
 
     /**
      * 发送get请求
      *
-     * @param url       请求的URL
-     * @param getParams GET请求参数
-     * @param headers   请求头部参数
+     * @param url     请求的URL
+     * @param params  GET请求参数
+     * @param headers 请求头部参数
      * @return
      */
-    public String sendGet(String url, FluentStringsMap getParams, Map<String, Collection<String>> headers) throws Exception {
+    public ListenableFuture<Response> sendGet(String url, Map<String, List<String>> params, Map<String, Collection<String>> headers, AsyncHandler<Response> handler) throws Exception {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(url), "URL can not be empty or null.");
         LOGGER.debug("Get Request:{}", url);
-        AsyncHttpClient.BoundRequestBuilder boundRequestBuilder = httpClient.prepareGet(url)
-                .setBodyEncoding(Constants.UTF_8)
-                .setQueryParameters(getParams)
-                .setHeaders(headers);
-        return sendRequest(boundRequestBuilder);
+        BoundRequestBuilder requestBuilder = this.httpClient.prepareGet(url);
+        if (params != null) {
+            requestBuilder.setQueryParams(params);
+        }
+        setHeaders(headers, requestBuilder);
+
+        if (handler != null) {
+            return requestBuilder.execute(handler);
+        } else {
+            return requestBuilder.execute();
+        }
     }
+
 
     /**
      * 发送post请求
      *
-     * @param url       请求的URL
-     * @param getParams POST请求参数
-     * @param headers   请求头部参数
+     * @param url     请求的URL
+     * @param params  POST请求参数
+     * @param headers 请求头部参数
      * @return
      */
-    public String sendPost(String url, Map<String, Collection<String>> getParams, Map<String, Collection<String>> headers) throws Exception {
+    public ListenableFuture<Response> sendPost(String url, Map<String, List<String>> params, Map<String, Collection<String>> headers, byte[] body, AsyncHandler<Response> handler) throws Exception {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(url), "URL can not be empty or null.");
         LOGGER.debug("Post Request:{}", url);
-        AsyncHttpClient.BoundRequestBuilder boundRequestBuilder = httpClient.preparePost(url);
-        boundRequestBuilder.setBodyEncoding("UTF-8");
-        boundRequestBuilder.setHeaders(headers);
-        boundRequestBuilder.setParameters(getParams);
-        return sendRequest(boundRequestBuilder);
+        BoundRequestBuilder requestBuilder = httpClient.preparePost(url);
+        if (params != null) {
+            requestBuilder.setQueryParams(params);
+        }
+
+        setHeaders(headers, requestBuilder);
+        if (body != null) {
+            requestBuilder.setBody(body);
+        }
+        if (handler != null) {
+            return requestBuilder.execute(handler);
+        } else {
+            return requestBuilder.execute();
+        }
     }
 
+    public void stop() {
+        if (this.httpClient != null) {
+            try {
+                this.httpClient.close();
+            } catch (IOException e) {
+                //ignore it
+            }
+        }
+    }
 
     /**
-     * 发送指定Http方法的请求，并接收response的字符串
+     * 按字符串解析响应
      * <p/>
      * 对于服务器返回的压缩数据的情况，目前支持gzip和deflate两种解压缩方式
      *
-     * @param boundRequestBuilder GET或POST方法
+     * @param listenableFuture
      * @return 返回response字符串
      * @throws java.io.IOException
      * @throws IllegalStateException 对于gzip和deflate以外压缩格式，抛出该异常
      */
-    private String sendRequest(AsyncHttpClient.BoundRequestBuilder boundRequestBuilder) throws Exception {
-        ListenableFuture<Response> listenableFuture = null;
-        try {
-            listenableFuture = boundRequestBuilder.execute();
-            Response response = listenableFuture.get();
-            int statusCode = response.getStatusCode();
-            LOGGER.debug("Response return statusCode:{}", statusCode);
+    public String getResponse(ListenableFuture<Response> listenableFuture) throws Exception {
+        Response response = listenableFuture.get();
+        return getResponse(response);
+    }
 
-            if (statusCode != HttpStatus.SC_OK) {
-                throw new IllegalStateException("Http response error. status code:" + statusCode);
-            }
+    /**
+     * @param response
+     * @return
+     * @throws IOException
+     */
+    public String getResponse(Response response) throws IOException {
+        int statusCode = response.getStatusCode();
+        LOGGER.debug("Response return statusCode:{}", statusCode);
 
-            if (LOGGER.isDebugEnabled()) {
-                FluentCaseInsensitiveStringsMap resHeader = response.getHeaders();
-                LOGGER.debug("response headers :");
-            }
+        if (statusCode != HttpStatus.SC_OK) {
+            throw new IllegalStateException("Http response error. status code:" + statusCode);
+        }
 
-            String encodingHeader = response.getHeader(HttpHeaders.Names.CONTENT_ENCODING);
+        String encodingHeader = response.getHeader(HttpHeaders.Names.CONTENT_ENCODING);
+        try (InputStream responseBodyAsStream = response.getResponseBodyAsStream()) {
             if (!Strings.isNullOrEmpty(encodingHeader)) {
                 if (HttpClientConfig.CompressFormat.COMPRESS_FORMAT_GZIP.isBelong(encodingHeader)) {
-                    return HttpClientUtils.uncompressStream(HttpClientConfig.CompressFormat.COMPRESS_FORMAT_GZIP, response.getResponseBodyAsStream(), null);
+                    return HttpClientUtils.uncompressStream(HttpClientConfig.CompressFormat.COMPRESS_FORMAT_GZIP, responseBodyAsStream, null);
                 } else if (HttpClientConfig.CompressFormat.COMPRESS_FORMAT_DEFLATE.isBelong(encodingHeader)) {
-                    return HttpClientUtils.uncompressStream(HttpClientConfig.CompressFormat.COMPRESS_FORMAT_DEFLATE, response.getResponseBodyAsStream(), null);
+                    return HttpClientUtils.uncompressStream(HttpClientConfig.CompressFormat.COMPRESS_FORMAT_DEFLATE, responseBodyAsStream, null);
                 } else if (HttpClientConfig.CompressFormat.COMPRESS_FORMAT_IDENTITY.isBelong(encodingHeader)) {
                     return response.getResponseBody();
                 } else {
@@ -169,14 +204,20 @@ public class AsyncHttpClientService {
                     throw new RuntimeException("Unsupported HTTP compressed encoding:" + encodingHeader);
                 }
             }
+
             // 如果response头部没有指示编码格式，认为非压缩，直接返回
-            InputStreamReader inputReader = new InputStreamReader(response.getResponseBodyAsStream(), Constants.UTF_8);
-            return CharStreams.toString(inputReader);
-        } finally {
-            /// 不论如何，释放连接
-//            if (listenableFuture != null && listenableFuture.isDone()) {
-//                listenableFuture.cancel(true);
-//            }
+            try (InputStreamReader inputReader = new InputStreamReader(responseBodyAsStream, Constants.UTF_8)) {
+                return CharStreams.toString(inputReader);
+            }
         }
     }
+
+    private void setHeaders(Map<String, Collection<String>> headers, BoundRequestBuilder requestBuilder) {
+        if (headers != null) {
+            for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
+                requestBuilder.addHeader(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
 }

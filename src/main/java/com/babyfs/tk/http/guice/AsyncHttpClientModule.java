@@ -1,6 +1,8 @@
 package com.babyfs.tk.http.guice;
 
 
+import com.babyfs.tk.commons.service.IStageActionRegistry;
+import com.babyfs.tk.commons.service.annotation.ShutdownStage;
 import com.google.inject.Inject;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provider;
@@ -16,9 +18,9 @@ import com.babyfs.tk.http.constants.AsyncHttpClientConfig;
  */
 public class AsyncHttpClientModule extends PrivateModule {
 
-    public static final int DEFAULT_MAX_CONNECTION = 50;
-    public static final int DEFAULT_CONNECTION_TIMEOUT = 2000;
-    public static final int DEFAULT_SOCKET_TIMEOUT = 1000;
+    public static final int DEFAULT_MAX_CONNECTION = 200;
+    public static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
+    public static final int DEFAULT_SOCKET_TIMEOUT = 5000;
 
     public AsyncHttpClientModule() {
     }
@@ -33,9 +35,12 @@ public class AsyncHttpClientModule extends PrivateModule {
      * HTTP客户端服务的提供者
      */
     private static class AsyncHttpClientServiceProvider implements Provider<AsyncHttpClientService> {
-
         @Inject(optional = true)
         private IConfigService conf;
+
+        @Inject(optional = true)
+        @ShutdownStage
+        private IStageActionRegistry registry;
 
         @Override
         public AsyncHttpClientService get() {
@@ -55,8 +60,13 @@ public class AsyncHttpClientModule extends PrivateModule {
                     conf, "");
             int port = MapConfig.getInt(AsyncHttpClientConfig.CONF_ASYNC_HTTP_CLIENT_PROXY_PORT,
                     conf, 0);
+
             HttpClientProxyConfig httpClientProxyConfig = new HttpClientProxyConfig(isUse, host, port, user, passwd);
-            return new AsyncHttpClientService(maxConnection, connectTimeout, socketTimeout, httpClientProxyConfig);
+            AsyncHttpClientService asyncHttpClientService = new AsyncHttpClientService(maxConnection, connectTimeout, socketTimeout, httpClientProxyConfig);
+            if (registry != null) {
+                registry.addAction(asyncHttpClientService::stop);
+            }
+            return asyncHttpClientService;
         }
     }
 
