@@ -140,6 +140,7 @@ public class HttpClientService {
             }
         }
 
+        requestBilder.setExpectContinueEnabled(false);
         httpClient = httpClientBuilder
                 .setConnectionManager(connectionManager)
                 .setDefaultRequestConfig(requestBilder.build())
