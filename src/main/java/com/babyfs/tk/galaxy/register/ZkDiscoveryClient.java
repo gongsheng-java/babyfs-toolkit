@@ -11,17 +11,11 @@ import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * 基于zk的服务发现客户端
@@ -48,28 +42,29 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     }
 
     private String getLocalIp() {
-        try {
-            for (Enumeration<NetworkInterface> enumNic = NetworkInterface
-                    .getNetworkInterfaces(); enumNic.hasMoreElements(); ) {
-                NetworkInterface ifc = enumNic.nextElement();
-                if (ifc.isUp()) {
-                    for (Enumeration<InetAddress> enumAddr = ifc
-                            .getInetAddresses(); enumAddr.hasMoreElements(); ) {
-                        InetAddress address = enumAddr.nextElement();
-                        if (address instanceof Inet4Address
-                                && !address.isLoopbackAddress()) {
-                            return address.getHostAddress();
-                        }
-                    }
-                }
-            }
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            return null;
-        } catch (IOException e) {
-            LOGGER.warn("Unable to find non-loopback address", e);
-            return null;
-        }
+//        try {
+//            for (Enumeration<NetworkInterface> enumNic = NetworkInterface
+//                    .getNetworkInterfaces(); enumNic.hasMoreElements(); ) {
+//                NetworkInterface ifc = enumNic.nextElement();
+//                if (ifc.isUp()) {
+//                    for (Enumeration<InetAddress> enumAddr = ifc
+//                            .getInetAddresses(); enumAddr.hasMoreElements(); ) {
+//                        InetAddress address = enumAddr.nextElement();
+//                        if (address instanceof Inet4Address
+//                                && !address.isLoopbackAddress()) {
+//                            return address.getHostAddress();
+//                        }
+//                    }
+//                }
+//            }
+//            return InetAddress.getLocalHost().getHostAddress();
+//        } catch (UnknownHostException e) {
+//            return null;
+//        } catch (IOException e) {
+//            LOGGER.warn("Unable to find non-loopback address", e);
+//            return null;
+//        }
+        return "127.0.0.1";
     }
 
     @Override
@@ -77,7 +72,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
         if (!providerMapList.isEmpty() && providerMapList.containsKey(appName)) {
             return providerMapList.get(appName);
         }
-        return refreshAndGet(appName);
+        return Collections.EMPTY_LIST;
     }
 
     /**
@@ -86,13 +81,15 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
      * @param appName 应用名称
      * @return
      */
-    private List<ServiceInstance> refreshAndGet(String appName) {
+    private void refresh(String appName) {
+
+        LOGGER.error("refresh appName:{}",appName);
         String path = RpcConstant.DISCOVERY_PREFIX + "/" + appName;
         List<String> hosts = getChildren(path);
-        List<ServiceInstance> instances = new CopyOnWriteArrayList<>();
+        List<ServiceInstance> instances = new ArrayList<>();
         if (CollectionUtils.isEmpty(hosts)) {
             LOGGER.error("the server:{} has no provider", appName);
-            return Collections.EMPTY_LIST;
+            return;
         }
         for (String string : hosts) {
             String[] parts = string.split(":");
@@ -100,10 +97,10 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
         }
         if (CollectionUtils.isEmpty(instances)) {
             LOGGER.error("the server:{} has no provider", appName);
-            return Collections.EMPTY_LIST;
+            return ;
         }
         providerMapList.put(appName, instances);
-        return instances;
+        return ;
     }
 
     /**
@@ -125,6 +122,13 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     public void register() throws Exception {
         String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
         create(path);
+    }
+
+    private void forceegisterR() throws Exception {
+
+        String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
+        delete(path);
+        register();
     }
 
     /**
@@ -161,8 +165,8 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
                 while (true) {
                     try {
                         if (curatorFramework.getZookeeperClient().blockUntilConnectedOrTimedOut()) {
-                            register();
-                            watch();
+                            forceegisterR();
+                            //curator treeCahce支持连接断开后从新监听，所以不用再一次添加监听器
                             break;
                         }
                     } catch (Exception e) {
@@ -207,13 +211,15 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     private void connect(final String PATH) throws Exception {
         TreeCache cache = new TreeCache(curator, PATH);
         TreeCacheListener listener = (curatorFramework, treeCacheEvent) -> {
-            LOGGER.debug("事件类型：" + treeCacheEvent.getType() +
+            LOGGER.error("事件类型：" + treeCacheEvent.getType() +
                     " | 路径：" + (null != treeCacheEvent.getData() ? treeCacheEvent.getData().getPath() : null));
             if (treeCacheEvent.getData() != null) {
                 String path = treeCacheEvent.getData().getPath();
                 String[] strings = path.split("/");
-                if (strings.length == 4) {
-                    refreshAndGet(strings[3]);
+                LOGGER.error("Strings length:{}",strings.length);
+                if (strings.length == 4|| strings.length ==5) {
+                    LOGGER.error("split zkPath appName:{}",strings[3]);
+                    refresh(strings[3]);
                 }
             }
         };

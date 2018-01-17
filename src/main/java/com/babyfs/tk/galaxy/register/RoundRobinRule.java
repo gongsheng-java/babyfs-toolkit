@@ -15,8 +15,6 @@ public class RoundRobinRule implements IRule {
 
     private Logger log = LoggerFactory.getLogger("RoundRobinRule");
 
-    private static final int RETRY_TIME = 5;
-
     /**
      * 根据传入的ServiceInstance列表，轮询出一个ServiceInstance实例
      *
@@ -25,31 +23,18 @@ public class RoundRobinRule implements IRule {
      */
     public ServiceInstance choose(List<ServiceInstance> list) {
         if (list == null || list.isEmpty()) {
-            log.warn("no load balancer");
+            log.warn("no ServiceInstance");
             return null;
         }
         ServiceInstance server = null;
         int index = 0;
-        int count = 0;
-        // 因为list中的可用服务实例可能发生变化,所以此处增加重试机制
-        while (server == null && count++ < RETRY_TIME) {
-            int serverCount = list.size();
-            if (serverCount == 0) {
-                log.warn("No up servers available from load balancer: " + list);
-                return null;
-            }
-            index = (int) (nextIndexAI.incrementAndGet() % serverCount);
-            server = list.get(index);
-            if (server == null) {
-                continue;
-            } else {
-                return server;
-            }
+        int serverCount = list.size();
+        if (serverCount == 0) {
+            log.warn("No up servers available from load balancer: " + list);
+            return null;
         }
-        if (count >= RETRY_TIME) {
-            log.warn("No available alive servers after 10 tries from load balancer: "
-                    + list);
-        }
+        index = (int) (nextIndexAI.incrementAndGet() % serverCount);
+        server = list.get(index);
         return server;
     }
 }
