@@ -36,7 +36,6 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
     }
 
     public void init() {
-
         Set<ServiceEnrty> allServices = ServiceEnrty.getAllServices(injector);
         for (ServiceEnrty entry : allServices) {
             Key<?> key = entry.getGuiceKey();

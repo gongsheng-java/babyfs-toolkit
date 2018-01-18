@@ -4,6 +4,7 @@ import com.babyfs.tk.galaxy.RpcException;
 import com.babyfs.tk.galaxy.constant.RpcConstant;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.TreeCache;
+import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
@@ -77,18 +78,17 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
 
     /**
      * 刷新并且返回指定应用的可用实例列表
-     *
      * @param appName 应用名称
      * @return
      */
     private void refresh(String appName) {
 
-        LOGGER.error("refresh appName:{}",appName);
         String path = RpcConstant.DISCOVERY_PREFIX + "/" + appName;
         List<String> hosts = getChildren(path);
         List<ServiceInstance> instances = new ArrayList<>();
         if (CollectionUtils.isEmpty(hosts)) {
             LOGGER.error("the server:{} has no provider", appName);
+            providerMapList.remove(appName);
             return;
         }
         for (String string : hosts) {
@@ -97,6 +97,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
         }
         if (CollectionUtils.isEmpty(instances)) {
             LOGGER.error("the server:{} has no provider", appName);
+            providerMapList.remove(appName);
             return ;
         }
         providerMapList.put(appName, instances);
@@ -105,7 +106,6 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
 
     /**
      * 获取指定path的子节点
-     *
      * @param path
      * @return
      */
@@ -124,8 +124,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
         create(path);
     }
 
-    private void forceegisterR() throws Exception {
-
+    private void forceRegister() throws Exception {
         String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
         delete(path);
         register();
@@ -165,7 +164,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
                 while (true) {
                     try {
                         if (curatorFramework.getZookeeperClient().blockUntilConnectedOrTimedOut()) {
-                            forceegisterR();
+                            forceRegister();
                             //curator treeCahce支持连接断开后从新监听，所以不用再一次添加监听器
                             break;
                         }
@@ -211,14 +210,15 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     private void connect(final String PATH) throws Exception {
         TreeCache cache = new TreeCache(curator, PATH);
         TreeCacheListener listener = (curatorFramework, treeCacheEvent) -> {
-            LOGGER.error("事件类型：" + treeCacheEvent.getType() +
+            LOGGER.info("事件类型：" + treeCacheEvent.getType() +
                     " | 路径：" + (null != treeCacheEvent.getData() ? treeCacheEvent.getData().getPath() : null));
+            if(treeCacheEvent.getType()== TreeCacheEvent.Type.CONNECTION_LOST){
+                providerMapList.clear();
+            }
             if (treeCacheEvent.getData() != null) {
                 String path = treeCacheEvent.getData().getPath();
                 String[] strings = path.split("/");
-                LOGGER.error("Strings length:{}",strings.length);
-                if (strings.length == 4|| strings.length ==5) {
-                    LOGGER.error("split zkPath appName:{}",strings[3]);
+                if (strings.length == 4||strings.length ==5) {
                     refresh(strings[3]);
                 }
             }
