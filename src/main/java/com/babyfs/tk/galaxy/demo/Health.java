@@ -13,7 +13,7 @@ public interface Health {
 
     ServiceResponse<PostModel> login(List list);
 
-    ServiceResponse<String> JsonTest(String string);
+    ServiceResponse<String> jsonTest(String string);
 
     ServiceResponse<PostModel> notJsonTest(Long id);
 }

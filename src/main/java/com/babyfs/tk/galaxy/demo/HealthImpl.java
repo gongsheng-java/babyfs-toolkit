@@ -24,7 +24,7 @@ public class HealthImpl implements Health {
     }
 
     @Override
-    public ServiceResponse JsonTest(String string) {
+    public ServiceResponse jsonTest(String string) {
         return ServiceResponse.createSuccessResponse("JsonTest");
     }
 

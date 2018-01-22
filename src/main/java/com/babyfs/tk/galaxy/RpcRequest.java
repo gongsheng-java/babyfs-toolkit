@@ -24,11 +24,11 @@ public class RpcRequest implements Serializable {
     }
 
     public Object[] getParameters() {
-        return parameters;
+        return parameters.clone();
     }
 
     public void setParameters(Object[] parameters) {
-        this.parameters = parameters;
+        this.parameters = parameters.clone();
     }
 
     public String getMethodSign() {

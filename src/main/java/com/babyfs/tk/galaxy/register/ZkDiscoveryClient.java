@@ -98,11 +98,6 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
             String[] parts = string.split(":");
             instances.add(new ServiceInstance(appName, parts[0], Integer.parseInt(parts[1])));
         }
-        if (CollectionUtils.isEmpty(instances)) {
-            LOGGER.error("the server:{} has no provider", appName);
-            providerMapList.remove(appName);
-            return ;
-        }
         providerMapList.put(appName, instances);
         return ;
     }
@@ -124,13 +119,8 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     @Override
     public void register() throws Exception {
         String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
-        create(path);
-    }
-
-    private void forceRegister() throws Exception {
-        String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
         delete(path);
-        register();
+        create(path);
     }
 
     /**
@@ -167,7 +157,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
                 while (true) {
                     try {
                         if (curatorFramework.getZookeeperClient().blockUntilConnectedOrTimedOut()) {
-                            forceRegister();
+                            register();
                             //curator treeCahce支持连接断开后从新监听，所以不用再一次添加监听器
                             break;
                         }
@@ -215,9 +205,6 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
         TreeCacheListener listener = (curatorFramework, treeCacheEvent) -> {
             LOGGER.info("事件类型：" + treeCacheEvent.getType() +
                     " | 路径：" + (null != treeCacheEvent.getData() ? treeCacheEvent.getData().getPath() : null));
-            if(treeCacheEvent.getType()== TreeCacheEvent.Type.CONNECTION_LOST){
-                providerMapList.clear();
-            }
             if (treeCacheEvent.getData() != null) {
                 String path = treeCacheEvent.getData().getPath();
                 String[] strings = path.split("/");
