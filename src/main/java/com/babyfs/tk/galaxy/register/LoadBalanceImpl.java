@@ -5,14 +5,13 @@ import com.babyfs.tk.galaxy.RpcException;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
  * 负载均衡器
  * 用builder模式构建负载均衡器对象
- * 默认用ZkDiscoveryClient
+ * 服务发现客户端默认用ZkDiscoveryClient
  */
 public class LoadBalanceImpl implements ILoadBalance {
 
@@ -37,11 +36,11 @@ public class LoadBalanceImpl implements ILoadBalance {
      * @return
      */
     public ServiceInstance getServerByAppName(String appName) {
-        return rule.choose(discoveryClient.getInstances(appName));
+        return rule.choose(discoveryClient.getInstancesByAppName(appName));
     }
 
     @Override
-    public IRpcConfigService getDiscoveryProperties() {
+    public IRpcConfigService getRpcProperties() {
         return discoveryProperties;
     }
 

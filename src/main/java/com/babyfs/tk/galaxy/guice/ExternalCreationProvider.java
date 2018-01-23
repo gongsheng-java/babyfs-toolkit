@@ -7,8 +7,7 @@ import java.util.function.Function;
 /**
  * ExternalCreationProvider
  * 目的：
- * 将rpc生成的代理对象加入guice容器管理
- *
+ * 将Galaxy生成的代理对象加入guice容器管理
  * @param <T>
  */
 public class ExternalCreationProvider<T> implements Provider<T> {

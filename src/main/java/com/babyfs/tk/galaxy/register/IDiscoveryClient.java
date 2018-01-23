@@ -22,6 +22,6 @@ public interface IDiscoveryClient {
      * @param appName
      * @return
      */
-    List<ServiceInstance> getInstances(String appName);
+    List<ServiceInstance> getInstancesByAppName(String appName);
 
 }

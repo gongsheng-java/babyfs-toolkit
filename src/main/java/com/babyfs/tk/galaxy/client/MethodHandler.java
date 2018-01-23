@@ -57,7 +57,7 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
         }
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("http://").append(serviceInstance.getHost()).append(":").append(serviceInstance.getPort());
-        String url = stringBuilder.append(loadBalance.getDiscoveryProperties().getUrlPrefix()).toString();
+        String url = stringBuilder.append(loadBalance.getRpcProperties().getUrlPrefix()).toString();
         try {
             byte[] content = client.execute(url, body);
             return decoder.decode(content);
@@ -88,7 +88,7 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
      */
     static class Factory {
         /**
-         * create方法创建GalaxyMethodHandler
+         * create方法创建MethodHandler
          *
          * @param target
          * @param encoder

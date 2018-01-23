@@ -21,6 +21,7 @@ public class RpcOkHttpClient implements IClient {
     private OkHttpClient client;
 
 
+    //初始化OkHttpClient
     public void init(long connectTimeOut, long readTimeOut, long writeTimeOut) {
 
         ConnectionPool connectionPool = new ConnectionPool();

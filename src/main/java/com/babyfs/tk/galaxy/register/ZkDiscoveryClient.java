@@ -4,7 +4,6 @@ import com.babyfs.tk.galaxy.RpcException;
 import com.babyfs.tk.galaxy.constant.RpcConstant;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.TreeCache;
-import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
@@ -20,6 +19,7 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * 基于zk的服务发现客户端
@@ -68,11 +68,10 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
             LOGGER.warn("Unable to find non-loopback address", e);
             return null;
         }
-
     }
 
     @Override
-    public List<ServiceInstance> getInstances(String appName) {
+    public List<ServiceInstance> getInstancesByAppName(String appName) {
         if (!providerMapList.isEmpty() && providerMapList.containsKey(appName)) {
             return providerMapList.get(appName);
         }
@@ -81,6 +80,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
 
     /**
      * 刷新并且返回指定应用的可用实例列表
+     *
      * @param appName 应用名称
      * @return
      */
@@ -88,7 +88,8 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
 
         String path = RpcConstant.DISCOVERY_PREFIX + "/" + appName;
         List<String> hosts = getChildren(path);
-        List<ServiceInstance> instances = new ArrayList<>();
+        //线程安全的list
+        List<ServiceInstance> instances = new CopyOnWriteArrayList<>();
         if (CollectionUtils.isEmpty(hosts)) {
             LOGGER.error("the server:{} has no provider", appName);
             providerMapList.remove(appName);
@@ -96,14 +97,19 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
         }
         for (String string : hosts) {
             String[] parts = string.split(":");
+            if (parts.length != 2) {
+                LOGGER.error("error host:{}", string);
+                continue;
+            }
             instances.add(new ServiceInstance(appName, parts[0], Integer.parseInt(parts[1])));
         }
         providerMapList.put(appName, instances);
-        return ;
+        return;
     }
 
     /**
      * 获取指定path的子节点
+     *
      * @param path
      * @return
      */
@@ -208,7 +214,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
             if (treeCacheEvent.getData() != null) {
                 String path = treeCacheEvent.getData().getPath();
                 String[] strings = path.split("/");
-                if (strings.length == 4||strings.length ==5) {
+                if (strings.length > 4) {
                     refresh(strings[3]);
                 }
             }

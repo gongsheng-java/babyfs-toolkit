@@ -47,7 +47,7 @@ public class ReflectiveClientProxy implements IClientProxy {
     public <T> T newInstance(ITarget<T> target) {
         Map<String, IInvocationHandlerFactory.IMethodHandler> nameToHandler = targetToHandlersByName.apply(target);
         Map<Method, IInvocationHandlerFactory.IMethodHandler> methodToHandler = new LinkedHashMap<Method, IInvocationHandlerFactory.IMethodHandler>();
-        if (nameToHandler.isEmpty() || methodToHandler.isEmpty())
+        if (!nameToHandler.isEmpty() || methodToHandler.isEmpty())
             for (Method method : target.type().getMethods()) {
                 if (FORBIDDEN_METHODS.contains(method)) {
                     continue;
@@ -123,7 +123,6 @@ public class ReflectiveClientProxy implements IClientProxy {
         /**
          * 暴露给其他类调用的方法
          * 创建被代理类的方法签名,方法handler映射对象
-         *
          * @param key 被代理对象
          * @return 方法签名方法handler映射map
          */
@@ -153,7 +152,7 @@ public class ReflectiveClientProxy implements IClientProxy {
                     continue;
                 }
                 MethodMetadata metadata = parseAndValidateMetadata(targetType, method);
-                //不容许在一个接口中有两个方法签名相同的方法
+                //不容许在一个接口中有两个签名相同的方法
                 checkState(!result.containsKey(metadata.configKey()), "Overrides unsupported: %s",
                         metadata.configKey());
                 result.put(metadata.configKey(), metadata);

@@ -14,8 +14,6 @@ public class ClientProxyBuilder {
 
     /**
      * 创建ClientProxyBuilder方法
-     *
-     * @return
      */
     public static ClientProxyBuilder builder() {
         return new ClientProxyBuilder();
@@ -57,7 +55,6 @@ public class ClientProxyBuilder {
 
     /**
      * appName信息的Target对象
-     *
      * @param apiType Class对
      * @param appName 应用名称
      * @param <T>

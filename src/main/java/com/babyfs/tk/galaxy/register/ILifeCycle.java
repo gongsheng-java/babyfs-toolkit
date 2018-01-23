@@ -12,6 +12,7 @@ public interface ILifeCycle {
 
     /**
      * 将本节点的信息加到注册中心
+     *
      * @throws Exception
      */
     void register() throws Exception;
@@ -25,7 +26,7 @@ public interface ILifeCycle {
 
 
     /**
-     * DiscoveryClient启动执行的方法
+     * DiscoveryClient启动方法
      */
     void start() throws Exception;
 }

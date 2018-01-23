@@ -7,7 +7,7 @@ package com.babyfs.tk.galaxy.register;
 public interface ILoadBalance {
 
     /**
-     * 根据规则获取获取应用的一个服务实例
+     * 根据规则获取应用的一个服务实例
      *
      * @param appName 应用名称
      * @return
@@ -19,5 +19,5 @@ public interface ILoadBalance {
      *
      * @return
      */
-    IRpcConfigService getDiscoveryProperties();
+    IRpcConfigService getRpcProperties();
 }

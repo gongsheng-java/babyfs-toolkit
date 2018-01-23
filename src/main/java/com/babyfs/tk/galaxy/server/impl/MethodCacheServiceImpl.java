@@ -12,13 +12,18 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.babyfs.tk.galaxy.ProxyUtils.FORBIDDEN_METHODS;
 
+
+/**
+ * 方法缓存Service实现
+ */
 public class MethodCacheServiceImpl implements IMethodCacheService {
 
     // hashMap key:方法签名，value:方法
-    private final Map<String, Method> methodMap = new HashMap();
+    private final Map<String, Method> methodMap = new ConcurrentHashMap<>();
 
     private Injector injector;
 
@@ -35,6 +40,7 @@ public class MethodCacheServiceImpl implements IMethodCacheService {
         return ServiceResponse.createSuccessResponse(methodMap.get(sign));
     }
 
+    //guice容器加载的时候执行的methodCache初始化方法
     public void init() {
         Set<ServiceEnrty> allServices = ServiceEnrty.getAllServices(injector);
         for (ServiceEnrty entry : allServices) {
