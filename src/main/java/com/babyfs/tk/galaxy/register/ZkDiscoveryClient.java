@@ -8,6 +8,7 @@ import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -125,8 +126,23 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     @Override
     public void register() throws Exception {
         String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
-        delete(path);
+        if(exit(path)) {
+           return ;
+        }
         create(path);
+    }
+
+    private void forceRegister() throws Exception {
+        String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
+        if(exit(path)) {
+           delete(path);
+        }
+        create(path);
+    }
+
+    private boolean exit(String path) throws Exception {
+      Stat stat = curator.checkExists().forPath(path);
+     return stat!=null;
     }
 
     /**
@@ -163,7 +179,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
                 while (true) {
                     try {
                         if (curatorFramework.getZookeeperClient().blockUntilConnectedOrTimedOut()) {
-                            register();
+                            forceRegister();
                             //curator treeCahce支持连接断开后从新监听，所以不用再一次添加监听器
                             break;
                         }
