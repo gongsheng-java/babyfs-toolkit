@@ -31,6 +31,8 @@ public class ClientProxyBuilder {
     private IInvocationHandlerFactory invocationHandlerFactory =
             new IInvocationHandlerFactory.Default();
 
+    private String urlPrefix;
+
 
     public ClientProxyBuilder encoder(IEncoder encoder) {
         this.encoder = encoder;
@@ -49,6 +51,11 @@ public class ClientProxyBuilder {
 
     public ClientProxyBuilder loadBalance(LoadBalanceImpl loadBalance) {
         this.loadBalance = loadBalance;
+        return this;
+    }
+
+    public ClientProxyBuilder urlPrefix(String urlPrefix) {
+        this.urlPrefix = urlPrefix;
         return this;
     }
 
@@ -73,10 +80,11 @@ public class ClientProxyBuilder {
 
         checkNotNull(client, "client");
         checkNotNull(loadBalance, "loadBalance");
+        checkNotNull(urlPrefix, "urlPrefix");
         MethodHandler.Factory methodHandlerFactory = new MethodHandler.Factory();
         ReflectiveClientProxy.ParseHandlersByName parseHandlersByName =
                 new ReflectiveClientProxy.ParseHandlersByName(encoder, decoder, client,
-                        methodHandlerFactory, loadBalance);
+                        methodHandlerFactory, loadBalance, urlPrefix);
         return new ReflectiveClientProxy(parseHandlersByName, invocationHandlerFactory);
     }
 }

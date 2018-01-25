@@ -27,15 +27,18 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
     private final MethodMetadata metadata;
     private final IClient client;
     private final LoadBalanceImpl loadBalance;
+    private final String urlPrefix;
 
     private MethodHandler(ITarget<?> target, IEncoder encoder,
-                          IDecoder decoder, IClient client, MethodMetadata metadata, LoadBalanceImpl loadBalance) {
+                          IDecoder decoder, IClient client, MethodMetadata metadata, LoadBalanceImpl loadBalance, String urlPrefix) {
         this.target = checkNotNull(target, "target for %s", target);
         this.decoder = checkNotNull(decoder, "decoder for %s", decoder);
         this.metadata = checkNotNull(metadata, "metadata for %s", metadata);
         this.encoder = checkNotNull(encoder, "encode for %s", encoder);
         this.client = checkNotNull(client, "client for %s", client);
         this.loadBalance = checkNotNull(loadBalance, "loadBalance for %s", loadBalance);
+        this.urlPrefix = checkNotNull(urlPrefix, "urlPrefix for %s", urlPrefix);
+
     }
 
     /**
@@ -57,7 +60,7 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
         }
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("http://").append(serviceInstance.getHost()).append(":").append(serviceInstance.getPort());
-        String url = stringBuilder.append(loadBalance.getRpcProperties().getUrlPrefix()).toString();
+        String url = stringBuilder.append(urlPrefix).toString();
         try {
             byte[] content = client.execute(url, body);
             return decoder.decode(content);
@@ -98,8 +101,8 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
          * @param loadBalance
          * @return
          */
-        public IInvocationHandlerFactory.IMethodHandler create(ITarget<?> target, IEncoder encoder, IDecoder decoder, IClient client, MethodMetadata md, LoadBalanceImpl loadBalance) {
-            return new MethodHandler(target, encoder, decoder, client, md, loadBalance);
+        public IInvocationHandlerFactory.IMethodHandler create(ITarget<?> target, IEncoder encoder, IDecoder decoder, IClient client, MethodMetadata md, LoadBalanceImpl loadBalance, String urlPrefix) {
+            return new MethodHandler(target, encoder, decoder, client, md, loadBalance, urlPrefix);
         }
     }
 }

@@ -11,6 +11,7 @@ import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -84,7 +85,6 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
      * @return
      */
     private void refresh(String appName) {
-
         String appPath = RpcConstant.DISCOVERY_PREFIX + "/" + appName;
         List<String> hosts = getChildren(appPath);
         //线程安全的list
@@ -145,10 +145,10 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
      * @throws Exception
      */
     private void create(String path) throws Exception {
-            curator.create()
-                    .creatingParentContainersIfNeeded()
-                    .withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
-                    .forPath(path);
+        curator.create()
+                .creatingParentContainersIfNeeded()
+                .withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
+                .forPath(path);
     }
 
     @Override
@@ -188,7 +188,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     /**
      * 删除指定path下的节点
      *
-     * @param path  zk节点路径
+     * @param path zk节点路径
      */
     private void delete(String path) {
         try {
@@ -220,7 +220,6 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     }
 
     private String getLocalZkPath() {
-
         return RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
     }
 

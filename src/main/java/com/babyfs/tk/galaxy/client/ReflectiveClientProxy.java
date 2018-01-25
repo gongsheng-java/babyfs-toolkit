@@ -110,14 +110,16 @@ public class ReflectiveClientProxy implements IClientProxy {
         private final MethodHandler.Factory factory;
         private final IClient client;
         private final LoadBalanceImpl loadBalance;
+        private final String urlPrefix;
 
         ParseHandlersByName(IEncoder encoder, IDecoder decoder, IClient client,
-                            MethodHandler.Factory factory, LoadBalanceImpl loadBalance) {
+                            MethodHandler.Factory factory, LoadBalanceImpl loadBalance, String urlPrefix) {
             this.factory = checkNotNull(factory, "factory");
             this.client = checkNotNull(client, "client");
             this.loadBalance = checkNotNull(loadBalance, "loadBalance");
             this.encoder = checkNotNull(encoder, "encoder");
             this.decoder = checkNotNull(decoder, "decoder");
+            this.urlPrefix = checkNotNull(urlPrefix, "String urlPrefix");
         }
 
         /**
@@ -133,7 +135,7 @@ public class ReflectiveClientProxy implements IClientProxy {
             List<MethodMetadata> metadata = parseAndValidateMetadata(key.type());
             for (MethodMetadata md : metadata) {
                 result.put(md.configKey(),
-                        factory.create(key, encoder, decoder, client, md, loadBalance));
+                        factory.create(key, encoder, decoder, client, md, loadBalance, urlPrefix));
             }
             return result;
         }

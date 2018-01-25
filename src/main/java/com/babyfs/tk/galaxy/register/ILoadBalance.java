@@ -14,10 +14,4 @@ public interface ILoadBalance {
      */
     ServiceInstance getServerByAppName(String appName);
 
-    /**
-     * 获取负载均衡器配置文件
-     *
-     * @return
-     */
-    IRpcConfigService getRpcProperties();
 }

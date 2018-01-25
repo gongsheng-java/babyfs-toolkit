@@ -22,14 +22,11 @@ public class LoadBalanceImpl implements ILoadBalance {
 
     private IDiscoveryClient discoveryClient;
 
-    private IRpcConfigService discoveryProperties;
-
     private IRule rule = new RoundRobinRule();
 
-    public LoadBalanceImpl(IDiscoveryClient discoveryClient, IRule rule, IRpcConfigService discoveryProperties) {
+    public LoadBalanceImpl(IDiscoveryClient discoveryClient, IRule rule) {
         this.discoveryClient = discoveryClient;
         this.rule = rule;
-        this.discoveryProperties = discoveryProperties;
     }
 
     /**
@@ -40,10 +37,6 @@ public class LoadBalanceImpl implements ILoadBalance {
         return rule.choose(discoveryClient.getInstancesByAppName(appName));
     }
 
-    @Override
-    public IRpcConfigService getRpcProperties() {
-        return discoveryProperties;
-    }
 
     //LoadBalance的构建类
     public static class Builder {
@@ -55,8 +48,8 @@ public class LoadBalanceImpl implements ILoadBalance {
             return this;
         }
 
-        public LoadBalanceImpl.Builder discoveryProperties(IRpcConfigService discoveryProperties) {
-            this.iRpcConfig = discoveryProperties;
+        public LoadBalanceImpl.Builder rpcConfig(IRpcConfigService rpcConfig) {
+            this.iRpcConfig = rpcConfig;
             return this;
         }
 
@@ -84,7 +77,7 @@ public class LoadBalanceImpl implements ILoadBalance {
             } catch (Exception e) {
                 throw new RpcException("zkDiscoveryClient start fail", e);
             }
-            return new LoadBalanceImpl(zkDiscoveryClient, rule, iRpcConfig);
+            return new LoadBalanceImpl(zkDiscoveryClient, rule);
         }
     }
 }

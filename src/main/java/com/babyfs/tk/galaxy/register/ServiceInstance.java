@@ -1,6 +1,5 @@
 package com.babyfs.tk.galaxy.register;
 
-import com.babyfs.tk.galaxy.client.ITarget;
 
 /**
  * 服务实例pojo
@@ -61,5 +60,13 @@ public class ServiceInstance {
                     && other.getAppName().equals(((ServiceInstance) obj).getAppName());
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + host.hashCode();
+        result = 31 * result + appName.hashCode();
+        return result;
     }
 }

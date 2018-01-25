@@ -8,13 +8,9 @@ public class RpcConfigServiceImpl implements IRpcConfigService {
 
     private String appName;
 
-    private String urlPrefix;
-
-    public RpcConfigServiceImpl(int port, String appName, String urlPrefix) {
-
+    public RpcConfigServiceImpl(int port, String appName) {
         this.port = port;
         this.appName = appName;
-        this.urlPrefix = urlPrefix;
     }
 
     @Override
@@ -27,8 +23,4 @@ public class RpcConfigServiceImpl implements IRpcConfigService {
         return appName;
     }
 
-    @Override
-    public String getUrlPrefix() {
-        return urlPrefix;
-    }
 }

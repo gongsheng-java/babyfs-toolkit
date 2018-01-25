@@ -17,6 +17,7 @@ public class ClientProxyBuilderModel extends PrivateModule {
     private static final int DEFAULT_CONNECT_TIMEOUT = 20000;
     private static final int DEFAULT_SESSION_TIMEOUT = 20000;
     private static final String DEFAULT_REGISTER_URL = "127.0.0.1:2181";
+    private static final String DEFAULT_URL_PREFIX = "/rpc/invoke";
 
     @Override
     protected void configure() {
@@ -39,11 +40,12 @@ public class ClientProxyBuilderModel extends PrivateModule {
 
         @Override
         public ClientProxyBuilder get() {
-            LoadBalanceImpl loadBalance = LoadBalanceImpl.builder().discoveryProperties(rpcConfig).build(
+            LoadBalanceImpl loadBalance = LoadBalanceImpl.builder().rpcConfig(rpcConfig).build(
                     MapConfig.getString(RpcZkConfig.REGISTER_URL, conf, DEFAULT_REGISTER_URL),
                     MapConfig.getInt(RpcZkConfig.CONNECT_TIMEOUT, conf, DEFAULT_CONNECT_TIMEOUT),
                     MapConfig.getInt(RpcZkConfig.SESSION_TIMEOUT, conf, DEFAULT_SESSION_TIMEOUT));
-            return ClientProxyBuilder.builder().loadBalance(loadBalance).client(rpcOkHttpClient);
+
+            return ClientProxyBuilder.builder().loadBalance(loadBalance).client(rpcOkHttpClient).urlPrefix(MapConfig.getString(RpcZkConfig.URL_PREFIX, conf, DEFAULT_REGISTER_URL));
         }
     }
 }

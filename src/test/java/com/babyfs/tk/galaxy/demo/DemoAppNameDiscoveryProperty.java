@@ -9,7 +9,6 @@ public class DemoAppNameDiscoveryProperty implements IRpcConfigService {
 
     private String appName = "appName";
 
-    private String urlPrefix = "/rpc/invoke";
 
     public int getPort() {
         return port;
@@ -19,8 +18,4 @@ public class DemoAppNameDiscoveryProperty implements IRpcConfigService {
         return appName;
     }
 
-    @Override
-    public String getUrlPrefix() {
-        return urlPrefix;
-    }
 }

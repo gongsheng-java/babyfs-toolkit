@@ -10,8 +10,4 @@ public interface IRpcConfigService {
 
     //本服务的应用名称
     String getAppName();
-
-    //rpc调用的url前缀
-    String getUrlPrefix();
-
 }
