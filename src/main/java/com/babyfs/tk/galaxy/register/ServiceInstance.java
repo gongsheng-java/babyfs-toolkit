@@ -1,5 +1,7 @@
 package com.babyfs.tk.galaxy.register;
 
+import com.babyfs.tk.galaxy.client.ITarget;
+
 /**
  * 服务实例pojo
  */
@@ -49,5 +51,15 @@ public class ServiceInstance {
                 ", host='" + host + '\'' +
                 ", port=" + port +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ServiceInstance) {
+            ServiceInstance other = (ServiceInstance) obj;
+            return other.getPort() == (((ServiceInstance) obj).getPort()) && other.getHost().equals(((ServiceInstance) obj).host)
+                    && other.getAppName().equals(((ServiceInstance) obj).getAppName());
+        }
+        return false;
     }
 }

@@ -102,7 +102,10 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
                 LOGGER.error("error host:{}", string);
                 continue;
             }
-            instances.add(new ServiceInstance(appName, parts[0], Integer.parseInt(parts[1])));
+            ServiceInstance serviceInstance = new ServiceInstance(appName, parts[0], Integer.parseInt(parts[1].substring(0, 4)));
+            if (!instances.contains(serviceInstance)) {
+                instances.add(serviceInstance);
+            }
         }
         providerMapList.put(appName, instances);
         return;
@@ -126,16 +129,16 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     @Override
     public void register() throws Exception {
         String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
-        if(exit(path)) {
+        if (exit(path)) {
             delete(path);
-        }else {
+        } else {
             create(path);
         }
     }
 
     private boolean exit(String path) throws Exception {
-      Stat stat = curator.checkExists().forPath(path);
-     return stat!=null;
+        Stat stat = curator.checkExists().forPath(path);
+        return stat != null;
     }
 
     /**
@@ -148,7 +151,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
         try {
             curator.create()
                     .creatingParentContainersIfNeeded()
-                    .withMode(CreateMode.EPHEMERAL)
+                    .withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
                     .forPath(path);
         } catch (Exception e) {
             LOGGER.error("create zk node  fail path:{}", path, e);
@@ -172,7 +175,8 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
                 while (true) {
                     try {
                         if (curatorFramework.getZookeeperClient().blockUntilConnectedOrTimedOut()) {
-                            register();
+                            String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
+                            create(path);
                             //curator treeCahce支持连接断开后从新监听，所以不用再一次添加监听器
                             break;
                         }

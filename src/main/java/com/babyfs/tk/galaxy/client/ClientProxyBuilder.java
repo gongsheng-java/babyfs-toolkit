@@ -55,6 +55,7 @@ public class ClientProxyBuilder {
 
     /**
      * appName信息的Target对象
+     *
      * @param apiType Class对
      * @param appName 应用名称
      * @param <T>

@@ -28,7 +28,11 @@ public class LoadBalanceTest {
         while (true) {
             Thread.sleep(30000);
             ServiceInstance serviceInstance = loadBalance.getServerByAppName("api");
-            logger.error(serviceInstance.toString());
+            if(serviceInstance!=null) {
+                logger.error(serviceInstance.toString());
+            }else {
+                logger.error("no instance");
+            }
             Assert.assertTrue(serviceInstance!=null);
         }
     }
