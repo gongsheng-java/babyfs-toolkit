@@ -1,6 +1,5 @@
 package com.babyfs.tk.galaxy.register;
 
-import com.babyfs.tk.galaxy.RpcException;
 import com.babyfs.tk.galaxy.constant.RpcConstant;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.TreeCache;
@@ -12,7 +11,6 @@ import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -87,8 +85,8 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
      */
     private void refresh(String appName) {
 
-        String path = RpcConstant.DISCOVERY_PREFIX + "/" + appName;
-        List<String> hosts = getChildren(path);
+        String appPath = RpcConstant.DISCOVERY_PREFIX + "/" + appName;
+        List<String> hosts = getChildren(appPath);
         //线程安全的list
         List<ServiceInstance> instances = new CopyOnWriteArrayList<>();
         if (CollectionUtils.isEmpty(hosts)) {
@@ -128,11 +126,10 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
 
     @Override
     public void register() throws Exception {
-        String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
-        if (exit(path)) {
-            delete(path);
+        if (exit(getLocalZkPath())) {
+            delete(getLocalZkPath());
         } else {
-            create(path);
+            create(getLocalZkPath());
         }
     }
 
@@ -144,19 +141,14 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     /**
      * 在指定路径下创建节点
      *
-     * @param path
+     * @param path zk节点路径
      * @throws Exception
      */
     private void create(String path) throws Exception {
-        try {
             curator.create()
                     .creatingParentContainersIfNeeded()
                     .withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
                     .forPath(path);
-        } catch (Exception e) {
-            LOGGER.error("create zk node  fail path:{}", path, e);
-            throw new RpcException("create zk node fail .path:" + path, e);
-        }
     }
 
     @Override
@@ -175,8 +167,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
                 while (true) {
                     try {
                         if (curatorFramework.getZookeeperClient().blockUntilConnectedOrTimedOut()) {
-                            String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
-                            create(path);
+                            create(getLocalZkPath());
                             //curator treeCahce支持连接断开后从新监听，所以不用再一次添加监听器
                             break;
                         }
@@ -190,15 +181,14 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
         //增加shutDownHook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             LOGGER.error("deRegister ......");
-            String path = RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
-            delete(path);
+            delete(getLocalZkPath());
         }));
     }
 
     /**
      * 删除指定path下的节点
      *
-     * @param path
+     * @param path  zk节点路径
      */
     private void delete(String path) {
         try {
@@ -209,13 +199,11 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     }
 
     /**
-     * zk监听指定path
-     *
-     * @param PATH 监听的地址
+     * @param watchPath 监听的地址
      * @throws Exception
      */
-    private void connect(final String PATH) throws Exception {
-        TreeCache cache = new TreeCache(curator, PATH);
+    private void connect(final String watchPath) throws Exception {
+        TreeCache cache = new TreeCache(curator, watchPath);
         TreeCacheListener listener = (curatorFramework, treeCacheEvent) -> {
             LOGGER.info("事件类型：" + treeCacheEvent.getType() +
                     " | 路径：" + (null != treeCacheEvent.getData() ? treeCacheEvent.getData().getPath() : null));
@@ -229,6 +217,11 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
         };
         cache.getListenable().addListener(listener);
         cache.start();
+    }
+
+    private String getLocalZkPath() {
+
+        return RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
     }
 
 }
