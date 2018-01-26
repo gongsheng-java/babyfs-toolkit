@@ -7,7 +7,7 @@ import org.junit.Test;
 public class ClientTest {
 
     @Test
-    public void test(){
+    public void test() {
 
 //        LoadBalanceImpl loadBalance = LoadBalanceImpl.builder().rpcConfig(new DemoApiDiscoveryProperties()).build("127.0.0.1:2181",20000,20000);
 //        Health health = ClientProxyBuilder.builder().loadBalance(loadBalance).target(Health.class,"api");

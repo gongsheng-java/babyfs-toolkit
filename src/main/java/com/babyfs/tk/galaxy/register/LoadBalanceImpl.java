@@ -1,14 +1,6 @@
 package com.babyfs.tk.galaxy.register;
 
 
-import com.babyfs.tk.galaxy.RpcException;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.retry.ExponentialBackoffRetry;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 /**
  * 负载均衡器
  */

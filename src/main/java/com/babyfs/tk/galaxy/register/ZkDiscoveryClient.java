@@ -11,6 +11,7 @@ import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -35,7 +36,7 @@ public final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZkDiscoveryClient.class);
 
-    public ZkDiscoveryClient(CuratorFramework curator,String appName,int port) {
+    public ZkDiscoveryClient(CuratorFramework curator, String appName, int port) {
         this.appName = appName;
         this.port = port;
         this.curator = curator;
@@ -185,9 +186,9 @@ public final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
      */
     private void deleteIfExit(String path) {
         try {
-            if(!exit(path)){
+            if (!exit(path)) {
                 LOGGER.warn("the path not exit");
-            }else {
+            } else {
                 curator.delete().forPath(path);
             }
         } catch (Exception e) {

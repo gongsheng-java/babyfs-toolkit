@@ -1,8 +1,5 @@
 package com.babyfs.tk.galaxy.register;
 
-import org.apache.zookeeper.KeeperException;
-
-import java.util.concurrent.ExecutionException;
 
 /**
  * DiscoveryClient生命周期接口
