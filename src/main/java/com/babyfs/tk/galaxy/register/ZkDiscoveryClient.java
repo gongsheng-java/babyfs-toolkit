@@ -126,16 +126,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
 
     @Override
     public void register() throws Exception {
-        if (exit(getLocalZkPath())) {
-            delete(getLocalZkPath());
-        } else {
-            create(getLocalZkPath());
-        }
-    }
-
-    private boolean exit(String path) throws Exception {
-        Stat stat = curator.checkExists().forPath(path);
-        return stat != null;
+        create(getLocalZkPath());
     }
 
     /**

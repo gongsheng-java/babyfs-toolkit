@@ -37,7 +37,6 @@ public class LoadBalanceImpl implements ILoadBalance {
         return rule.choose(discoveryClient.getInstancesByAppName(appName));
     }
 
-
     //LoadBalance的构建类
     public static class Builder {
         private IRule rule = new RoundRobinRule();

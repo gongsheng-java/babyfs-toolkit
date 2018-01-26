@@ -67,6 +67,7 @@ public class ServiceInstance {
         int result = 17;
         result = 31 * result + host.hashCode();
         result = 31 * result + appName.hashCode();
+        result = 31 * result + port;
         return result;
     }
 }
