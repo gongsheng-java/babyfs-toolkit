@@ -7,6 +7,7 @@ import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -173,7 +174,7 @@ public final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
         //增加shutDownHook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             LOGGER.error("deRegister ......");
-            delete(getLocalZkPath());
+            deleteIfExit(getLocalZkPath());
         }));
     }
 
@@ -182,12 +183,21 @@ public final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
      *
      * @param path zk节点路径
      */
-    private void delete(String path) {
+    private void deleteIfExit(String path) {
         try {
-            curator.delete().forPath(path);
+            if(!exit(path)){
+                LOGGER.warn("the path not exit");
+            }else {
+                curator.delete().forPath(path);
+            }
         } catch (Exception e) {
             LOGGER.error("zk delete node fail path:{}", path, e);
         }
+    }
+
+    private boolean exit(String path) throws Exception {
+        Stat stat = curator.checkExists().forPath(path);
+        return stat != null;
     }
 
     /**
