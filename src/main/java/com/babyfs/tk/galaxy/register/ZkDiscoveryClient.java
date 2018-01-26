@@ -179,7 +179,7 @@ public final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     }
 
     /**
-     * 删除指定path下的节点
+     * 如果指定path下的节点存在删除
      *
      * @param path zk节点路径
      */
