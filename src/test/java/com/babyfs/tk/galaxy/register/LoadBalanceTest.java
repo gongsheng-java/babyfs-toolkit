@@ -1,7 +1,5 @@
 package com.babyfs.tk.galaxy.register;
 
-import com.babyfs.tk.galaxy.demo.DemoApiDiscoveryProperties;
-import com.babyfs.tk.galaxy.demo.DemoOpDiscoveryProperty;
 import org.apache.zookeeper.KeeperException;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -19,10 +17,13 @@ public class LoadBalanceTest {
     //zookeeper 出现问题后，application采用缓存中的服务器列表
     // step，启动zookeeper,启动api,停止zookeeper
     @Test
-    public void testApi() throws InterruptedException, ExecutionException, KeeperException {
-        LoadBalanceImpl loadBalance = LoadBalanceImpl.builder().rpcConfig(new DemoApiDiscoveryProperties()).build("127.0.0.1:2181", 20000, 20000);
-        Thread.sleep(30000);
-        while (true) {
+    public void testApi() throws Exception {
+
+
+      ZkDiscoveryClient zkDiscoveryClient  = ZkDiscoveryClientBuilder.builder().port(9091).appName("api").sessionTimeout(5000).connectTimeout(5000).zkRegisterUrl("127.0.0.1:2181").build();
+      zkDiscoveryClient.start();
+      LoadBalanceImpl loadBalance = LoadBalanceBuilder.builder().discoveryClient(zkDiscoveryClient).build();
+      while (true) {
             Thread.sleep(30000);
             ServiceInstance serviceInstance = loadBalance.getServerByAppName("api");
             if(serviceInstance!=null) {
@@ -38,9 +39,11 @@ public class LoadBalanceTest {
      * step1  testApiConnectLost 运行，testOpConnectLost运行，zookeeper停机，testApiConnectLost停机,
      */
     @Test
-    public void testOp() throws InterruptedException, ExecutionException, KeeperException {
+    public void testOp() throws Exception {
 
-        LoadBalanceImpl loadBalance = LoadBalanceImpl.builder().rpcConfig(new DemoOpDiscoveryProperty()).build("127.0.0.1:2181", 20000, 20000);
+        ZkDiscoveryClient zkDiscoveryClient  = ZkDiscoveryClientBuilder.builder().port(8091).appName("op").sessionTimeout(5000).connectTimeout(5000).zkRegisterUrl("127.0.0.1:2181").build();
+        zkDiscoveryClient.start();
+        LoadBalanceImpl loadBalance = LoadBalanceBuilder.builder().discoveryClient(zkDiscoveryClient).build();
         Thread.sleep(30000);
         while (true) {
             Thread.sleep(30000);

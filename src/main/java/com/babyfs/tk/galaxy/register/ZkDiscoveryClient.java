@@ -7,11 +7,9 @@ import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -24,9 +22,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * 基于zk的服务发现客户端
  */
-final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
+public final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
 
-    private final IRpcConfigService properties;
+    private final String appName;
+
+    private final int port;
 
     private final CuratorFramework curator;
 
@@ -34,15 +34,16 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZkDiscoveryClient.class);
 
-    public ZkDiscoveryClient(IRpcConfigService discoveryProperties, CuratorFramework curator) {
-        this.properties = discoveryProperties;
+    public ZkDiscoveryClient(CuratorFramework curator,String appName,int port) {
+        this.appName = appName;
+        this.port = port;
         this.curator = curator;
     }
 
     @Override
     public ServiceInstance getLocalServiceInstance() {
-        return new ServiceInstance(properties.getAppName(), getLocalIp()
-                , properties.getPort());
+        return new ServiceInstance(appName, getLocalIp()
+                , port);
     }
 
     private String getLocalIp() {
@@ -211,7 +212,7 @@ final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     }
 
     private String getLocalZkPath() {
-        return RpcConstant.DISCOVERY_PREFIX + "/" + properties.getAppName() + "/" + getLocalIp() + ":" + properties.getPort();
+        return RpcConstant.DISCOVERY_PREFIX + "/" + appName + "/" + getLocalIp() + ":" + port;
     }
 
 }

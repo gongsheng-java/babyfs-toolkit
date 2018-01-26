@@ -20,7 +20,7 @@ public class ServerInstanceTest {
         ServiceInstance serviceInstanceB = new ServiceInstance("api","127.0.0.1",8080);
         List<ServiceInstance>  list = new CopyOnWriteArrayList<>();
         if(!list.contains(serviceInstanceA)){
-            LOGGER.error(" no contains A");
+            LOGGER.error("no contains A");
             list.add(serviceInstanceA);
         }
         if(!list.contains(serviceInstanceB)){
