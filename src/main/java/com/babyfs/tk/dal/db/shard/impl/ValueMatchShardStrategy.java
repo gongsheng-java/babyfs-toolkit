@@ -12,7 +12,7 @@ import java.util.Objects;
  * shard策略:值匹配匹配
  */
 public class ValueMatchShardStrategy implements IShardStrategy {
-    public static final String Value_NAME = "shard_match_name";
+    public static final String Value_NAME = "valueName";
     public static final String VALUE = "value";
 
     private final String shardName;

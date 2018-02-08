@@ -67,7 +67,7 @@ public class EntityShard implements IDBObject {
                 return strategy.getShardName(value);
             }
         }
-        throw new RuntimeException("Can't find the db shard name for value [" + value + "],entityClass" + entityClass);
+        return null;
     }
 
     /**
@@ -75,7 +75,6 @@ public class EntityShard implements IDBObject {
      *
      * @param value
      * @return
-     * @throws RuntimeException 无法查找到对应的table shard会抛出此异常
      */
     public String findTableShardName(@Nonnull Map<String, Object> value) {
         for (IShardStrategy strategy : this.tableShardStragies) {
@@ -83,7 +82,7 @@ public class EntityShard implements IDBObject {
                 return strategy.getShardName(value);
             }
         }
-        throw new RuntimeException("Can't find the table shard name for value [" + value + "],entityClass" + entityClass);
+        return null;
     }
 
     @Override

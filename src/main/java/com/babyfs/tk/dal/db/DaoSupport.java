@@ -534,10 +534,12 @@ public class DaoSupport {
                 Map<String, Object> realShardValue = getRealShardValue(shardValue, pair);
                 Preconditions.checkState(realShardValue != null, "Not a valid shard parameter type,must be Map<String,Object>,but it's %s", shardValue);
                 String dbShardName = entityShard.findDBShardName(realShardValue);
-                Pair<String, String> lookupKey = ShardUtil.createLookupKey(entityShard.getDbShardGroup(), dbShardName);
-                LOGGER.debug("setupDBShar,shardValue:{},metaPair:{},entityShard:{},lookupKey:{}", shardValue, pair, entityShard, lookupKey);
-                ShardUtil.setLookKey(lookupKey);
-                return;
+                if (dbShardName != null) {
+                    Pair<String, String> lookupKey = ShardUtil.createLookupKey(entityShard.getDbShardGroup(), dbShardName);
+                    LOGGER.debug("setupDBShar,shardValue:{},metaPair:{},entityShard:{},lookupKey:{}", shardValue, pair, entityShard, lookupKey);
+                    ShardUtil.setLookKey(lookupKey);
+                    return;
+                }
             }
         }
         LOGGER.debug("setupDBShar,shardValue:{},metaPair:{},lookupKey:NULL_LOOKUP_KEY", shardValue, pair);
@@ -579,8 +581,10 @@ public class DaoSupport {
                 Map<String, Object> realShardValue = getRealShardValue(shardValue, pair);
                 Preconditions.checkState(realShardValue != null, "Not a valid shard parameter type,must be Map<String,Object>.");
                 String tableShardName = entityShard.findTableShardName(realShardValue);
-                LOGGER.debug("getTableName,shardValue:{},metaPair:{},entityShard:{},tableShardName:{}", shardValue, pair, entityShard, tableShardName);
-                return tableShardName;
+                if (tableShardName != null) {
+                    LOGGER.debug("getTableName,shardValue:{},metaPair:{},entityShard:{},tableShardName:{}", shardValue, pair, entityShard, tableShardName);
+                    return tableShardName;
+                }
             }
         }
         LOGGER.debug("getTableName,shardValue:{},metaPair:{},entityShard:{},tableShardName:{}", shardValue, pair, null, pair.first.getTableName());
