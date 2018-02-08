@@ -180,6 +180,11 @@ public class DalXmlConfModule extends AbstractModule {
             } else if ("named".equals(type)) {
                 String name = properties.get("shardName");
                 return new EntityShard.NamedShardStrategy(name);
+            } else if ("name_match".equals(type)) {
+                String name = properties.get("shardName");
+                String valueName = properties.get("valueName");
+                String value = properties.get("value");
+                return new EntityShard.NameMatchShardStrategy(name, valueName, value);
             } else {
                 throw new RuntimeException("Unknown strategy type:" + type);
             }

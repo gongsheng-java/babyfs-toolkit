@@ -9,6 +9,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 实体对象{@link IEntity} 的shard配置
@@ -227,6 +228,42 @@ public class EntityShard implements IDBObject {
                 return l >= begin && l <= end;
             }
             return false;
+        }
+
+        @Override
+        public String getShardName(Map<String, Object> value) {
+            return shardName;
+        }
+    }
+
+    /**
+     * shard策略:名称匹配
+     */
+    public static class NameMatchShardStrategy implements IShardStrategy {
+        private final String shardName;
+        private final String valueName;
+        private final String value;
+
+        /**
+         * @param shardName shard名称
+         * @param valueName value的名称
+         * @param value     value值
+         */
+        public NameMatchShardStrategy(@Nonnull String shardName, @Nonnull String valueName, String value) {
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(shardName), "shardName");
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(valueName), "valueName");
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(value), "value");
+            this.shardName = shardName;
+            this.valueName = valueName;
+            this.value = value;
+        }
+
+        @Override
+        public boolean isMatch(Map<String, Object> value) {
+            if (value == null || value.isEmpty() || !value.containsKey(this.valueName)) {
+                return false;
+            }
+            return Objects.equals(this.value, value.get(this.valueName));
         }
 
         @Override

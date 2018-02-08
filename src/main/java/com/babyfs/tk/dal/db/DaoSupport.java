@@ -529,13 +529,13 @@ public class DaoSupport {
         LOGGER.debug("setupDBShar,shardValue:{},metaPair:{}", shardValue, pair);
         if (this.entityShardSet != null) {
             EntityShard entityShard = this.entityShardSet.get(pair.first.getEntityClass().getName());
-            LOGGER.debug("setupDBShar,shardValue:{},metaPair:{},entityShard:{}", new Object[]{shardValue, pair, entityShard});
+            LOGGER.debug("setupDBShar,shardValue:{},metaPair:{},entityShard:{}", shardValue, pair, entityShard);
             if (entityShard != null) {
                 Map<String, Object> realShardValue = getRealShardValue(shardValue, pair);
                 Preconditions.checkState(realShardValue != null, "Not a valid shard parameter type,must be Map<String,Object>,but it's %s", shardValue);
                 String dbShardName = entityShard.findDBShardName(realShardValue);
                 Pair<String, String> lookupKey = ShardUtil.createLookupKey(entityShard.getDbShardGroup(), dbShardName);
-                LOGGER.debug("setupDBShar,shardValue:{},metaPair:{},entityShard:{},lookupKey:{}", new Object[]{shardValue, pair, entityShard, lookupKey});
+                LOGGER.debug("setupDBShar,shardValue:{},metaPair:{},entityShard:{},lookupKey:{}", shardValue, pair, entityShard, lookupKey);
                 ShardUtil.setLookKey(lookupKey);
                 return;
             }
@@ -574,16 +574,16 @@ public class DaoSupport {
         LOGGER.debug("getTableName,shardValue:{},metaPair:{}", shardValue, pair);
         if (this.entityShardSet != null) {
             EntityShard entityShard = this.entityShardSet.get(pair.first.getEntityClass().getName());
-            LOGGER.debug("getTableName,shardValue:{},metaPair:{},entityShard:{}", new Object[]{shardValue, pair, entityShard});
+            LOGGER.debug("getTableName,shardValue:{},metaPair:{},entityShard:{}", shardValue, pair, entityShard);
             if (entityShard != null) {
                 Map<String, Object> realShardValue = getRealShardValue(shardValue, pair);
                 Preconditions.checkState(realShardValue != null, "Not a valid shard parameter type,must be Map<String,Object>.");
                 String tableShardName = entityShard.findTableShardName(realShardValue);
-                LOGGER.debug("getTableName,shardValue:{},metaPair:{},entityShard:{},tableShardName:{}", new Object[]{shardValue, pair, entityShard, tableShardName});
+                LOGGER.debug("getTableName,shardValue:{},metaPair:{},entityShard:{},tableShardName:{}", shardValue, pair, entityShard, tableShardName);
                 return tableShardName;
             }
         }
-        LOGGER.debug("getTableName,shardValue:{},metaPair:{},entityShard:{},tableShardName:{}", new Object[]{shardValue, pair, null, pair.first.getTableName()});
+        LOGGER.debug("getTableName,shardValue:{},metaPair:{},entityShard:{},tableShardName:{}", shardValue, pair, null, pair.first.getTableName());
         return pair.first.getTableName();
     }
 
