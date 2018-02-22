@@ -1,5 +1,7 @@
 package com.babyfs.tk.dal.db.shard;
 
+import com.babyfs.tk.dal.db.shard.impl.HashShardStrategy;
+import com.babyfs.tk.dal.db.shard.impl.NumberRangeStrategy;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.babyfs.tk.dal.db.model.Friend;
@@ -15,11 +17,11 @@ import java.util.Map;
 public class EntityShardTest {
     @Test
     public void test() {
-        EntityShard.NumberRangeStrategy dbRangeStrategy = new EntityShard.NumberRangeStrategy(1000, 1000, "gsns_big");
-        ArrayList<EntityShard.IShardStrategy> dbShards = Lists.newArrayList(dbRangeStrategy, new EntityShard.HashShardStrategy(1, "gsns"));
+        NumberRangeStrategy dbRangeStrategy = new NumberRangeStrategy(1000, 1000, "gsns_big");
+        ArrayList<IShardStrategy> dbShards = Lists.newArrayList(dbRangeStrategy, new HashShardStrategy(1, "gsns"));
 
-        EntityShard.NumberRangeStrategy tableRangeStrategy = new EntityShard.NumberRangeStrategy(1000, 1000, "friend_big_1000");
-        ArrayList<EntityShard.IShardStrategy> tableShards = Lists.newArrayList(tableRangeStrategy, new EntityShard.HashShardStrategy(1, "friend"));
+        NumberRangeStrategy tableRangeStrategy = new NumberRangeStrategy(1000, 1000, "friend_big_1000");
+        ArrayList<IShardStrategy> tableShards = Lists.newArrayList(tableRangeStrategy, new HashShardStrategy(1, "friend"));
         EntityShard entityShard = new EntityShard(Friend.class, "gsns_test", dbShards, tableShards);
 
         Friend friend = new Friend();

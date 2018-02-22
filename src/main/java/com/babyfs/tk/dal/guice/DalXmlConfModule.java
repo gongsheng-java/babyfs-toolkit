@@ -6,6 +6,10 @@ import com.babyfs.tk.commons.xml.JAXBUtil;
 import com.babyfs.tk.dal.db.shard.DBInstance;
 import com.babyfs.tk.dal.db.shard.DBShardInstance;
 import com.babyfs.tk.dal.db.shard.EntityShard;
+import com.babyfs.tk.dal.db.shard.IShardStrategy;
+import com.babyfs.tk.dal.db.shard.impl.HashShardStrategy;
+import com.babyfs.tk.dal.db.shard.impl.ValueMatchShardStrategy;
+import com.babyfs.tk.dal.db.shard.impl.NamedShardStrategy;
 import com.babyfs.tk.dal.orm.IEntity;
 import com.babyfs.tk.dal.xml.*;
 import com.google.common.base.Charsets;
@@ -28,6 +32,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.babyfs.tk.dal.db.shard.ShardStrategyType.HASH;
+import static com.babyfs.tk.dal.db.shard.ShardStrategyType.NAMED;
+import static com.babyfs.tk.dal.db.shard.ShardStrategyType.VALUE_MATCH;
 
 /**
  * 使用xml配置DAL的Module
@@ -127,9 +135,9 @@ public class DalXmlConfModule extends AbstractModule {
                 }
                 for (XmlEntityShards.XmlEntityShard entityShard : entityShards1) {
                     XmlEntityShards.ShardStrategyType dbShardStrategies = entityShard.getDbShardStrategies();
-                    List<EntityShard.IShardStrategy> dbStrategies = ListUtil.transform(dbShardStrategies.getShardStrategies(), new Func());
+                    List<IShardStrategy> dbStrategies = ListUtil.transform(dbShardStrategies.getShardStrategies(), new Func());
                     XmlEntityShards.ShardStrategyType tableShardStrategies = entityShard.getTableShardStrategies();
-                    List<EntityShard.IShardStrategy> tableStrategies = ListUtil.transform(tableShardStrategies.getShardStrategies(), new Func());
+                    List<IShardStrategy> tableStrategies = ListUtil.transform(tableShardStrategies.getShardStrategies(), new Func());
                     Preconditions.checkState(existedEntityShard.add(entityShard.getClassName()), "Duplicate entity shard %s in %s", entityShard.getClassName(), entityShardXml);
                     try {
                         @SuppressWarnings("unchecked")
@@ -168,18 +176,23 @@ public class DalXmlConfModule extends AbstractModule {
         }
     }
 
-    private static final class Func implements Function<XmlShardStrategy, EntityShard.IShardStrategy> {
+    private static final class Func implements Function<XmlShardStrategy, IShardStrategy> {
         @Override
-        public EntityShard.IShardStrategy apply(@Nonnull XmlShardStrategy input) {
+        public IShardStrategy apply(@Nonnull XmlShardStrategy input) {
             String type = input.getType();
             Map<String, String> properties = input.getProperties();
-            if ("hash".equals(type)) {
-                int sharCount = Integer.parseInt(properties.get("shardCount"));
-                String prefixName = properties.get("shardNamePrefix");
-                return new EntityShard.HashShardStrategy(sharCount, prefixName);
-            } else if ("named".equals(type)) {
-                String name = properties.get("shardName");
-                return new EntityShard.NamedShardStrategy(name);
+            if (HASH.isMatch(type)) {
+                int sharCount = Integer.parseInt(properties.get(HashShardStrategy.SHARD_COUNT));
+                String prefixName = properties.get(HashShardStrategy.SHARD_NAME_PREFIX);
+                return new HashShardStrategy(sharCount, prefixName);
+            } else if (NAMED.isMatch(type)) {
+                String name = properties.get(NamedShardStrategy.SHARD_NAME);
+                return new NamedShardStrategy(name);
+            } else if (VALUE_MATCH.isMatch(type)) {
+                String name = properties.get(NamedShardStrategy.SHARD_NAME);
+                String valueName = properties.get(ValueMatchShardStrategy.Value_NAME);
+                String value = properties.get(ValueMatchShardStrategy.VALUE);
+                return new ValueMatchShardStrategy(name, valueName, value);
             } else {
                 throw new RuntimeException("Unknown strategy type:" + type);
             }

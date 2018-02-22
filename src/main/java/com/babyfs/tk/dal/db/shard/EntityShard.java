@@ -9,6 +9,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 实体对象{@link IEntity} 的shard配置
@@ -66,7 +67,7 @@ public class EntityShard implements IDBObject {
                 return strategy.getShardName(value);
             }
         }
-        throw new RuntimeException("Can't find the db shard name for value [" + value + "],entityClass" + entityClass);
+        return null;
     }
 
     /**
@@ -74,7 +75,6 @@ public class EntityShard implements IDBObject {
      *
      * @param value
      * @return
-     * @throws RuntimeException 无法查找到对应的table shard会抛出此异常
      */
     public String findTableShardName(@Nonnull Map<String, Object> value) {
         for (IShardStrategy strategy : this.tableShardStragies) {
@@ -82,7 +82,7 @@ public class EntityShard implements IDBObject {
                 return strategy.getShardName(value);
             }
         }
-        throw new RuntimeException("Can't find the table shard name for value [" + value + "],entityClass" + entityClass);
+        return null;
     }
 
     @Override
@@ -95,143 +95,4 @@ public class EntityShard implements IDBObject {
         return this.seqId;
     }
 
-    /**
-     * Shard的策略
-     */
-    public static enum ShardStrategyType {
-        /**
-         * 使用Hash取模的算法,例如 id % shard_count
-         */
-        HASH,
-        /**
-         * 指定区间的算法,例如[1,1000] -> shard_0
-         */
-        RANGE
-    }
-
-    /**
-     */
-    public static interface IShardStrategy {
-        /**
-         * 指定的值是否与该策略匹配
-         *
-         * @param value
-         * @return
-         */
-        public boolean isMatch(Map<String, Object> value);
-
-        /**
-         * 取得指定数据对应的shard name
-         *
-         * @param value
-         * @return
-         */
-        public String getShardName(Map<String, Object> value);
-    }
-
-    /**
-     * 指定命名的shard策略
-     */
-    public static class NamedShardStrategy implements IShardStrategy {
-        private final String shardName;
-
-        /**
-         * @param shardName 指定的shard名称
-         */
-        public NamedShardStrategy(@Nonnull String shardName) {
-            Preconditions.checkArgument(!Strings.isNullOrEmpty(shardName), "shardName");
-            this.shardName = shardName;
-        }
-
-        @Override
-        public boolean isMatch(Map<String, Object> value) {
-            return true;
-        }
-
-        @Override
-        public String getShardName(Map<String, Object> value) {
-            return shardName;
-        }
-    }
-
-    /**
-     * 使用Hash算法的shard策略
-     */
-    public static class HashShardStrategy implements IShardStrategy {
-        private final int shardCount;
-        private final String shardNamePrefix;
-        private final String valueName;
-
-        /**
-         * @param shardCount
-         * @param shardNamePrefix
-         */
-        public HashShardStrategy(@Nonnegative int shardCount, @Nonnull String shardNamePrefix) {
-            this(shardCount, shardNamePrefix, "id");
-        }
-
-        /**
-         * @param shardCount      shard的个数,必须大于0
-         * @param shardNamePrefix shard名称的前缀
-         * @param valueName       {@link #isMatch(Map)} map中用于确定shard名称的key名
-         */
-        public HashShardStrategy(@Nonnegative int shardCount, @Nonnull String shardNamePrefix, String valueName) {
-            Preconditions.checkArgument(shardCount > 0, "shardCount");
-            Preconditions.checkArgument(!Strings.isNullOrEmpty(shardNamePrefix), "shardNamePrefix");
-            this.shardCount = shardCount;
-            this.shardNamePrefix = shardNamePrefix;
-            this.valueName = valueName;
-        }
-
-        @Override
-        public boolean isMatch(Map<String, Object> value) {
-            return value.containsKey(this.valueName);
-        }
-
-        @Override
-        public String getShardName(Map<String, Object> value) {
-            long l = ((Number) value.get(this.valueName)).longValue();
-            Preconditions.checkArgument(l > 0, "value  %s must be > 0", value);
-            return shardNamePrefix + "_" + (l % shardCount);
-        }
-    }
-
-    /**
-     * 使用数字区间的shard策略,即在[begin,end]区间内
-     */
-    public static class NumberRangeStrategy implements IShardStrategy {
-        private final long begin;
-        private final long end;
-        private final String shardName;
-        private final String valeName;
-
-        public NumberRangeStrategy(@Nonnegative long begin, @Nonnegative long end, @Nonnull String shardName) {
-            this(begin, end, shardName, "id");
-        }
-
-        public NumberRangeStrategy(@Nonnegative long begin, @Nonnegative long end, @Nonnull String shardName, @Nonnull String valueName) {
-            Preconditions.checkArgument(begin > 0, "begin");
-            Preconditions.checkArgument(end > 0, "end");
-            Preconditions.checkArgument(begin <= end, "The begin(%s) should <= end(%s).", begin, end);
-            Preconditions.checkArgument(!Strings.isNullOrEmpty(shardName), "shardName");
-            this.begin = begin;
-            this.end = end;
-            this.shardName = shardName;
-            this.valeName = valueName;
-        }
-
-        @Override
-        public boolean isMatch(Map<String, Object> value) {
-            if (value.containsKey(this.valeName)) {
-                long l = ((Number) value.get(this.valeName)).longValue();
-                return l >= begin && l <= end;
-            }
-            return false;
-        }
-
-        @Override
-        public String getShardName(Map<String, Object> value) {
-            return shardName;
-        }
-    }
 }
