@@ -16,6 +16,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.inject.AbstractModule;
@@ -135,9 +136,16 @@ public class DalXmlConfModule extends AbstractModule {
                 }
                 for (XmlEntityShards.XmlEntityShard entityShard : entityShards1) {
                     XmlEntityShards.ShardStrategyType dbShardStrategies = entityShard.getDbShardStrategies();
-                    List<IShardStrategy> dbStrategies = ListUtil.transform(dbShardStrategies.getShardStrategies(), new Func());
+                    List<IShardStrategy> dbStrategies = Lists.newArrayListWithCapacity(0);
+                    if (dbShardStrategies != null && dbShardStrategies.getShardStrategies() != null) {
+                        dbStrategies = ListUtil.transform(dbShardStrategies.getShardStrategies(), new Func());
+                    }
+
                     XmlEntityShards.ShardStrategyType tableShardStrategies = entityShard.getTableShardStrategies();
-                    List<IShardStrategy> tableStrategies = ListUtil.transform(tableShardStrategies.getShardStrategies(), new Func());
+                    List<IShardStrategy> tableStrategies = Lists.newArrayListWithCapacity(0);
+                    if (tableShardStrategies != null && tableShardStrategies.getShardStrategies() != null) {
+                        tableStrategies = ListUtil.transform(tableShardStrategies.getShardStrategies(), new Func());
+                    }
                     Preconditions.checkState(existedEntityShard.add(entityShard.getClassName()), "Duplicate entity shard %s in %s", entityShard.getClassName(), entityShardXml);
                     try {
                         @SuppressWarnings("unchecked")
