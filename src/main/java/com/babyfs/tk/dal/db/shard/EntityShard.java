@@ -67,6 +67,9 @@ public class EntityShard implements IDBObject {
                 return strategy.getShardName(value);
             }
         }
+        if (value != null && !value.isEmpty()) {
+            throw new RuntimeException("Can't find the db shard name for value [" + value + "],entityClass" + entityClass);
+        }
         return null;
     }
 
@@ -81,6 +84,9 @@ public class EntityShard implements IDBObject {
             if (strategy.isMatch(value)) {
                 return strategy.getShardName(value);
             }
+        }
+        if (value != null && !value.isEmpty()) {
+            throw new RuntimeException("Can't find the table shard name for value [" + value + "],entityClass" + entityClass);
         }
         return null;
     }

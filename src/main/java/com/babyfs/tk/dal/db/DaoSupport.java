@@ -345,7 +345,7 @@ public class DaoSupport {
                 return null;
             }
             return (T) query.get(0);
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             throw logAndReThrowException(e);
         } finally {
             cleanUpDBShard();
@@ -528,7 +528,8 @@ public class DaoSupport {
         }
         LOGGER.debug("setupDBShar,shardValue:{},metaPair:{}", shardValue, pair);
         if (this.entityShardSet != null) {
-            EntityShard entityShard = this.entityShardSet.get(pair.first.getEntityClass().getName());
+            final String entityName = pair.first.getEntityClass().getName();
+            EntityShard entityShard = this.entityShardSet.get(entityName);
             LOGGER.debug("setupDBShar,shardValue:{},metaPair:{},entityShard:{}", shardValue, pair, entityShard);
             if (entityShard != null) {
                 Map<String, Object> realShardValue = getRealShardValue(shardValue, pair);
@@ -539,6 +540,8 @@ public class DaoSupport {
                     LOGGER.debug("setupDBShar,shardValue:{},metaPair:{},entityShard:{},lookupKey:{}", shardValue, pair, entityShard, lookupKey);
                     ShardUtil.setLookKey(lookupKey);
                     return;
+                } else if (!realShardValue.isEmpty()) {
+                    LOGGER.error("setupDBShard for {} with shardValue:{},but can't find shard name:{},", entityName, realShardValue);
                 }
             }
         }
@@ -575,7 +578,8 @@ public class DaoSupport {
         }
         LOGGER.debug("getTableName,shardValue:{},metaPair:{}", shardValue, pair);
         if (this.entityShardSet != null) {
-            EntityShard entityShard = this.entityShardSet.get(pair.first.getEntityClass().getName());
+            String entityName = pair.first.getEntityClass().getName();
+            EntityShard entityShard = this.entityShardSet.get(entityName);
             LOGGER.debug("getTableName,shardValue:{},metaPair:{},entityShard:{}", shardValue, pair, entityShard);
             if (entityShard != null) {
                 Map<String, Object> realShardValue = getRealShardValue(shardValue, pair);
@@ -584,6 +588,8 @@ public class DaoSupport {
                 if (tableShardName != null) {
                     LOGGER.debug("getTableName,shardValue:{},metaPair:{},entityShard:{},tableShardName:{}", shardValue, pair, entityShard, tableShardName);
                     return tableShardName;
+                } else if (!realShardValue.isEmpty()) {
+                    LOGGER.error("getTableName for {} with shardValue:{},but can't find table name:{},", entityName, realShardValue);
                 }
             }
         }
@@ -607,7 +613,7 @@ public class DaoSupport {
         }
     }
 
-    private DALException logAndReThrowException(DataAccessException e) {
+    private DALException logAndReThrowException(Exception e) {
         String msg = "Shard[" + getCurrentDBShard() + "] ";
         LOGGER.error(msg, e);
         return new DALException(msg, e);
