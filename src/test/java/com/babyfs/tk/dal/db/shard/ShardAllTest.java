@@ -6,6 +6,8 @@ import com.babyfs.tk.dal.db.EntityMetaSet;
 import com.babyfs.tk.dal.db.ShardDataSource;
 import com.babyfs.tk.dal.db.model.IShardFriendDao;
 import com.babyfs.tk.dal.db.model.ShardFriend;
+import com.babyfs.tk.dal.db.shard.impl.HashShardStrategy;
+import com.babyfs.tk.dal.db.shard.impl.NamedShardStrategy;
 import com.babyfs.tk.dal.db.shard.impl.TomcatDataSourceCreator;
 import com.google.common.collect.Lists;
 import org.junit.Assert;
@@ -25,8 +27,8 @@ public class ShardAllTest {
        分库策略: 不分库
        分表策略: 不分表
         */
-        ArrayList<EntityShard.NamedShardStrategy> dbShards = Lists.newArrayList(new EntityShard.NamedShardStrategy("test"));
-        ArrayList<EntityShard.NamedShardStrategy> tablebShards = Lists.newArrayList(new EntityShard.NamedShardStrategy("friend"));
+        ArrayList<NamedShardStrategy> dbShards = Lists.newArrayList(new NamedShardStrategy("test"));
+        ArrayList<NamedShardStrategy> tablebShards = Lists.newArrayList(new NamedShardStrategy("friend"));
         test(dbShards, tablebShards);
     }
 
@@ -37,8 +39,8 @@ public class ShardAllTest {
        分库策略: hash值 id%3
        分表策略: 不分表
         */
-        ArrayList<EntityShard.HashShardStrategy> dbShards = Lists.newArrayList(new EntityShard.HashShardStrategy(3, "gsns"));
-        ArrayList<EntityShard.NamedShardStrategy> tablebShards = Lists.newArrayList(new EntityShard.NamedShardStrategy("friend_shard"));
+        ArrayList<HashShardStrategy> dbShards = Lists.newArrayList(new HashShardStrategy(3, "gsns"));
+        ArrayList<NamedShardStrategy> tablebShards = Lists.newArrayList(new NamedShardStrategy("friend_shard"));
         test(dbShards, tablebShards);
     }
 
@@ -49,12 +51,12 @@ public class ShardAllTest {
        分库策略: hash值 id%3
        分表策略: hash id%2
         */
-        ArrayList<EntityShard.HashShardStrategy> dbShards = Lists.newArrayList(new EntityShard.HashShardStrategy(3, "gsns"));
-        ArrayList<EntityShard.HashShardStrategy> tablebShards = Lists.newArrayList(new EntityShard.HashShardStrategy(2, "friend_shard"));
+        ArrayList<HashShardStrategy> dbShards = Lists.newArrayList(new HashShardStrategy(3, "gsns"));
+        ArrayList<HashShardStrategy> tablebShards = Lists.newArrayList(new HashShardStrategy(2, "friend_shard"));
         test(dbShards, tablebShards);
     }
 
-    private void test(List<? extends EntityShard.IShardStrategy> dbShards, List<? extends EntityShard.IShardStrategy> tableShards) {
+    private void test(List<? extends IShardStrategy> dbShards, List<? extends IShardStrategy> tableShards) {
         //setup db instance
         DBInstance dbInstance_remote = new DBInstance("db_0", "127.0.0.1", 3306, "root", "123456");
         ShardDataSourceContainer shardDataSourceContainer = new ShardDataSourceContainer(new TomcatDataSourceCreator());
