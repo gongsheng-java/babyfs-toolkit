@@ -12,7 +12,6 @@ import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -224,7 +223,7 @@ public class DaoSupport {
      *
      * @param entity
      * @return
-     * @throws org.springframework.dao.DataAccessException
+     * @throws DALException
      * @throws IllegalArgumentException
      */
     public <T extends IEntity> T save(@Nonnull final T entity) {
@@ -248,7 +247,7 @@ public class DaoSupport {
                 entity.setId(returnId);
             }
             return entity;
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             throw logAndReThrowException(e);
         } finally {
             cleanUpDBShard();
@@ -261,7 +260,7 @@ public class DaoSupport {
      *
      * @param entity
      * @return true, 更新成功;false,更新失败
-     * @throws org.springframework.dao.DataAccessException
+     * @throws DALException
      * @throws IllegalArgumentException
      */
     public boolean update(@Nonnull IEntity entity) {
@@ -278,7 +277,7 @@ public class DaoSupport {
             setupDBShard(entity, metaPair);
             final String sql = "update " + tableName + " set " + updateSqlColumns + " where " + idColumnName + " =:" + idAttribueName;
             return namedJdbcTemplate.update(sql, helper.toSource(entity)) == 1;
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             throw logAndReThrowException(e);
         } finally {
             cleanUpDBShard();
@@ -290,7 +289,7 @@ public class DaoSupport {
      *
      * @param entity
      * @return true, 删除成功;false,删除失败
-     * @throws org.springframework.dao.DataAccessException
+     * @throws DALException
      * @throws IllegalArgumentException
      */
     public boolean delete(@Nonnull IEntity entity) {
@@ -303,7 +302,7 @@ public class DaoSupport {
             String tableName = getTableName(entity, metaPair);
             String sql = "delete from " + tableName + " where " + entityMeta.getIdField().getColumnName() + " = ?";
             return namedJdbcTemplate.getJdbcOperations().update(sql, entity.getId()) == 1;
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             throw logAndReThrowException(e);
         } finally {
             cleanUpDBShard();
@@ -317,7 +316,7 @@ public class DaoSupport {
      * @param clazz
      * @param <T>
      * @return null, 没有找到与<code>id</code>对应的实体对象
-     * @throws org.springframework.dao.DataAccessException
+     * @throws DALException
      * @throws IllegalArgumentException
      */
     public <T extends IEntity> T get(@Nonnegative long id, Class<T> clazz) {
@@ -372,7 +371,7 @@ public class DaoSupport {
             final String tableName = getTableName(shardValue, metaPair);
             final String sql = "select " + entityMeta.getQuerySqlColumns() + " from " + tableName + " " + (conditiong != null ? conditiong : "");
             return namedJdbcTemplate.query(sql, sqlParameterSource, new ObjectRowMapper2(helper));
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             throw logAndReThrowException(e);
         } finally {
             cleanUpDBShard();
@@ -399,7 +398,7 @@ public class DaoSupport {
             final String tableName = getTableName(shardValue, metaPair);
             final String sql = "select " + columns + " from " + tableName + " " + (conditiong != null ? conditiong : "");
             return (List) namedJdbcTemplate.query(sql, sqlParameterSource, new ColumnsRowMapper());
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             throw logAndReThrowException(e);
         } finally {
             cleanUpDBShard();
@@ -424,7 +423,7 @@ public class DaoSupport {
             final String tableName = getTableName(shardValue, metaPair);
             final String sql = "update " + tableName + " set  " + columns + " " + (conditiong != null ? conditiong : "");
             return namedJdbcTemplate.update(sql, sqlParameterSource);
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             throw logAndReThrowException(e);
         } finally {
             cleanUpDBShard();
@@ -453,7 +452,7 @@ public class DaoSupport {
                 sql = String.format(sql, tableName);
             }
             return namedJdbcTemplate.update(sql, sqlParameterSource);
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             throw logAndReThrowException(e);
         } finally {
             cleanUpDBShard();
@@ -503,7 +502,7 @@ public class DaoSupport {
             final String tableName = getTableName(shardValue, metaPair);
             final String sql = "delete from " + tableName + " " + conditiong;
             return namedJdbcTemplate.update(sql, sqlParameterSource);
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             throw logAndReThrowException(e);
         } finally {
             cleanUpDBShard();
@@ -666,7 +665,7 @@ public class DaoSupport {
                 entityParameter.addValues(conditionParameter.getValues());
             }
             return namedJdbcTemplate.update(sql, entityParameter) == 1;
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             throw logAndReThrowException(e);
         } finally {
             cleanUpDBShard();
