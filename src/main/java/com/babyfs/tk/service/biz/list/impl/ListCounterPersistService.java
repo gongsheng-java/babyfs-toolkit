@@ -46,6 +46,19 @@ public class ListCounterPersistService<C extends BaseListCounterEntity> implemen
     }
 
     /**
+     * 构建counter map
+     *
+     * @param value
+     * @return
+     */
+    public static Map<String, Long> buildCounterMap(long value) {
+        HashMap<String, Long> map = Maps.newHashMap();
+        map.put(FIELD_COUNTER_VALUE, value);
+        return map;
+    }
+
+
+    /**
      * 取得列表计数器的值
      *
      * @param counterField not null
