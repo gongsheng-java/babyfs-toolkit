@@ -208,13 +208,25 @@ public class RedisCounterService implements ICounterService {
     public void del(final int type, final String id) {
         Preconditions.checkArgument(type > 0, "type must >0");
         Preconditions.checkNotNull(id, "id must not be null");
-        counterPersistService.del(type, id);
-
         final IRedis redis = getRedis();
         final String counterKey = getCounterCacheKey(type, id);
         final String syncSetKey = getSyncSetSlotKeyForCounter(counterKey);
 
         //LUA: 同时删除counter_key和sync set中国年的conter key
+        redis.eval(counterKey, COUNTER_DEL_LUA.getScript(), COUNTER_DEL_LUA.getSha1(), syncSetKey);
+
+        counterPersistService.del(type, id);
+    }
+
+    @Override
+    public void delOnlyCache(final int type, final String id) {
+        Preconditions.checkArgument(type > 0, "type must >0");
+        Preconditions.checkNotNull(id, "id must not be null");
+
+        final IRedis redis = getRedis();
+        final String counterKey = getCounterCacheKey(type, id);
+        final String syncSetKey = getSyncSetSlotKeyForCounter(counterKey);
+
         redis.eval(counterKey, COUNTER_DEL_LUA.getScript(), COUNTER_DEL_LUA.getSha1(), syncSetKey);
     }
 
