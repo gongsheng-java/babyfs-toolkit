@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.babyfs.tk.commons.base.Pair;
 
+import java.util.IllegalFormatException;
 import java.util.Map;
 
 /**
@@ -63,7 +64,7 @@ public final class MapUtil {
     }
 
     /**
-     * 从map中取得整数
+     * 从map中取得整数,如果map为空或者key不存在,返回默认值defaultValue
      *
      * @param map
      * @param key
@@ -71,7 +72,11 @@ public final class MapUtil {
      * @return
      * @throws NumberFormatException
      */
-    public static int getInt(Map<?, ?> map, Object key, int defaultValue) {
+    public static <K, V> int getInt(Map<K, V> map, K key, int defaultValue) {
+        if (map == null || map.isEmpty()) {
+            return defaultValue;
+        }
+
         Object val = map.get(key);
         if (val == null) {
             return defaultValue;
@@ -91,7 +96,7 @@ public final class MapUtil {
     }
 
     /**
-     * 从map中取得整数
+     * 从map中取得整数,如果map为空或者key不存在,返回默认值defaultValue
      *
      * @param map
      * @param key
@@ -99,7 +104,11 @@ public final class MapUtil {
      * @return
      * @throws NumberFormatException
      */
-    public static long getLong(Map<?, ?> map, Object key, long defaultValue) {
+    public static <K, V> long getLong(Map<K, V> map, K key, long defaultValue) {
+        if (map == null || map.isEmpty()) {
+            return defaultValue;
+        }
+
         Object val = map.get(key);
         if (val == null) {
             return defaultValue;
@@ -119,7 +128,34 @@ public final class MapUtil {
     }
 
     /**
+     * 从map中取得字符串,如果map为空或者key不存在,返回默认值defaultValue
+     *
+     * @param map
+     * @param key
+     * @param defaultValue
+     * @return
+     * @throws RuntimeException
+     */
+    public static <K, V> String getString(Map<K, V> map, K key, String defaultValue) {
+        if (map == null || map.isEmpty()) {
+            return defaultValue;
+        }
+
+        Object val = map.get(key);
+        if (val == null) {
+            return defaultValue;
+        }
+        if (val instanceof String) {
+            return (String) val;
+        } else {
+            throw new RuntimeException("Not a string " + val);
+        }
+    }
+
+
+    /**
      * 转换map
+     *
      * @param map
      * @param transformFunc
      * @param <K1>
