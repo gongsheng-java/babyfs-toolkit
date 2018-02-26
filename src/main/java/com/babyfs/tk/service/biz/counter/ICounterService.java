@@ -29,6 +29,14 @@ public interface ICounterService {
     void del(int type, String id);
 
     /**
+     * 删除计数,仅删除cache中的计数
+     *
+     * @param type
+     * @param id
+     */
+    void delOnlyCache(int type, String id);
+
+    /**
      * 取得计数
      *
      * @param type 计数器的类型,>0
