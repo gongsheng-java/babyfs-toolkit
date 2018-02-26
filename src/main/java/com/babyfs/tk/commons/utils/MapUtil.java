@@ -73,7 +73,7 @@ public final class MapUtil {
      * @throws NumberFormatException
      */
     public static <K, V> int getInt(Map<K, V> map, K key, int defaultValue) {
-        if (map == null || map.isEmpty()) {
+        if (map == null) {
             return defaultValue;
         }
 
@@ -105,7 +105,7 @@ public final class MapUtil {
      * @throws NumberFormatException
      */
     public static <K, V> long getLong(Map<K, V> map, K key, long defaultValue) {
-        if (map == null || map.isEmpty()) {
+        if (map == null) {
             return defaultValue;
         }
 
@@ -137,7 +137,7 @@ public final class MapUtil {
      * @throws RuntimeException
      */
     public static <K, V> String getString(Map<K, V> map, K key, String defaultValue) {
-        if (map == null || map.isEmpty()) {
+        if (map == null) {
             return defaultValue;
         }
 
