@@ -35,7 +35,7 @@ public class Const {
      */
     public static final String DEL_MARK = "_DEL_";
     /**
-     * 执行后台任务的Executor名称,用于非关键的业务场景
+     * 执行后台任务的Executor名称,用于非关键的业务场景,带shutdown
      */
     public static final String NAME_BACKGROUND_EXECUTOR = "background_executor";
     /**
