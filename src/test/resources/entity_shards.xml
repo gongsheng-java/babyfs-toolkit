@@ -5,7 +5,7 @@
     class: 实体的类名
     groups: shard的组名
     -->
-    <entityShard interfaceName="com.babyfs.tk.dal.db.model.ShardFriend" groups="gsns_test">
+    <entityShard className="com.babyfs.tk.dal.db.model.ShardFriend" groups="gsns_test">
         <!-- shard 策略 -->
         <!-- 数据库的shard策略 -->
         <dbShardStrategies>
