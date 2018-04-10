@@ -14,7 +14,6 @@ import java.util.Map;
 public class HashShardStrategy implements IShardStrategy {
     public static final String SHARD_NAME_PREFIX = "shardNamePrefix";
     public static final String SHARD_COUNT = "shardCount";
-    public static final String VALUE_NAME = "valueName";
 
     private final int shardCount;
     private final String shardNamePrefix;
@@ -36,7 +35,6 @@ public class HashShardStrategy implements IShardStrategy {
     public HashShardStrategy(@Nonnegative int shardCount, @Nonnull String shardNamePrefix, String valueName) {
         Preconditions.checkArgument(shardCount > 0, "shardCount");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(shardNamePrefix), "shardNamePrefix");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(valueName), "valueName");
         this.shardCount = shardCount;
         this.shardNamePrefix = shardNamePrefix;
         this.valueName = valueName;

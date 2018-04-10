@@ -192,8 +192,7 @@ public class DalXmlConfModule extends AbstractModule {
             if (HASH.isMatch(type)) {
                 int sharCount = Integer.parseInt(properties.get(HashShardStrategy.SHARD_COUNT));
                 String prefixName = properties.get(HashShardStrategy.SHARD_NAME_PREFIX);
-                String valueName = properties.get(HashShardStrategy.VALUE_NAME);
-                return new HashShardStrategy(sharCount, prefixName,valueName);
+                return new HashShardStrategy(sharCount, prefixName);
             } else if (NAMED.isMatch(type)) {
                 String name = properties.get(NamedShardStrategy.SHARD_NAME);
                 return new NamedShardStrategy(name);
