@@ -40,7 +40,7 @@ public class ExecutorServiceModule extends AbstractModule {
     public ExecutorServiceModule(String name) {
         this.name = Preconditions.checkNotNull(name);
         this.executorConfPrefix = null;
-        this.needShutdown = false;
+        this.needShutdown = true;
     }
 
     /**
