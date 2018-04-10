@@ -8,6 +8,7 @@ import java.util.Arrays;
  */
 public class RpcRequest implements Serializable {
 
+    private static final long serialVersionUID = 2003969790677366364L;
     //接口名称
     private String interfaceName;
     //方法签名
