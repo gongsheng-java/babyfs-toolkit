@@ -1,5 +1,7 @@
 package com.babyfs.tk.dal.xml;
 
+import com.google.common.collect.Lists;
+
 import javax.xml.bind.annotation.*;
 import java.util.List;
 
@@ -67,7 +69,7 @@ public class XmlEntityShards {
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class ShardStrategyType {
         @XmlElement(name = "shardStrategy")
-        private List<XmlShardStrategy> xmlShardStrategies;
+        private List<XmlShardStrategy> xmlShardStrategies = Lists.newArrayListWithCapacity(0);
 
         public List<XmlShardStrategy> getShardStrategies() {
             return xmlShardStrategies;
