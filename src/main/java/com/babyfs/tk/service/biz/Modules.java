@@ -3,23 +3,20 @@ package com.babyfs.tk.service.biz;
 import com.babyfs.tk.commons.service.IVersion;
 import com.babyfs.tk.commons.service.ServiceModule;
 import com.babyfs.tk.commons.service.VersionModule;
+import com.babyfs.tk.galaxy.guice.MethodCacheServiceModel;
+import com.babyfs.tk.galaxy.guice.RpcOkHttpClientModel;
+import com.babyfs.tk.galaxy.server.IRpcService;
+import com.babyfs.tk.galaxy.server.impl.RpcServiceImpl;
 import com.babyfs.tk.http.guice.HttpClientModule;
 import com.babyfs.tk.service.basic.es.guice.ESClientModule;
 import com.babyfs.tk.service.biz.constants.Const;
 import com.babyfs.tk.service.biz.schedule.guice.ExecutorServiceModule;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Binder;
 import com.google.inject.Module;
-import com.babyfs.tk.commons.name.INameService;
-import com.babyfs.tk.commons.name.Server;
 import com.babyfs.tk.commons.service.LifecycleModule;
 import com.babyfs.tk.commons.zookeeper.integration.guice.ZKClientModule;
 import com.babyfs.tk.dal.guice.DalShardModule;
 import com.babyfs.tk.dal.guice.DalXmlConfModule;
-import com.babyfs.tk.rpc.guice.RPCClientModule;
-import com.babyfs.tk.rpc.guice.RPCClientZkNSModule;
-import com.babyfs.tk.rpc.guice.RPCServerModule;
-import com.babyfs.tk.rpc.guice.RPCServerZkNSRegModule;
 import com.babyfs.tk.service.basic.guice.BasicServiceConfModule;
 import com.babyfs.tk.service.basic.guice.BasicServiceModule;
 import com.babyfs.tk.service.basic.guice.BasicServiceModuleProviders;
@@ -27,13 +24,7 @@ import com.babyfs.tk.service.basic.guice.annotation.ServiceRedis;
 import com.babyfs.tk.service.basic.redis.IRedis;
 import com.babyfs.tk.service.basic.security.guice.CryptoServiceModule;
 import com.babyfs.tk.service.biz.validator.guice.ValidateServiceModule;
-import com.google.inject.name.Names;
 import redis.clients.jedis.JedisPool;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 常用的Module , 主要是一些基础服务
@@ -137,6 +128,11 @@ public final class Modules {
 
             //一般的后台任务Executor,用于非关键的业务场景
             install(new ExecutorServiceModule(Const.NAME_BACKGROUND_EXECUTOR));
+
+            //rpc module
+            install(new RpcOkHttpClientModel());
+            bindService(IRpcService.class, RpcServiceImpl.class);
+            install(new MethodCacheServiceModel());
         }
     }
 }
