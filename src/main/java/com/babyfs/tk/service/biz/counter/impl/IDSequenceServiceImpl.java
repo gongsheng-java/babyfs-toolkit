@@ -44,6 +44,21 @@ public class IDSequenceServiceImpl implements IDSequenceService {
     }
 
     @Override
+    public long getNext(String key,int expireSeconds) throws Exception {
+        if (Strings.isNullOrEmpty(key)) {
+            LOGGER.error("getNext : parameter key to get next id is null or empty");
+            return INVALID_ID;
+        }
+        try {
+            IRedis redis = redisService.get(CacheConst.DEFAULT_COUNTER_GROUP);
+            return redis.incr(key,expireSeconds);
+        } catch (Exception e) {
+            LOGGER.error("Exception occured in Redis", e);
+            throw new RuntimeException("Exception occured in Redis", e);
+        }
+    }
+
+    @Override
     public void resetCounter(String key) throws Exception {
         if (Strings.isNullOrEmpty(key)) {
             LOGGER.error("resetCounter : parameter key to get next id is null or empty");

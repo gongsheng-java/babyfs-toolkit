@@ -24,6 +24,16 @@ public interface IDSequenceService {
     long getNext(String key) throws Exception;
 
     /**
+     * 根据表名key,获得下一个增量id
+     *
+     * @param key
+     * @param expireSeconds 过期时间
+     * @return
+     * @throws Exception
+     */
+    long getNext(String key, int expireSeconds) throws Exception;
+
+    /**
      * 根据表名key，清空计数器
      *
      * @param key 表名key
