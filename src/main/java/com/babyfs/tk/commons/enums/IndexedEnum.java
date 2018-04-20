@@ -101,6 +101,14 @@ public interface IndexedEnum {
             return values.get(index);
         }
 
+        /**
+         * 检查是否有重复的index
+         *
+         * @param clazz
+         * @param <E>
+         * @throws IllegalStateException 有重复时抛出这个异常
+         * @throws RuntimeException
+         */
         public static <E extends IndexedEnum> void checkDuplicateIndexes(Class<E> clazz) {
             Field[] fields = clazz.getFields();
             if (fields == null || fields.length == 0) {
