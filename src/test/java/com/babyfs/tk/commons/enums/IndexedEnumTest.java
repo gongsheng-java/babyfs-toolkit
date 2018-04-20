@@ -178,7 +178,7 @@ public class IndexedEnumTest {
      */
     //@Test(expected = IllegalArgumentException.class)
     public void indexTest() {
-       // Assert.assertEquals(isNullException, true);
+        // Assert.assertEquals(isNullException, true);
 
     }
 
@@ -204,7 +204,7 @@ public class IndexedEnumTest {
      */
     //@Test
     public void indexOfNullATest() {
-         // Assert.assertEquals(isNullException, true);
+        // Assert.assertEquals(isNullException, true);
     }
 
     /**
@@ -215,5 +215,58 @@ public class IndexedEnumTest {
         Assert.assertSame(null, TestNull_B.indexOf(0));
     }
 
+    private static enum DupEnum implements IndexedEnum {
+        T_Enum_0(0),
+        T_Enum_1(0);
 
+        private final int index;
+
+        DupEnum(int index) {
+            this.index = index;
+        }
+
+        @Override
+        public int getIndex() {
+            return index;
+        }
+    }
+
+    public interface L1 extends IndexedEnum {
+        L1 UNKOWN = new L1.Index(0);
+
+        class Index extends IndexedEnum.Index implements L1 {
+            public Index(int index) {
+                super(index);
+            }
+        }
+    }
+
+    public interface L2 extends L1 {
+        L1 RESOURCE = new Index(0);
+        L1 COURSE = new Index(1);
+    }
+
+    @Test
+    public void checkDuplicateEnumIndexes() {
+        try {
+            IndexedEnum.Util.checkDuplicateIndexes(DupEnum.class);
+        } catch (IllegalStateException e) {
+            //ignore
+            System.out.println(e);
+            return;
+        }
+        throw new RuntimeException("not here");
+    }
+
+    @Test
+    public void checkDuplicateInterfaceIndexes() {
+        try {
+            IndexedEnum.Util.checkDuplicateIndexes(L2.class);
+        } catch (IllegalStateException e) {
+            System.out.println(e);
+            //ignore
+            return;
+        }
+        throw new RuntimeException("not here");
+    }
 }
