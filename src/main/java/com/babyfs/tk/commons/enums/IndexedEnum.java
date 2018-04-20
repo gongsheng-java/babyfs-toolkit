@@ -1,11 +1,15 @@
 package com.babyfs.tk.commons.enums;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 从0开始的可索引枚举接口
@@ -95,6 +99,42 @@ public interface IndexedEnum {
                 return null;
             }
             return values.get(index);
+        }
+
+        /**
+         * 检查是否有重复的index
+         *
+         * @param clazz
+         * @param <E>
+         * @throws IllegalStateException 有重复时抛出这个异常
+         * @throws RuntimeException
+         */
+        public static <E extends IndexedEnum> void checkDuplicateIndexes(Class<E> clazz) {
+            Field[] fields = clazz.getFields();
+            if (fields == null || fields.length == 0) {
+                return;
+            }
+
+            final Set<Integer> indexes = Sets.newHashSet();
+            for (Field field : fields) {
+                field.setAccessible(true);
+
+                final int modifiers = field.getModifiers();
+                if (!Modifier.isFinal(modifiers) || !Modifier.isStatic(modifiers)) {
+                    continue;
+                }
+
+                if (!IndexedEnum.class.isAssignableFrom(field.getType())) {
+                    continue;
+                }
+
+                try {
+                    IndexedEnum in = (IndexedEnum) field.get(clazz);
+                    Preconditions.checkState(indexes.add(in.getIndex()), "duplicate index %s in class %s", in.getIndex(), clazz.getName());
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 
