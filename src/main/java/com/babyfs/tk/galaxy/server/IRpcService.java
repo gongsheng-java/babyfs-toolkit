@@ -16,4 +16,6 @@ public interface IRpcService {
      * @return
      */
     ServiceResponse invoke(String interfaceName, String methodSign, Object[] parameters);
+
+    byte[] invoke(byte[] content);
 }

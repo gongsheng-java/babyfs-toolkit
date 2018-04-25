@@ -5,6 +5,8 @@ import com.babyfs.tk.commons.service.ServiceModule;
 import com.babyfs.tk.commons.service.VersionModule;
 import com.babyfs.tk.galaxy.guice.MethodCacheServiceModel;
 import com.babyfs.tk.galaxy.guice.RpcOkHttpClientModel;
+import com.babyfs.tk.galaxy.guice.RpcSupportModel;
+import com.babyfs.tk.galaxy.guice.ZkDiscoveryClientModule;
 import com.babyfs.tk.galaxy.server.IRpcService;
 import com.babyfs.tk.galaxy.server.impl.RpcServiceImpl;
 import com.babyfs.tk.http.guice.HttpClientModule;
@@ -133,6 +135,8 @@ public final class Modules {
             install(new RpcOkHttpClientModel());
             bindService(IRpcService.class, RpcServiceImpl.class);
             install(new MethodCacheServiceModel());
+            install(new ZkDiscoveryClientModule());
+            install(new RpcSupportModel());
         }
     }
 }

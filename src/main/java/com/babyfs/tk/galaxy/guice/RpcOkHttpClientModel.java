@@ -18,7 +18,6 @@ public class RpcOkHttpClientModel extends PrivateModule {
 
     @Override
     protected void configure() {
-
         bind(RpcOkHttpClient.class).toProvider(RpcOkHttpClientModel.OkHttpClientProvider.class).asEagerSingleton();
         expose(RpcOkHttpClient.class);
     }

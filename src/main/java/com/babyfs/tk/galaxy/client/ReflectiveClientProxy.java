@@ -2,6 +2,7 @@
 package com.babyfs.tk.galaxy.client;
 
 
+import com.babyfs.tk.commons.JavaProxyUtil;
 import com.babyfs.tk.galaxy.ProxyUtils;
 import com.babyfs.tk.galaxy.codec.IDecoder;
 import com.babyfs.tk.galaxy.codec.IEncoder;
@@ -55,7 +56,9 @@ public class ReflectiveClientProxy implements IClientProxy {
                 methodToHandler.put(method, nameToHandler.get(ProxyUtils.configKey(target.type().getSimpleName(), method)));
             }
         InvocationHandler handler = factory.create(target, methodToHandler);
-        T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(), new Class<?>[]{target.type()}, handler);
+        Class[] interfaces = {target.type()};
+        ClassLoader loader = this.getClass().getClassLoader();
+        T proxy = (T) Proxy.newProxyInstance(loader, interfaces, handler);
         return proxy;
     }
 
@@ -75,7 +78,11 @@ public class ReflectiveClientProxy implements IClientProxy {
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            return dispatch.get(method).invoke(args);
+            if (dispatch.containsKey(method)) {
+                return dispatch.get(method).invoke(args);
+            }else {
+                return JavaProxyUtil.invokeMethodOfObject(proxy,method,args,new Class[]{target.type()});
+            }
         }
 
         @Override

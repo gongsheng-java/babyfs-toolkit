@@ -20,16 +20,15 @@ public class ClientProxyBuilder {
     }
 
     //编码器
-    private IEncoder encoder = new IEncoder.Default();
+    private IEncoder encoder;
     //解码器
-    private IDecoder decoder = new IDecoder.Default();
+    private IDecoder decoder;
     //传输层采用的Client
-    private IClient client = null;
+    private IClient client;
     //负载均衡器
-    private LoadBalanceImpl loadBalance = null;
+    private LoadBalanceImpl loadBalance;
     //InvocationHandler工厂类
-    private IInvocationHandlerFactory invocationHandlerFactory =
-            new IInvocationHandlerFactory.Default();
+    private IInvocationHandlerFactory invocationHandlerFactory;
 
     private String urlPrefix;
 
@@ -56,6 +55,11 @@ public class ClientProxyBuilder {
 
     public ClientProxyBuilder urlPrefix(String urlPrefix) {
         this.urlPrefix = urlPrefix;
+        return this;
+    }
+
+    public ClientProxyBuilder invocationHandlerFactory(IInvocationHandlerFactory invocationHandlerFactory) {
+        this.invocationHandlerFactory = invocationHandlerFactory;
         return this;
     }
 

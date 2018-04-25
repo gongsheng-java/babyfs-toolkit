@@ -7,12 +7,12 @@ import java.util.function.Function;
 /**
  * 用于注入需要代理的接口到guice
  */
-public class InterfaceModule extends ServiceModule {
+public class InterfaceModule<T> extends ServiceModule {
 
-    private final Function<Class<?>, ?> function;
-    private Class<?> aClass;
+    private final Function<Class<T>, T> function;
+    private Class<T> aClass;
 
-    InterfaceModule(Function<Class<?>, ?> function, Class aClass) {
+    InterfaceModule(Function<Class<T>, T> function, Class aClass) {
         this.function = function;
         this.aClass = aClass;
     }
@@ -31,7 +31,7 @@ public class InterfaceModule extends ServiceModule {
      * @param clazz   代理接口class
      * @return
      */
-    public static InterfaceModule build(String appName, Class<?> clazz) {
-        return new InterfaceModule(new RpcSuppler(appName, clazz), clazz);
+    public static <T> InterfaceModule<T> build(String appName, Class<T> clazz) {
+        return new InterfaceModule<>(new RpcSuppler<>(appName, clazz), clazz);
     }
 }

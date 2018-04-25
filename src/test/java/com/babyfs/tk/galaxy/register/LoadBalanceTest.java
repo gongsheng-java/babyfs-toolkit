@@ -24,10 +24,10 @@ public class LoadBalanceTest {
         zkDiscoveryClient.start();
         LoadBalanceImpl loadBalance = LoadBalanceBuilder.builder().discoveryClient(zkDiscoveryClient).build();
         while (true) {
-            Thread.sleep(30000);
+            Thread.sleep(1000);
             ServiceInstance serviceInstance = loadBalance.getServerByAppName("api");
             if (serviceInstance != null) {
-                logger.error(serviceInstance.toString());
+                logger.info("=======================================================:"+serviceInstance.toString());
             } else {
                 logger.error("no instance");
             }
@@ -46,7 +46,7 @@ public class LoadBalanceTest {
         ZkDiscoveryClient zkDiscoveryClient = ZkDiscoveryClientBuilder.builder().port(8091).appName("op").sessionTimeout(5000).connectTimeout(5000).zkRegisterUrl("127.0.0.1:2181").build();
         zkDiscoveryClient.start();
         LoadBalanceImpl loadBalance = LoadBalanceBuilder.builder().discoveryClient(zkDiscoveryClient).build();
-        Thread.sleep(30000);
+        Thread.sleep(10000);
         while (true) {
             Thread.sleep(30000);
             ServiceInstance serviceInstance = loadBalance.getServerByAppName("api");
