@@ -3,15 +3,14 @@ package com.babyfs.tk.galaxy.guice;
 import com.babyfs.tk.galaxy.client.ClientProxyBuilder;
 import com.babyfs.tk.galaxy.client.IClient;
 import com.babyfs.tk.galaxy.client.IInvocationHandlerFactory;
-import com.babyfs.tk.galaxy.client.RpcOkHttpClient;
 import com.babyfs.tk.galaxy.codec.IDecoder;
 import com.babyfs.tk.galaxy.codec.IEncoder;
-import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
+import com.babyfs.tk.galaxy.constant.RpcConstant;
+import com.babyfs.tk.galaxy.register.ILoadBalance;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 public class ClientProxyBuilderProvider implements Provider<ClientProxyBuilder> {
-    private String urlPrefix;
     //编码器
     @Inject
     private IEncoder encoder;
@@ -20,22 +19,18 @@ public class ClientProxyBuilderProvider implements Provider<ClientProxyBuilder> 
     private IDecoder decoder;
     //传输层采用的Client
     @Inject
-    private RpcOkHttpClient client;
+    private IClient client;
     //负载均衡器
     @Inject
-    private LoadBalanceImpl loadBalance;
+    private ILoadBalance loadBalance;
     //InvocationHandler工厂类
     @Inject
     private IInvocationHandlerFactory invocationHandlerFactory;
 
-    public ClientProxyBuilderProvider(String urlPrefix) {
-        this.urlPrefix = urlPrefix;
-    }
-
     @Override
     public ClientProxyBuilder get() {
         return ClientProxyBuilder.builder()
-                .urlPrefix(urlPrefix)
+                .urlPrefix(RpcConstant.RPC_URL_PREFIX_DEFAULT)
                 .client(client)
                 .decoder(decoder)
                 .encoder(encoder)

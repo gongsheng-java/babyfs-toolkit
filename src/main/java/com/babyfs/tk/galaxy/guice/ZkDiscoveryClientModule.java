@@ -2,6 +2,7 @@ package com.babyfs.tk.galaxy.guice;
 
 import com.babyfs.tk.commons.MapConfig;
 import com.babyfs.tk.commons.config.IConfigService;
+import com.babyfs.tk.commons.name.NameConfig;
 import com.babyfs.tk.commons.service.IStageActionRegistry;
 import com.babyfs.tk.commons.service.annotation.InitStage;
 import com.babyfs.tk.galaxy.constant.RpcConstant;
@@ -30,7 +31,7 @@ public class ZkDiscoveryClientModule extends AbstractModule {
             ZkDiscoveryClient client = ZkDiscoveryClientBuilder.
                     builder().
                     appName(conf.get(RpcConstant.APP_NAME))
-                    .zkRegisterUrl("127.0.0.1:2181")
+                    .zkRegisterUrl(conf.get(RpcConstant.APP_ZK_SERVERS))
                     .port(MapConfig.getInt(RpcConstant.APP_PORT, conf, RpcConstant.APP_PORT_DEFAULT))
                     .connectTimeout(MapConfig.getInt(RpcConstant.APP_CONNECT_TIMEOUT, conf, RpcConstant.APP_CONNECT_TIMEOUT_DEFAULT))
                     .sessionTimeout(MapConfig.getInt(RpcConstant.APP_SESSION_TIMEOUT, conf, RpcConstant.APP_SESSION_TIMEOUT_DEFAULT))

@@ -2,22 +2,23 @@
 package com.babyfs.tk.galaxy.codec;
 
 
-import com.babyfs.tk.commons.codec.util.HessianCodecUtil;
+import com.babyfs.tk.commons.codec.util.ProtostuffCodecUtil;
 
 /**
  * 解码器接口
  */
 public interface IDecoder {
 
-    Object decode(byte[] response);
+    <T> T decode(byte[] response, Class<T> result);
 
     /**
-     * 默认的Hessian解码器
+     * 默认的Protostuff解码器
      */
     class Default implements IDecoder {
+
         @Override
-        public Object decode(byte[] response) {
-            return HessianCodecUtil.decode(response);
+        public <T> T decode(byte[] response, Class<T> result) {
+            return ProtostuffCodecUtil.decode(response, result);
         }
     }
 }

@@ -10,11 +10,11 @@ import com.google.inject.Provider;
 
 public class RpcOkHttpClientModel extends PrivateModule {
 
-    private static final long DEFAULT_CONNECT_TIMEOUT = 5;
+    private static final long DEFAULT_CONNECT_TIMEOUT = 15;
 
-    private static final long DEFAULT_READ_TIMEOUT = 5;
+    private static final long DEFAULT_READ_TIMEOUT = 15;
 
-    private static final long DEFAULT_WRITE_TIMEOUT = 5;
+    private static final long DEFAULT_WRITE_TIMEOUT = 15;
 
     @Override
     protected void configure() {

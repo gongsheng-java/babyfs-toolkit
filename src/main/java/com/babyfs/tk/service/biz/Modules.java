@@ -132,10 +132,6 @@ public final class Modules {
             install(new ExecutorServiceModule(Const.NAME_BACKGROUND_EXECUTOR));
 
             //rpc module
-            install(new RpcOkHttpClientModel());
-            bindService(IRpcService.class, RpcServiceImpl.class);
-            install(new MethodCacheServiceModel());
-            install(new ZkDiscoveryClientModule());
             install(new RpcSupportModel());
         }
     }

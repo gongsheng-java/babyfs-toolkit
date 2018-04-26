@@ -6,7 +6,7 @@ import com.babyfs.tk.commons.JavaProxyUtil;
 import com.babyfs.tk.galaxy.ProxyUtils;
 import com.babyfs.tk.galaxy.codec.IDecoder;
 import com.babyfs.tk.galaxy.codec.IEncoder;
-import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
+import com.babyfs.tk.galaxy.register.ILoadBalance;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -79,7 +79,7 @@ public class ReflectiveClientProxy implements IClientProxy {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if (dispatch.containsKey(method)) {
-                return dispatch.get(method).invoke(args);
+                return dispatch.get(method).invoke(args, method.getReturnType());
             }else {
                 return JavaProxyUtil.invokeMethodOfObject(proxy,method,args,new Class[]{target.type()});
             }
@@ -116,11 +116,11 @@ public class ReflectiveClientProxy implements IClientProxy {
         private final IDecoder decoder;
         private final MethodHandler.Factory factory;
         private final IClient client;
-        private final LoadBalanceImpl loadBalance;
+        private final ILoadBalance loadBalance;
         private final String urlPrefix;
 
         ParseHandlersByName(IEncoder encoder, IDecoder decoder, IClient client,
-                            MethodHandler.Factory factory, LoadBalanceImpl loadBalance, String urlPrefix) {
+                            MethodHandler.Factory factory, ILoadBalance loadBalance, String urlPrefix) {
             this.factory = checkNotNull(factory, "factory");
             this.client = checkNotNull(client, "client");
             this.loadBalance = checkNotNull(loadBalance, "loadBalance");

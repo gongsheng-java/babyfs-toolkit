@@ -1,7 +1,5 @@
 package com.babyfs.tk.galaxy.server;
 
-import com.babyfs.tk.commons.model.ServiceResponse;
-
 /**
  * rpc server端执行实际方法的service
  */
@@ -15,7 +13,7 @@ public interface IRpcService {
      * @param parameters    方法参数
      * @return
      */
-    ServiceResponse invoke(String interfaceName, String methodSign, Object[] parameters);
+    Object invoke(String interfaceName, String methodSign, Object[] parameters);
 
     byte[] invoke(byte[] content);
 }

@@ -2,7 +2,7 @@ package com.babyfs.tk.galaxy.client;
 
 import com.babyfs.tk.galaxy.codec.IDecoder;
 import com.babyfs.tk.galaxy.codec.IEncoder;
-import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
+import com.babyfs.tk.galaxy.register.ILoadBalance;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -26,7 +26,7 @@ public class ClientProxyBuilder {
     //传输层采用的Client
     private IClient client;
     //负载均衡器
-    private LoadBalanceImpl loadBalance;
+    private ILoadBalance loadBalance;
     //InvocationHandler工厂类
     private IInvocationHandlerFactory invocationHandlerFactory;
 
@@ -48,7 +48,7 @@ public class ClientProxyBuilder {
         return this;
     }
 
-    public ClientProxyBuilder loadBalance(LoadBalanceImpl loadBalance) {
+    public ClientProxyBuilder loadBalance(ILoadBalance loadBalance) {
         this.loadBalance = loadBalance;
         return this;
     }

@@ -33,7 +33,7 @@ public interface IInvocationHandlerFactory {
          * @return 方法执行结果
          * @throws Throwable
          */
-        Object invoke(Object[] argv);
+        <T> T invoke(Object[] argv, Class<T> returnType);
     }
 
     /**

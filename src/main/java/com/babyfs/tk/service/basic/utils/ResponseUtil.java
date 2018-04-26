@@ -10,6 +10,7 @@ import com.babyfs.tk.commons.model.ServiceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.util.LinkedHashMap;
@@ -142,6 +143,41 @@ public class ResponseUtil {
             return ServiceResponse.createSuccessResponse(true);
         } else {
             return ServiceResponse.createFailResponse(ErrorCode.FAIL, false, null);
+        }
+    }
+
+    /**
+     * 写字节响应到客户端
+     * <p>
+     * 根据{@value #X_CACHE_CONTROL}是否设置判断{@value HttpHeaders#CACHE_CONTROL}如何设置:
+     * 1. 如果X-Cache-Control为null,设置为no-cache
+     * 2. 如果X-Cache-Control不为null,且不为空,则设置为X-Cache-Control的值
+     * 3. 其他情况不设置Cache-Controle
+     *
+     * @param response
+     * @param data
+     * @throws RuntimeException 如果写入失败将抛出异常
+     */
+    public static boolean writeByteResult(HttpServletResponse response, byte[] data) {
+        try {
+            String xCacheControl = response.getHeader(X_CACHE_CONTROL);
+            if (xCacheControl == null) {
+                response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
+            } else {
+                if (!xCacheControl.isEmpty()) {
+                    response.setHeader(HttpHeaders.CACHE_CONTROL, xCacheControl);
+                }
+            }
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/octet-stream");
+            ServletOutputStream stream = response.getOutputStream();
+            stream.write(data);
+            stream.flush();
+            stream.close();
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("writer to response exception.", e);
+            return false;
         }
     }
 }

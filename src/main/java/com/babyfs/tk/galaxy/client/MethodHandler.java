@@ -3,10 +3,11 @@ package com.babyfs.tk.galaxy.client;
 
 
 import com.babyfs.tk.commons.model.ServiceResponse;
+import com.babyfs.tk.galaxy.RpcException;
 import com.babyfs.tk.galaxy.RpcRequest;
 import com.babyfs.tk.galaxy.codec.IDecoder;
 import com.babyfs.tk.galaxy.codec.IEncoder;
-import com.babyfs.tk.galaxy.register.LoadBalanceImpl;
+import com.babyfs.tk.galaxy.register.ILoadBalance;
 import com.babyfs.tk.galaxy.register.ServiceInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +27,11 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
     private final IEncoder encoder;
     private final MethodMetadata metadata;
     private final IClient client;
-    private final LoadBalanceImpl loadBalance;
+    private final ILoadBalance loadBalance;
     private final String urlPrefix;
 
     private MethodHandler(ITarget<?> target, IEncoder encoder,
-                          IDecoder decoder, IClient client, MethodMetadata metadata, LoadBalanceImpl loadBalance, String urlPrefix) {
+                          IDecoder decoder, IClient client, MethodMetadata metadata, ILoadBalance loadBalance, String urlPrefix) {
         this.target = checkNotNull(target, "target for %s", target);
         this.decoder = checkNotNull(decoder, "decoder for %s", decoder);
         this.metadata = checkNotNull(metadata, "metadata for %s", metadata);
@@ -50,23 +51,23 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
      * @throws Throwable
      */
     @Override
-    public Object invoke(Object[] argv) {
+    public <T> T invoke(Object[] argv, Class<T> returnType) {
 
         byte[] body = encoder.encode(createRequest(argv));
         ServiceInstance serviceInstance = loadBalance.getServerByAppName(target.appName());
         if (serviceInstance == null) {
             LOGGER.error("no serviceInstance by appName:" + target.appName());
-            return ServiceResponse.createFailResponse("no serviceInstance by appName:" + target.appName());
+            throw new RpcException("no serviceInstance by appName:" + target.appName());
         }
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("http://").append(serviceInstance.getHost()).append(":").append(serviceInstance.getPort());
         String url = stringBuilder.append(urlPrefix).toString();
         try {
             byte[] content = client.execute(url, body);
-            return decoder.decode(content);
+            return decoder.decode(content, returnType);
         } catch (Exception e) {
             LOGGER.error("rpc invoke remote method fail", e);
-            return ServiceResponse.createFailResponse(e.getMessage());
+            throw new RpcException("rpc invoke remote method fail", e);
         }
     }
 
@@ -101,7 +102,7 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
          * @param loadBalance
          * @return
          */
-        public IInvocationHandlerFactory.IMethodHandler create(ITarget<?> target, IEncoder encoder, IDecoder decoder, IClient client, MethodMetadata md, LoadBalanceImpl loadBalance, String urlPrefix) {
+        public IInvocationHandlerFactory.IMethodHandler create(ITarget<?> target, IEncoder encoder, IDecoder decoder, IClient client, MethodMetadata md, ILoadBalance loadBalance, String urlPrefix) {
             return new MethodHandler(target, encoder, decoder, client, md, loadBalance, urlPrefix);
         }
     }

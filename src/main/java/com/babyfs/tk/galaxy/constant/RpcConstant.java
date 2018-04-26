@@ -17,4 +17,9 @@ public class RpcConstant {
     public static final String APP_SESSION_TIMEOUT = "app.session.timeout";
 
     public static final int APP_SESSION_TIMEOUT_DEFAULT = 5000;
+
+    public static final String RPC_URL_PREFIX_DEFAULT = "/internal/rpc/invoke";
+
+    public static final String APP_ZK_SERVERS = "app.zk.servers";
+
 }

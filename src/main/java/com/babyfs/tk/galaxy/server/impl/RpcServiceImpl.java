@@ -2,12 +2,12 @@ package com.babyfs.tk.galaxy.server.impl;
 
 
 import com.babyfs.tk.commons.model.ServiceResponse;
+import com.babyfs.tk.galaxy.RpcException;
 import com.babyfs.tk.galaxy.RpcRequest;
 import com.babyfs.tk.galaxy.codec.IDecoder;
 import com.babyfs.tk.galaxy.codec.IEncoder;
 import com.babyfs.tk.galaxy.server.IMethodCacheService;
 import com.babyfs.tk.galaxy.server.IRpcService;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -40,7 +40,7 @@ public class RpcServiceImpl implements IRpcService {
     }
 
     @Override
-    public ServiceResponse invoke(String interfaceName, String methodSign, Object[] parameters) {
+    public Object invoke(String interfaceName, String methodSign, Object[] parameters) {
 
         if (Strings.isNullOrEmpty(interfaceName) || Strings.isNullOrEmpty(methodSign)) {
             LOGGER.error("error para,interfaceName:{},methodSign:{},parameters：{}", interfaceName, methodSign, parameters);
@@ -57,22 +57,23 @@ public class RpcServiceImpl implements IRpcService {
             Object obj;
             if (null == parameters) {
                 obj = method.invoke(object);
-            }else {
+            } else {
                 obj = method.invoke(object, parameters);
             }
-            return ServiceResponse.createSuccessResponse(obj);
+            return obj;
         } catch (Exception e) {
             LOGGER.error("RpcServiceImpl@invoke error", e);
-            return ServiceResponse.createFailResponse(e.getMessage());
+            throw new RpcException("rpc service invoke fail", e);
         }
 
     }
 
     @Override
     public byte[] invoke(byte[] content) {
-        RpcRequest request = (RpcRequest) decoder.decode(content);
-        ServiceResponse result = invoke(request.getInterfaceName(), request.getMethodSign(), request.getParameters());
-        return encoder.encode(result);
+        RpcRequest request = decoder.decode(content, RpcRequest.class);
+        Object result = invoke(request.getInterfaceName(), request.getMethodSign(), request.getParameters());
+        byte[] code = encoder.encode(result);
+        return code;
 
     }
 }
