@@ -1,6 +1,8 @@
 package com.babyfs.tk.galaxy.guice;
 
 import com.babyfs.tk.commons.service.ServiceModule;
+import com.babyfs.tk.galaxy.RpcApp;
+import com.google.common.base.Preconditions;
 
 import java.util.function.Function;
 
@@ -24,14 +26,16 @@ public class InterfaceModule<T> extends ServiceModule {
         bindService(aClass, new ExternalCreationProvider(function, aClass));
     }
 
+
     /**
      * 代理远程服务的接口，并注入guice
      *
-     * @param appName 远程调用的appName
      * @param clazz   代理接口class
      * @return
      */
-    public static <T> InterfaceModule<T> build(String appName, Class<T> clazz) {
-        return new InterfaceModule<>(new RpcSuppler<>(appName, clazz), clazz);
+    public static <T> InterfaceModule<T> build(Class<T> clazz) {
+        RpcApp app = clazz.getAnnotation(RpcApp.class);
+        Preconditions.checkNotNull(app);
+        return new InterfaceModule<>(new RpcSuppler<>(app.name(), clazz), clazz);
     }
 }

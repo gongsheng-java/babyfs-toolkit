@@ -12,14 +12,16 @@ public class RpcConstant {
 
     public static final String APP_CONNECT_TIMEOUT = "app.connect.timeout";
 
-    public static final int APP_CONNECT_TIMEOUT_DEFAULT = 5000;
+    public static final int APP_CONNECT_TIMEOUT_DEFAULT = 15000;
 
     public static final String APP_SESSION_TIMEOUT = "app.session.timeout";
 
-    public static final int APP_SESSION_TIMEOUT_DEFAULT = 5000;
+    public static final int APP_SESSION_TIMEOUT_DEFAULT = 15000;
 
     public static final String RPC_URL_PREFIX_DEFAULT = "/internal/rpc/invoke";
 
-    public static final String APP_ZK_SERVERS = "app.zk.servers";
+    public static final String ZK_BOOTSTRAP_SERVERS = "zk.bootstrap.servers";
+
+    public static final String ZK_BOOTSTRAP_SERVERS_DEFAULT = "127.0.0.1:2181";
 
 }

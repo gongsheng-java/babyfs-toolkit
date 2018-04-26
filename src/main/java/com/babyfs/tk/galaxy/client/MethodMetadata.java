@@ -3,7 +3,6 @@ package com.babyfs.tk.galaxy.client;
 
 
 import java.io.Serializable;
-import java.lang.reflect.Type;
 
 /**
  * 记录方法元数据的pojo

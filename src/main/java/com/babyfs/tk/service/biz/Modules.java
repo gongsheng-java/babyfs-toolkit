@@ -130,9 +130,6 @@ public final class Modules {
 
             //一般的后台任务Executor,用于非关键的业务场景
             install(new ExecutorServiceModule(Const.NAME_BACKGROUND_EXECUTOR));
-
-            //rpc module
-            install(new RpcSupportModel());
         }
     }
 }

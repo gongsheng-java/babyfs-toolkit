@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * 内部rpc接口
+ * 内部rpc接口,供提供rpc服务的server引用
  */
 @Controller
 @RequestMapping(value = "/internal/rpc")

@@ -31,7 +31,7 @@ public class ZkDiscoveryClientModule extends AbstractModule {
             ZkDiscoveryClient client = ZkDiscoveryClientBuilder.
                     builder().
                     appName(conf.get(RpcConstant.APP_NAME))
-                    .zkRegisterUrl(conf.get(RpcConstant.APP_ZK_SERVERS))
+                    .zkRegisterUrl(MapConfig.getString(RpcConstant.ZK_BOOTSTRAP_SERVERS, conf, RpcConstant.ZK_BOOTSTRAP_SERVERS_DEFAULT))
                     .port(MapConfig.getInt(RpcConstant.APP_PORT, conf, RpcConstant.APP_PORT_DEFAULT))
                     .connectTimeout(MapConfig.getInt(RpcConstant.APP_CONNECT_TIMEOUT, conf, RpcConstant.APP_CONNECT_TIMEOUT_DEFAULT))
                     .sessionTimeout(MapConfig.getInt(RpcConstant.APP_SESSION_TIMEOUT, conf, RpcConstant.APP_SESSION_TIMEOUT_DEFAULT))
