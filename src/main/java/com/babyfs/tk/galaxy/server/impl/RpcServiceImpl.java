@@ -70,7 +70,7 @@ public class RpcServiceImpl implements IRpcService {
 
     @Override
     public byte[] invoke(byte[] content) {
-        RpcRequest request = decoder.decode(content, RpcRequest.class);
+        RpcRequest request = (RpcRequest) decoder.decode(content);
         Object result = invoke(request.getInterfaceName(), request.getMethodSign(), request.getParameters());
         byte[] code = encoder.encode(result);
         return code;

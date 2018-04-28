@@ -2,12 +2,15 @@ package com.babyfs.tk.service.biz.base.model;
 
 import com.babyfs.tk.dal.orm.IEntity;
 
+import java.io.Serializable;
+
 /**
  * 带有解析数据的实体
  * @param <E> 实体的类型
  * @param <T> 实体字段解析后的类型
  */
-public class ParsedEntity<E extends IEntity, T> {
+public class ParsedEntity<E extends IEntity, T> implements Serializable {
+    private static final long serialVersionUID = 7754705068651961068L;
     /**
      * 原实体
      */

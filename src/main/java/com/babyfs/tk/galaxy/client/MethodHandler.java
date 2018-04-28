@@ -51,7 +51,7 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
      * @throws Throwable
      */
     @Override
-    public <T> T invoke(Object[] argv, Class<T> returnType) {
+    public Object invoke(Object[] argv) {
 
         byte[] body = encoder.encode(createRequest(argv));
         ServiceInstance serviceInstance = loadBalance.getServerByAppName(target.appName());
@@ -64,7 +64,7 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
         String url = stringBuilder.append(urlPrefix).toString();
         try {
             byte[] content = client.execute(url, body);
-            return decoder.decode(content, returnType);
+            return decoder.decode(content);
         } catch (Exception e) {
             LOGGER.error("rpc invoke remote method fail", e);
             throw new RpcException("rpc invoke remote method fail", e);

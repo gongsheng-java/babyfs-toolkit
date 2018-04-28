@@ -79,7 +79,7 @@ public class ReflectiveClientProxy implements IClientProxy {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if (dispatch.containsKey(method)) {
-                return dispatch.get(method).invoke(args, method.getReturnType());
+                return dispatch.get(method).invoke(args);
             }else {
                 return JavaProxyUtil.invokeMethodOfObject(proxy,method,args,new Class[]{target.type()});
             }
