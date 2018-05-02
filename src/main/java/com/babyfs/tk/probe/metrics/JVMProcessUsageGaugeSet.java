@@ -3,14 +3,20 @@ package com.babyfs.tk.probe.metrics;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricSet;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Java虚拟机 进程信息
@@ -22,10 +28,23 @@ public class JVMProcessUsageGaugeSet implements MetricSet {
     private static final String NAME_SYSTEM_CPU_LOAD = "SystemCpuLoad";
 
     private final MBeanServer platformMBeanServer;
+    private final ObjectName name;
+    private final LoadingCache<String, Double> jvmGauageCache;
 
     public JVMProcessUsageGaugeSet() {
         platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
+        name = getOperatingSystemName();
+        jvmGauageCache = CacheBuilder.newBuilder().expireAfterWrite(3, TimeUnit.SECONDS).build(new CacheLoader<String, Double>() {
+            @Override
+            public Double load(String key) {
+                if (name == null) {
+                    return -1D;
+                }
+                return getDoubleAttributeValue(name, key) * Runtime.getRuntime().availableProcessors();
+            }
+        });
     }
+
 
     @Override
     public Map<String, Metric> getMetrics() {
@@ -35,17 +54,16 @@ public class JVMProcessUsageGaugeSet implements MetricSet {
             return gauges;
         }
         try {
-            final ObjectName name = ObjectName.getInstance(NAME_OPERATING_SYSTEM);
             gauges.put("cpu_usage", new Gauge<Double>() {
                 @Override
                 public Double getValue() {
-                    return getDoubleAttributeValue(name, NAME_PROCESS_CPU_LOAD) * Runtime.getRuntime().availableProcessors();
+                    return getValueWithCache(NAME_PROCESS_CPU_LOAD);
                 }
             });
             gauges.put("sys_cpu_usage", new Gauge<Double>() {
                 @Override
                 public Double getValue() {
-                    return getDoubleAttributeValue(name, NAME_SYSTEM_CPU_LOAD) * Runtime.getRuntime().availableProcessors();
+                    return getValueWithCache(NAME_SYSTEM_CPU_LOAD);
                 }
             });
         } catch (Exception e) {
@@ -73,4 +91,24 @@ public class JVMProcessUsageGaugeSet implements MetricSet {
         return Double.NaN;
 
     }
+
+    private ObjectName getOperatingSystemName() {
+        try {
+            return ObjectName.getInstance(NAME_OPERATING_SYSTEM);
+        } catch (MalformedObjectNameException e) {
+            LOGGER.error("get name for {} fail", NAME_OPERATING_SYSTEM, e);
+        }
+        return null;
+    }
+
+    private Double getValueWithCache(String key) {
+        try {
+            return this.jvmGauageCache.get(key);
+        } catch (ExecutionException e) {
+            LOGGER.error("get key {} from cache fail", e);
+            return Double.NaN;
+        }
+
+    }
 }
+
