@@ -29,10 +29,6 @@ public class RoundRobinRule implements IRule {
         ServiceInstance server = null;
         int index = 0;
         int serverCount = list.size();
-        if (serverCount == 0) {
-            log.warn("No up servers available from load balancer: " + list);
-            return null;
-        }
         index = (int) (nextIndexAI.incrementAndGet() % serverCount);
         server = list.get(index);
         return server;

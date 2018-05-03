@@ -8,20 +8,11 @@ import java.util.List;
  * rpc中负责获取指定appName的服务列表
  */
 public interface IDiscoveryClient {
-
-    /**
-     * 获取本机的ServerInstance
-     *
-     * @return
-     */
-    ServiceInstance getLocalServiceInstance();
-
     /**
      * 根据传入的appName获取ServiceInstance列表
      *
      * @param appName
      * @return
      */
-    List<ServiceInstance> getInstancesByAppName(String appName);
-
+    List<ServiceInstance> getInstancesByName(String appName);
 }

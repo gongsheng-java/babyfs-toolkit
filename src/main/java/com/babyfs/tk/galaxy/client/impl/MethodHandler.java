@@ -1,10 +1,10 @@
+package com.babyfs.tk.galaxy.client.impl;
 
-package com.babyfs.tk.galaxy.client;
 
-
-import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.galaxy.RpcException;
 import com.babyfs.tk.galaxy.RpcRequest;
+import com.babyfs.tk.galaxy.ServicePoint;
+import com.babyfs.tk.galaxy.client.IClient;
 import com.babyfs.tk.galaxy.codec.IDecoder;
 import com.babyfs.tk.galaxy.codec.IEncoder;
 import com.babyfs.tk.galaxy.register.ILoadBalance;
@@ -15,23 +15,19 @@ import org.slf4j.LoggerFactory;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * MethodHandler
  * 被代理对象方法的实际执行handler
- * 提供了工厂类实现
  */
-final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
-
+public final class MethodHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandler.class);
-    private final ITarget<?> target;
+    private final ServicePoint<?> target;
     private final IDecoder decoder;
     private final IEncoder encoder;
-    private final MethodMetadata metadata;
+    private final MethodMeta metadata;
     private final IClient client;
     private final ILoadBalance loadBalance;
     private final String urlPrefix;
 
-    private MethodHandler(ITarget<?> target, IEncoder encoder,
-                          IDecoder decoder, IClient client, MethodMetadata metadata, ILoadBalance loadBalance, String urlPrefix) {
+    public MethodHandler(ServicePoint<?> target, IEncoder encoder, IDecoder decoder, IClient client, MethodMeta metadata, ILoadBalance loadBalance, String urlPrefix) {
         this.target = checkNotNull(target, "target for %s", target);
         this.decoder = checkNotNull(decoder, "decoder for %s", decoder);
         this.metadata = checkNotNull(metadata, "metadata for %s", metadata);
@@ -50,14 +46,13 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
      * @return
      * @throws Throwable
      */
-    @Override
     public Object invoke(Object[] argv) {
-
         byte[] body = encoder.encode(createRequest(argv));
-        ServiceInstance serviceInstance = loadBalance.getServerByAppName(target.appName());
+        String interfaceName = target.getType().getName();
+        ServiceInstance serviceInstance = loadBalance.getServerByName(interfaceName);
         if (serviceInstance == null) {
-            LOGGER.error("no serviceInstance by appName:" + target.appName());
-            throw new RpcException("no serviceInstance by appName:" + target.appName());
+            LOGGER.error("no serviceInstance by appName:" + interfaceName);
+            throw new RpcException("no serviceInstance by appName:" + interfaceName);
         }
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("http://").append(serviceInstance.getHost()).append(":").append(serviceInstance.getPort());
@@ -77,33 +72,11 @@ final class MethodHandler implements IInvocationHandlerFactory.IMethodHandler {
      * @param argv
      * @return
      */
-    public RpcRequest createRequest(Object[] argv) {
-
+    private RpcRequest createRequest(Object[] argv) {
         RpcRequest rpcRequest = new RpcRequest();
         rpcRequest.setParameters(argv);
-        rpcRequest.setMethodSign(metadata.configKey());
-        rpcRequest.setInterfaceName(target.type().getName());
+        rpcRequest.setMethodSign(metadata.getSig());
+        rpcRequest.setInterfaceName(target.getInterfaceName());
         return rpcRequest;
-    }
-
-    /**
-     * MethodHandler工厂类
-     * 创建GalaxyMethodHandler对象
-     */
-    static class Factory {
-        /**
-         * create方法创建MethodHandler
-         *
-         * @param target
-         * @param encoder
-         * @param decoder
-         * @param client
-         * @param md
-         * @param loadBalance
-         * @return
-         */
-        public IInvocationHandlerFactory.IMethodHandler create(ITarget<?> target, IEncoder encoder, IDecoder decoder, IClient client, MethodMetadata md, ILoadBalance loadBalance, String urlPrefix) {
-            return new MethodHandler(target, encoder, decoder, client, md, loadBalance, urlPrefix);
-        }
     }
 }

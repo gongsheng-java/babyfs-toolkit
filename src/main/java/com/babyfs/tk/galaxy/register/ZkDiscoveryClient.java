@@ -24,61 +24,37 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * 基于zk的服务发现客户端
  */
-public final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
+public final class ZkDiscoveryClient implements IDiscoveryClient{
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZkDiscoveryClient.class);
 
-    private final String appName;
-
-    private final int port;
+    /**
+     * 本地服务的端口
+     */
+    private final int serverPort;
 
     private final CuratorFramework curator;
 
+    /**
+     * key interfaceName,value:server list
+     */
     private final Map<String, List<ServiceInstance>> providerMapList = new ConcurrentHashMap<>();
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZkDiscoveryClient.class);
-
-    public ZkDiscoveryClient(CuratorFramework curator, String appName, int port) {
-        this.appName = appName;
-        this.port = port;
+    /**
+     * @param curator
+     * @param serverPort
+     */
+    public ZkDiscoveryClient(CuratorFramework curator, int serverPort) {
         this.curator = curator;
+        this.serverPort = serverPort;
     }
+
 
     @Override
-    public ServiceInstance getLocalServiceInstance() {
-        return new ServiceInstance(appName, getLocalIp()
-                , port);
-    }
-
-    private String getLocalIp() {
-        try {
-            for (Enumeration<NetworkInterface> enumNic = NetworkInterface
-                    .getNetworkInterfaces(); enumNic.hasMoreElements(); ) {
-                NetworkInterface ifc = enumNic.nextElement();
-                if (ifc.isUp()) {
-                    for (Enumeration<InetAddress> enumAddr = ifc
-                            .getInetAddresses(); enumAddr.hasMoreElements(); ) {
-                        InetAddress address = enumAddr.nextElement();
-                        if (address instanceof Inet4Address
-                                && !address.isLoopbackAddress()) {
-                            return address.getHostAddress();
-                        }
-                    }
-                }
-            }
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            return null;
-        } catch (IOException e) {
-            LOGGER.warn("Unable to find non-loopback address", e);
-            return null;
+    public List<ServiceInstance> getInstancesByName(String interfaceName) {
+        if (!providerMapList.isEmpty() && providerMapList.containsKey(interfaceName)) {
+            return providerMapList.get(interfaceName);
         }
-    }
-
-    @Override
-    public List<ServiceInstance> getInstancesByAppName(String appName) {
-        if (!providerMapList.isEmpty() && providerMapList.containsKey(appName)) {
-            return providerMapList.get(appName);
-        }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     /**
@@ -139,10 +115,7 @@ public final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
      * @throws Exception
      */
     private void create(String path) throws Exception {
-        curator.create()
-                .creatingParentContainersIfNeeded()
-                .withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
-                .forPath(path);
+        curator.create().creatingParentContainersIfNeeded().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(path);
     }
 
     @Override
@@ -223,7 +196,30 @@ public final class ZkDiscoveryClient implements IDiscoveryClient, ILifeCycle {
     }
 
     private String getLocalZkPath() {
-        return RpcConstant.DISCOVERY_PREFIX + "/" + appName + "/" + getLocalIp() + ":" + port;
+        return RpcConstant.DISCOVERY_PREFIX + "/" + "/" + getLocalIp() + ":" + serverPort;
     }
 
+    private String getLocalIp() {
+        try {
+            for (Enumeration<NetworkInterface> enumNic = NetworkInterface.getNetworkInterfaces(); enumNic.hasMoreElements(); ) {
+                NetworkInterface ifc = enumNic.nextElement();
+                if (ifc.isUp()) {
+                    for (Enumeration<InetAddress> enumAddr = ifc
+                            .getInetAddresses(); enumAddr.hasMoreElements(); ) {
+                        InetAddress address = enumAddr.nextElement();
+                        if (address instanceof Inet4Address
+                                && !address.isLoopbackAddress()) {
+                            return address.getHostAddress();
+                        }
+                    }
+                }
+            }
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            return null;
+        } catch (IOException e) {
+            LOGGER.warn("Unable to find non-loopback address", e);
+            return null;
+        }
+    }
 }

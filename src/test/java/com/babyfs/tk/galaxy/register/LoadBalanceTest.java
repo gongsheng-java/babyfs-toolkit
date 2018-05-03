@@ -1,13 +1,9 @@
 package com.babyfs.tk.galaxy.register;
 
-import org.apache.zookeeper.KeeperException;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.ExecutionException;
 
 
 @Ignore
@@ -25,7 +21,7 @@ public class LoadBalanceTest {
         LoadBalanceImpl loadBalance = LoadBalanceBuilder.builder().discoveryClient(zkDiscoveryClient).build();
         while (true) {
             Thread.sleep(1000);
-            ServiceInstance serviceInstance = loadBalance.getServerByAppName("api");
+            ServiceInstance serviceInstance = loadBalance.getServerByName("api");
             if (serviceInstance != null) {
                 logger.info("=======================================================:"+serviceInstance.toString());
             } else {
@@ -49,7 +45,7 @@ public class LoadBalanceTest {
         Thread.sleep(10000);
         while (true) {
             Thread.sleep(30000);
-            ServiceInstance serviceInstance = loadBalance.getServerByAppName("api");
+            ServiceInstance serviceInstance = loadBalance.getServerByName("api");
             if (serviceInstance != null) {
                 logger.error(serviceInstance.toString());
             } else {

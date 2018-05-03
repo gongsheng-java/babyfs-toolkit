@@ -16,7 +16,6 @@ public class ZkDiscoveryClientBuilder {
     private int connectTimeout;
     private String zkRegisterUrl;
     private int sessionTimeout;
-    private String appName;
     private int port;
 
     public ZkDiscoveryClientBuilder connectTimeout(int connectTimeout) {
@@ -34,11 +33,6 @@ public class ZkDiscoveryClientBuilder {
         return this;
     }
 
-    public ZkDiscoveryClientBuilder appName(String appName) {
-        this.appName = appName;
-        return this;
-    }
-
     public ZkDiscoveryClientBuilder port(int port) {
         this.port = port;
         return this;
@@ -47,7 +41,6 @@ public class ZkDiscoveryClientBuilder {
     //构建ZkDiscoveryClient的方法
     public ZkDiscoveryClient build() {
         checkNotNull(zkRegisterUrl, "zkRegisterUrl");
-        checkNotNull(appName, "appName");
         checkState(connectTimeout > 0, "connectTimeout > 0");
         checkState(sessionTimeout > 0, "sessionTimeout > 0");
         checkState(port > 0, "port > 0");

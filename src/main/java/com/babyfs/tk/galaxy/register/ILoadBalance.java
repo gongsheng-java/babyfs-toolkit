@@ -9,9 +9,9 @@ public interface ILoadBalance {
     /**
      * 根据规则获取应用的一个服务实例
      *
-     * @param appName 应用名称
+     * @param interfaceName 服务接口名称
      * @return
      */
-    ServiceInstance getServerByAppName(String appName);
+    ServiceInstance getServerByName(String interfaceName);
 
 }

@@ -1,11 +1,11 @@
 package com.babyfs.tk.commons.name.impl.zookeeper;
 
+import com.alibaba.fastjson.JSON;
 import com.babyfs.tk.commons.codec.ICodec;
 import com.babyfs.tk.commons.event.EventUtil;
 import com.babyfs.tk.commons.event.IEventListener;
 import com.babyfs.tk.commons.name.NSProviderEventType;
 import com.babyfs.tk.commons.name.Server;
-import com.babyfs.tk.commons.name.model.gen.NamingServices;
 import com.babyfs.tk.commons.utils.ListUtil;
 import com.babyfs.tk.commons.zookeeper.ZkClient;
 import com.babyfs.tk.commons.name.INameServiceProvider;
@@ -36,15 +36,15 @@ import static com.google.common.base.Preconditions.checkArgument;
  * <pre>
  *     +---naming_service  +
  *                         |---group1_root +    #第一组服务的根节点,对于服务的分组
- *                         |               |---svr_a +    #服务器节点,所有的服务器节点名称格式应当是svr_xxxx,而svr_xxx作为该服务器的惟一节点
- *                                                        #data:byte[] Protocols Buffer 格式的数据,定义参见{@link NamingServices}
+ *                         |               |---ip:port +    #服务器节点,所有的服务器节点名称格式应当是svr_xxxx,而svr_xxx作为该服务器的惟一节点
+ *                                                        #data:byte[] JSON格式的数据,定义参见{@link Server}
  *                         |               |
- *                         |               |---svr_b +    #服务器节点,data:byte[] Protocols Buffer 格式的数据,定义参见{@link NamingServices}
+ *                         |               |---ip:port +    #服务器节点,data:byte[] JSON格式的数据,定义参见{@link Server}
  *                         |
  *                         |---group2_root +    #第二组服务定义的根节点
- *                                         |---svr_a +    #服务器节点,data:byte[]
+ *                                         |---ip:port +    #服务器节点,data:byte[]
  *                                         |
- *                                         |---svr_b +    #服务器节点,data:byte[]
+ *                                         |---ip:port+    #服务器节点,data:byte[]
  *
  *
  *
@@ -75,33 +75,18 @@ public class ZkNameServcieProvider implements INameServiceProvider {
      */
     protected ConcurrentMap<IEventListener<NSProviderEvent>, IEventListener<NSProviderEvent>> listeners = Maps.newConcurrentMap();
 
-    /**
-     * server节点数据的编码解码器
-     */
-    private final ICodec codec;
 
     /**
      * @param zkClient
      * @param serviceRootPath
      */
     public ZkNameServcieProvider(@Nonnull ZkClient zkClient, @Nonnull String serviceRootPath) {
-        this(zkClient, serviceRootPath, new ServerNodeProtoCodec());
-    }
-
-    /**
-     * @param zkClient
-     * @param serviceRootPath
-     * @param codec
-     */
-    public ZkNameServcieProvider(@Nonnull ZkClient zkClient, @Nonnull String serviceRootPath, @Nonnull ICodec codec) {
         Preconditions.checkArgument(zkClient != null, "zkClient");
         Preconditions.checkArgument(serviceRootPath != null && serviceRootPath.startsWith("/"), "The serviceRootPath must starts with / .");
-        Preconditions.checkArgument(codec != null, "codec");
         String rootPath = serviceRootPath;
         if (serviceRootPath.endsWith("/")) {
             rootPath = serviceRootPath.substring(0, serviceRootPath.length() - 1);
         }
-        this.codec = codec;
         this.serviceRootPath = rootPath.trim();
         this.zkClient = zkClient;
         this.zkClient.register(this.watcher);
@@ -144,21 +129,6 @@ public class ZkNameServcieProvider implements INameServiceProvider {
 
 
     /**
-     * 从节点的路径中解析服务器的节点
-     *
-     * @param path
-     * @return
-     */
-    private String getServerIdFromPath(String path) {
-        String child = path.substring(this.serviceRootPath.length() + 1);
-        if (!child.startsWith(ZkConstants.SERVER_NODE_PREFIX) || child.contains("/")) {
-            LOGGER.warn("Not a valid server node,the node name must be start with svr_ and must be the last node.");
-            return null;
-        }
-        return child;
-    }
-
-    /**
      * @param zooKeeper
      * @param serverPath
      * @return
@@ -172,21 +142,8 @@ public class ZkNameServcieProvider implements INameServiceProvider {
             LOGGER.warn("No data at node " + serverPath);
             return null;
         }
-        String serverId = getServerIdFromPath(serverPath);
-        if (Strings.isNullOrEmpty(serverId)) {
-            LOGGER.warn("Not valid server node,the server id is empty for the path " + serverPath);
-            return null;
-        }
-        NamingServices.NSServer nsServer = (NamingServices.NSServer) codec.decode(data);
-        if (!nsServer.getId().equals(serverId)) {
-            LOGGER.warn("Not valid server node,the server id doesn't match:path id=" + serverId + ",data id=" + nsServer.getId());
-            return null;
-        }
-        Server server = new Server(nsServer.getId(), nsServer.getIp(), nsServer.getPort());
-        for (String service : nsServer.getServicesList()) {
-            server.addService(service);
-        }
-        return server;
+
+        return JSON.parseObject(data, Server.class);
     }
 
     /**
@@ -209,6 +166,7 @@ public class ZkNameServcieProvider implements INameServiceProvider {
                 }
                 return Collections.emptyList();
             }
+
             //增加对root下字节点的监控
             List<String> serverChildren = ListUtil.transform(zooKeeper.getChildren(this.serviceRootPath, true), new Function<String, String>() {
                 @Override
@@ -216,6 +174,7 @@ public class ZkNameServcieProvider implements INameServiceProvider {
                     return serviceRootPath + "/" + input;
                 }
             });
+
             if (serverChildren.isEmpty()) {
                 LOGGER.warn("No servers from " + this.toString());
                 this.servers.clear();
@@ -225,6 +184,7 @@ public class ZkNameServcieProvider implements INameServiceProvider {
                 }
                 return Collections.emptyList();
             }
+
             Set[] difference = checkDifference(serverChildren);
             Set<String> added = difference[0];
             Set<String> removed = difference[1];
@@ -248,13 +208,9 @@ public class ZkNameServcieProvider implements INameServiceProvider {
             //处理删除的server
             for (String rs : removed) {
                 this.servers.remove(rs);
-                String serverId = getServerIdFromPath(rs);
-                LOGGER.info("Build for root " + rs + ",remove server " + serverId);
-                if (Strings.isNullOrEmpty(serverId)) {
-                    continue;
-                }
+                LOGGER.info("Build for root " + rs + ",remove server " + rs);
                 if (notifListener) {
-                    NSProviderEvent event = new NSProviderEvent(NSProviderEventType.DELETE_SERVER, Lists.newArrayList(new Server(serverId, "ToDelete", 1)));
+                    NSProviderEvent event = new NSProviderEvent(NSProviderEventType.DELETE_SERVER, Lists.newArrayList(new Server(rs, 1)));
                     triggerEvent(event);
                 }
             }

@@ -173,7 +173,6 @@ public class ResponseUtil {
             ServletOutputStream stream = response.getOutputStream();
             stream.write(data);
             stream.flush();
-            stream.close();
             return true;
         } catch (Exception e) {
             LOGGER.error("writer to response exception.", e);

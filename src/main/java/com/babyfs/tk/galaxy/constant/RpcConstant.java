@@ -24,4 +24,19 @@ public class RpcConstant {
 
     public static final String ZK_BOOTSTRAP_SERVERS_DEFAULT = "127.0.0.1:2181";
 
+    /**
+     * rpc客户端调用前缀
+     */
+    public static final String NAME_RPC_CLIENT_URL_PREFIX = "rpc.client.url.prefixe";
+    /**
+     * rpc服务端暴露出来的服务
+     */
+    public static final String NAME_RPC_SERVER_EXPOSE = "rpc.server.expose";
+
+    //连接超时时间 单位秒
+    public static final String CONNECT_TIMEOUT = "ok.http.connect.timeout";
+    //读超时时间 单位秒
+    public static final String READ_TIMEOUT = "ok.http.read.timeout";
+    //写超时时间 单位秒
+    public static final String WRITE_TIMEOUT = "ok.http.write.timeout";
 }
