@@ -1,12 +1,12 @@
 package com.babyfs.tk.commons.name.impl.zookeeper;
 
-import com.alibaba.fastjson.JSON;
-import com.babyfs.tk.commons.event.EventUtil;
+import com.babyfs.tk.commons.codec.ICodec;
 import com.babyfs.tk.commons.event.IEventListener;
+import com.babyfs.tk.commons.name.NSRegisterEventType;
+import com.babyfs.tk.commons.event.EventUtil;
 import com.babyfs.tk.commons.name.INameServiceRegister;
 import com.babyfs.tk.commons.name.NSRegisterEvent;
-import com.babyfs.tk.commons.name.NSRegisterEventType;
-import com.babyfs.tk.commons.name.Server;
+import com.babyfs.tk.commons.name.model.gen.NamingServices;
 import com.babyfs.tk.commons.zookeeper.ZkClient;
 import com.babyfs.tk.commons.zookeeper.ZkUtils;
 import com.google.common.base.Preconditions;
@@ -25,6 +25,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 
 import static org.apache.zookeeper.CreateMode.EPHEMERAL;
@@ -36,12 +37,18 @@ public class ZkNameServiceRegister implements INameServiceRegister {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZkNameServiceRegister.class);
 
     private final ZkClient zkClient;
+    private final String serverId;
     private final String ip;
     private final int port;
     private final String serviceRootPath;
     private final String nodePath;
     private final Set<String> services;
+    private final String registerToken;
 
+    /**
+     * server节点数据的编码解码器
+     */
+    private final ICodec codec;
     /**
      *
      */
@@ -55,21 +62,39 @@ public class ZkNameServiceRegister implements INameServiceRegister {
     protected ConcurrentMap<IEventListener<NSRegisterEvent>, IEventListener<NSRegisterEvent>> listeners = Maps.newConcurrentMap();
 
     /**
-     * @param zkClient Zookeeper的客户端
+     * @param zkClient
+     * @param serverId
      * @param ip
      * @param port
+     * @param serviceRootPath
      */
-    public ZkNameServiceRegister(@Nonnull ZkClient zkClient, @Nonnull String ip, @Nonnegative int port, @Nonnull String serviceRootPath) {
+    public ZkNameServiceRegister(@Nonnull ZkClient zkClient, @Nonnull String serverId, @Nonnull String ip, @Nonnegative int port, @Nonnull String serviceRootPath) {
+        this(zkClient, serverId, ip, port, serviceRootPath, new ServerNodeProtoCodec());
+    }
+
+    /**
+     * @param zkClient Zookeeper的客户端
+     * @param serverId
+     * @param ip
+     * @param port
+     * @param codec
+     */
+    public ZkNameServiceRegister(@Nonnull ZkClient zkClient, @Nonnull String serverId, @Nonnull String ip, @Nonnegative int port, @Nonnull String serviceRootPath, @Nonnull ICodec codec) {
         Preconditions.checkArgument(zkClient != null, "zkClient");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(serverId) && serverId.startsWith(ZkConstants.SERVER_NODE_PREFIX), "serverId");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(ip), "ip");
         Preconditions.checkArgument(port > 0, "port");
+        Preconditions.checkArgument(codec != null, "codec");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(serviceRootPath) && serviceRootPath.startsWith("/"), "serviceRootPath");
         this.zkClient = zkClient;
+        this.serverId = serverId;
         this.ip = ip;
         this.port = port;
         this.serviceRootPath = serviceRootPath;
-        this.nodePath = this.serviceRootPath + "/" + this.ip + ":" + this.port;
+        this.nodePath = this.serviceRootPath + "/" + this.serverId;
         this.services = Sets.newHashSet();
+        this.registerToken = UUID.randomUUID().toString();
+        this.codec = codec;
 
         watcher = new RegisterWatcher();
         this.zkClient.register(watcher);
@@ -109,18 +134,30 @@ public class ZkNameServiceRegister implements INameServiceRegister {
                 return false;
             }
 
-            Server server = new Server(this.ip, port);
-            server.addService(this.services);
+            NamingServices.NSServer.Builder builder = NamingServices.NSServer.newBuilder();
+            builder.setId(this.serverId).setIp(this.ip).setPort(this.port).setRegisterToken(this.registerToken);
+            builder.addAllServices(this.services);
+            byte[] data = codec.encode(builder.build());
 
-            byte[] data = JSON.toJSONBytes(server);
             if (zooKeeper.exists(nodePath, true) != null) {
                 LOGGER.warn("The node {} already exists,check the data", nodePath);
-                Stat stat = zooKeeper.setData(nodePath, data, -1);
-                LOGGER.info("Set server data for {},stat: {} ", nodePath, stat);
-                return stat != null;
+                Stat preStat = new Stat();
+                byte[] preData = zooKeeper.getData(nodePath, false, preStat);
+                if (preData != null && preData.length > 0) {
+                    NamingServices.NSServer preServer = (NamingServices.NSServer) codec.decode(preData);
+                    LOGGER.info("The exited node register token is {},our token is {}.", preServer.getRegisterToken(), this.registerToken);
+                    if (!this.registerToken.equals(preServer.getRegisterToken())) {
+                        LOGGER.warn("The exited node register token is {},but our token is {},stop register.", preServer.getRegisterToken(), this.registerToken);
+                        return false;
+                    }
+                    Stat stat = zooKeeper.setData(nodePath, data, preStat.getVersion());
+                    LOGGER.info("Set server data for {},stat: {} ", nodePath, stat);
+                    return stat != null;
+                }
+                return false;
             } else {
                 LOGGER.warn("The node {} doesn't exist,register it.", nodePath);
-                List<ACL> acls = ZkUtils.createACL(zkClient.getZkUser(), zkClient.getZkPassword());
+                List<ACL> acls = ZkUtils.createACL(zkClient.getZkUser(),zkClient.getZkPassword());
                 String path = zooKeeper.create(nodePath, data, acls, EPHEMERAL);
                 if (!nodePath.equals(path)) {
                     LOGGER.warn("The created path is {},but it should be {}", nodePath, path);
@@ -194,8 +231,8 @@ public class ZkNameServiceRegister implements INameServiceRegister {
                 zooKeeper.exists(nodePath, true);
             } catch (Exception e) {
                 LOGGER.error("Rewatch the node fail.", e);
+                return;
             }
-
             LOGGER.info("Event:" + event);
             switch (event.getType()) {
                 case NodeDeleted:

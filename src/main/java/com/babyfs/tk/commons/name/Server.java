@@ -6,7 +6,6 @@ import com.google.common.collect.Sets;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -15,6 +14,10 @@ import static com.google.common.base.Preconditions.checkArgument;
  * 服务实例的信息
  */
 public class Server {
+    /**
+     * 服务器的ID,每个服务器的ID应该是全局惟一的,也是服务器的惟一标识
+     */
+    private final String id;
     /**
      * 服务器监听的IP
      */
@@ -30,12 +33,15 @@ public class Server {
     private final Set<String> services = Sets.newHashSet();
 
     /**
+     * @param id
      * @param ip
      * @param port
      */
-    public Server(String ip, int port) {
+    public Server(String id, String ip, int port) {
+        checkArgument(!Strings.isNullOrEmpty(id), "The server id must not be null or emtpty.");
         checkArgument(!Strings.isNullOrEmpty(ip), "The server ip must not be null or empty.");
         checkArgument(port > 0, "The server port must be > 0.");
+        this.id = id;
         this.ip = ip;
         this.port = port;
     }
@@ -59,6 +65,9 @@ public class Server {
         return Collections.unmodifiableSet(services);
     }
 
+    public String getId() {
+        return id;
+    }
 
     public String getIp() {
         return ip;
@@ -72,21 +81,28 @@ public class Server {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         Server server = (Server) o;
-        return port == server.port &&
-                Objects.equals(ip, server.ip);
+
+        if (!id.equals(server.id)) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ip, port);
+        return id.hashCode();
     }
 
     @Override
     public String toString() {
-        return "Server{" +
-                "ip='" + ip + '\'' +
-                ", port=" + port +
-                '}';
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Server");
+        sb.append("{id='").append(id).append('\'');
+        sb.append(", ip='").append(ip).append('\'');
+        sb.append(", port=").append(port);
+        sb.append(", services=").append(services);
+        sb.append('}');
+        return sb.toString();
     }
 }

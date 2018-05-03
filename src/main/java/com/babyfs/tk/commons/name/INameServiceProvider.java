@@ -12,7 +12,7 @@ public interface INameServiceProvider {
     /**
      * 重新加载所有的命名服务数据,加载完成后发送{@link NSProviderEventType#INIT} 事件向所有的监听者
      */
-    void reload();
+    public void reload();
 
     /**
      * 初始化服务数据,成功加载后的服务器数据通过<code>function</code>回调接口通知给调用方
@@ -21,12 +21,12 @@ public interface INameServiceProvider {
      * @param <T>
      * @return
      */
-    <T> T init(Function<List<Server>, T> function);
+    public <T> T init(Function<List<Server>, T> function);
 
     /**
      * 增加事件监听器
      *
      * @param eventListener
      */
-    void addListener(IEventListener<NSProviderEvent> eventListener);
+    public void addListener(IEventListener<NSProviderEvent> eventListener);
 }
