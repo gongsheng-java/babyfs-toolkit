@@ -3,6 +3,7 @@ package com.babyfs.tk.galaxy.controller;
 import com.babyfs.tk.galaxy.server.IRpcService;
 import com.babyfs.tk.service.basic.utils.ResponseUtil;
 import com.babyfs.tk.service.biz.base.annotation.InternalAccess;
+import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -29,9 +30,8 @@ public class RPCController {
     @RequestMapping(value = "/invoke", method = RequestMethod.POST)
     @InternalAccess
     public void invokeRpcMethod(final HttpServletRequest request, final HttpServletResponse response) {
-        try {
-            int size = request.getContentLength();
-            ServletInputStream sis = request.getInputStream();
+        int size = request.getContentLength();
+        try(ServletInputStream sis = request.getInputStream()) {
             byte[] buffer = new byte[size];
             sis.read(buffer, 0, size);
             ResponseUtil.writeByteResult(response, rpcService.invoke(buffer));
