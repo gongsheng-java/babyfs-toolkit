@@ -9,7 +9,6 @@ import java.io.IOException;
  * 是rpc框架的传输层
  */
 public interface IClient {
-
     /**
      * 执行rpc远程调用的方法
      *

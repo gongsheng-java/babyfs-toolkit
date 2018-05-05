@@ -16,15 +16,15 @@ public class ServerInstanceTest {
     @Test
     public void deDoubleTest() {
 
-        ServiceInstance serviceInstanceA = new ServiceInstance("api", "127.0.0.1", 8080);
-        ServiceInstance serviceInstanceB = new ServiceInstance("api", "127.0.0.1", 8080);
-        List<ServiceInstance> list = new CopyOnWriteArrayList<>();
-        if (!list.contains(serviceInstanceA)) {
+        ServiceServer serviceServerA = new ServiceServer(null, "127.0.0.1", 8080);
+        ServiceServer serviceServerB = new ServiceServer(null, "127.0.0.1", 8080);
+        List<ServiceServer> list = new CopyOnWriteArrayList<>();
+        if (!list.contains(serviceServerA)) {
             LOGGER.error("no contains A");
-            list.add(serviceInstanceA);
+            list.add(serviceServerA);
         }
-        if (!list.contains(serviceInstanceB)) {
-            list.add(serviceInstanceA);
+        if (!list.contains(serviceServerB)) {
+            list.add(serviceServerA);
         } else {
             LOGGER.error("contains B");
         }

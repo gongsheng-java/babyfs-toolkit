@@ -2,6 +2,7 @@ package com.babyfs.tk.service.biz.pubsub;
 
 import com.alibaba.fastjson.JSONObject;
 import com.babyfs.tk.commons.config.IConfigService;
+import com.babyfs.tk.commons.enums.ShutdownOrder;
 import com.babyfs.tk.commons.service.LifeServiceSupport;
 import com.babyfs.tk.commons.thread.NamedThreadFactory;
 import com.babyfs.tk.commons.utils.MapUtil;
@@ -29,9 +30,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * order使用默认优先级最低,最后一个启动
+ * order使用默认优先级最低,最后一个启动,最先关闭
  */
 @Order
+@ShutdownOrder
 public class RedisPubSubServcie extends LifeServiceSupport {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPubSubServcie.class);
     protected final INameResourceService<JedisPool> redisService;

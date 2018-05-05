@@ -10,7 +10,7 @@
             {"type":"sys"},
             {
                 "type":"common",
-                "uris":["properties.xml"]
+                "uris":["properties.xml","rpc.xml"]
             }
             ]
     ]]>

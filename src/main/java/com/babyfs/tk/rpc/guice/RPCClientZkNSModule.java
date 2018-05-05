@@ -1,17 +1,16 @@
 package com.babyfs.tk.rpc.guice;
 
-import com.google.inject.Inject;
-import com.google.inject.PrivateModule;
-import com.google.inject.Provider;
 import com.babyfs.tk.commons.MapConfig;
 import com.babyfs.tk.commons.config.IConfigService;
 import com.babyfs.tk.commons.name.INameService;
 import com.babyfs.tk.commons.name.INameServiceProvider;
 import com.babyfs.tk.commons.name.ServiceRegistry;
-import com.babyfs.tk.commons.name.impl.zookeeper.ServerNodeJsonCodec;
 import com.babyfs.tk.commons.name.impl.zookeeper.ZkNameServcieProvider;
 import com.babyfs.tk.commons.zookeeper.ZkClient;
 import com.babyfs.tk.rpc.RPCConfig;
+import com.google.inject.Inject;
+import com.google.inject.PrivateModule;
+import com.google.inject.Provider;
 
 /**
  * RPC客户端基于Zookeepr实现的命名服务查找接口
@@ -43,7 +42,7 @@ public class RPCClientZkNSModule extends PrivateModule {
         @Override
         public INameServiceProvider get() {
             String serviceRootPath = MapConfig.getString(RPCConfig.CONF_RPC_SERVICE_ZK_ROOT, conf, null);
-            return new ZkNameServcieProvider(zkClient, serviceRootPath, new ServerNodeJsonCodec());
+            return new ZkNameServcieProvider(zkClient, serviceRootPath);
         }
     }
 }
