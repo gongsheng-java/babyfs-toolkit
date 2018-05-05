@@ -1,5 +1,6 @@
 package com.babyfs.tk.commons.service.internal;
 
+import com.babyfs.tk.commons.enums.ShutdownOrder;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -9,9 +10,11 @@ import com.babyfs.tk.commons.service.IStageActionRegistry;
 import com.babyfs.tk.commons.service.annotation.LifecycleServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.annotation.OrderUtils;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +24,7 @@ import java.util.Set;
  */
 public class StageActionRegistrySupport implements IStageActionRegistry {
     private static final Logger LOGGER = LoggerFactory.getLogger("StageAction");
+    public static final int DEFAULT_ORDER = 0;
     private final List<Runnable> actions = Lists.newLinkedList();
     private boolean completed = false;
 
@@ -43,7 +47,7 @@ public class StageActionRegistrySupport implements IStageActionRegistry {
             return;
         }
         completed = true;
-        LOGGER.info("Run actions in " + this);
+        LOGGER.info("run {} actions", this.getClass().getSimpleName());
         for (Runnable action : actions) {
             try {
                 LOGGER.info("Run action:" + action.getClass());
@@ -54,7 +58,7 @@ public class StageActionRegistrySupport implements IStageActionRegistry {
                 throw new IllegalStateException("Exec stage action error.", e);
             }
         }
-        LOGGER.info("Run actions in " + this + ",finish");
+        LOGGER.info("finish run {} actions", this.getClass().getSimpleName());
     }
 
     protected boolean isDisableStartLifeServcie() {
@@ -67,14 +71,14 @@ public class StageActionRegistrySupport implements IStageActionRegistry {
      * @param lifeServices
      * @return
      */
-    protected static List<ILifeService> sortByOrderAsc(Collection<ILifeService> lifeServices) {
+    protected static <A extends Annotation> List<ILifeService> sortByOrderAsc(Collection<ILifeService> lifeServices, Class<A> orderType) {
         if (lifeServices == null || lifeServices.isEmpty()) {
             return Collections.emptyList();
         }
 
         List<OrderedLifeService> orderedLifeServices = Lists.newArrayList();
         for (ILifeService lifeService : lifeServices) {
-            Integer order = OrderUtils.getOrder(lifeService.getClass(), 0);
+            Integer order = getOrder(lifeService.getClass(), orderType, DEFAULT_ORDER);
             orderedLifeServices.add(new OrderedLifeService(lifeService, order));
         }
 
@@ -85,16 +89,6 @@ public class StageActionRegistrySupport implements IStageActionRegistry {
         });
 
         return sorted;
-    }
-
-    /**
-     * 对{@link ILifeService}按{@link Order#value()}升序排序
-     *
-     * @param lifeServices
-     * @return
-     */
-    protected static List<ILifeService> sortByOrderDesc(Collection<ILifeService> lifeServices) {
-        return Lists.reverse(sortByOrderAsc(lifeServices));
     }
 
     static class OrderedLifeService implements Comparable<OrderedLifeService> {
@@ -110,5 +104,18 @@ public class StageActionRegistrySupport implements IStageActionRegistry {
         public int compareTo(OrderedLifeService other) {
             return this.order.compareTo(other.order);
         }
+
+    }
+
+    public static <A extends Annotation> Integer getOrder(Class<?> type, Class<A> annotationType, Integer defaultOrder) {
+        A order = AnnotationUtils.findAnnotation(type, annotationType);
+        if (order != null) {
+            if (order instanceof Order) {
+                return ((Order) order).value();
+            } else if (order instanceof ShutdownOrder) {
+                return ((ShutdownOrder) order).value();
+            }
+        }
+        return defaultOrder;
     }
 }

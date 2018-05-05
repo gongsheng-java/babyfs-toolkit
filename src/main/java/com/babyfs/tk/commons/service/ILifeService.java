@@ -12,4 +12,13 @@ public interface ILifeService extends Service {
      * @return
      */
     String getName();
+
+    /**
+     * 取得服务的描述性名称
+     *
+     * @return
+     */
+    default String getDescription() {
+        return getClass().getSimpleName() + (getName() != null ? "#" + getName() : "");
+    }
 }

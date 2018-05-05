@@ -26,7 +26,7 @@ public abstract class RpcClientServiceModule extends ServiceModule {
     }
 
     protected <T> void bindRPCService(final Class<T> serviceInterface, String name) {
-        Provider<T> provider = new ClientServiceProvider(serviceInterface, name);
+        Provider<T> provider = new ClientServiceProvider<T>(serviceInterface, name);
         bindService(serviceInterface, provider, name);
     }
 

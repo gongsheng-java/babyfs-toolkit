@@ -1,5 +1,6 @@
 package com.babyfs.tk.galaxy.server.impl;
 
+import com.babyfs.tk.commons.enums.ShutdownOrder;
 import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.commons.service.LifeServiceSupport;
 import com.babyfs.tk.galaxy.Utils;
@@ -7,17 +8,22 @@ import com.babyfs.tk.galaxy.RpcRequest;
 import com.babyfs.tk.galaxy.codec.IDecoder;
 import com.babyfs.tk.galaxy.codec.IEncoder;
 import com.babyfs.tk.galaxy.constant.RpcConstant;
+import com.babyfs.tk.galaxy.register.IServcieRegister;
 import com.babyfs.tk.galaxy.server.IServer;
 import com.babyfs.tk.galaxy.ServicePoint;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -25,6 +31,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * rpc server接口实现
  */
+@Order
 public class ServerImpl extends LifeServiceSupport implements IServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerImpl.class.getName());
 
@@ -35,6 +42,9 @@ public class ServerImpl extends LifeServiceSupport implements IServer {
     private final Map<ServicePoint, Object> services;
 
     private volatile Map<String, Dispatcher> serviceDispatchers;
+
+    @Inject(optional = true)
+    private IServcieRegister servcieRegister;
 
     @Inject
     public ServerImpl(@Named(RpcConstant.NAME_RPC_SERVER_EXPOSE) Map<ServicePoint, Object> services, IDecoder decoder, IEncoder encoder) {
@@ -104,10 +114,17 @@ public class ServerImpl extends LifeServiceSupport implements IServer {
         }
     }
 
+    public synchronized IServcieRegister getServcieRegister() {
+        return servcieRegister;
+    }
+
+    public synchronized void setServcieRegister(IServcieRegister servcieRegister) {
+        this.servcieRegister = servcieRegister;
+    }
+
     @Override
     protected void execStart() {
         super.execStart();
-        LOGGER.info("start init service");
         Map<String, Dispatcher> serviceDispatcher = Maps.newHashMap();
         for (Map.Entry<ServicePoint, Object> entry : this.services.entrySet()) {
             ServicePoint p = Preconditions.checkNotNull(entry.getKey());
@@ -119,19 +136,25 @@ public class ServerImpl extends LifeServiceSupport implements IServer {
 
             Map<String, Method> methods = parseMethods(type);
             serviceDispatcher.put(interfaceName, new Dispatcher(methods, svr));
+
             LOGGER.info("add rpc service {} ", interfaceName);
         }
 
         this.serviceDispatchers = serviceDispatcher;
-        //TODO 注册Zk服务
-        LOGGER.info("finish init service");
+
+        if (this.servcieRegister != null) {
+            ArrayList<String> serviceNames = Lists.newArrayList(this.serviceDispatchers.keySet());
+            LOGGER.info("add {} to servcie register", serviceNames);
+            this.servcieRegister.addServices(serviceNames);
+        } else {
+            LOGGER.info("not service register,ignore it");
+        }
     }
 
     @Override
     protected void execStop() {
         super.execStop();
         this.serviceDispatchers = null;
-        //TODO 注销Zk服务
     }
 
     /**

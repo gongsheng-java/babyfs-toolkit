@@ -12,6 +12,6 @@ public class BadServiceImpl implements BadService {
 
     @Override
     public ServiceResponse<ExcelModel> exception(Map<String, Object> queryMap) {
-        throw new RuntimeException("no");
+        throw new RuntimeException("it'ok,this exception is test");
     }
 }

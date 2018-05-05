@@ -1,27 +1,21 @@
 package com.babyfs.tk.galaxy;
 
-import com.babyfs.tk.commons.config.ConfigServiceConfig;
-import com.babyfs.tk.commons.config.IConfigService;
-import com.babyfs.tk.commons.config.guice.ConfigServiceModule;
 import com.babyfs.tk.commons.model.ServiceResponse;
-import com.babyfs.tk.commons.service.ServiceModule;
 import com.babyfs.tk.galaxy.codec.IDecoder;
 import com.babyfs.tk.galaxy.codec.IEncoder;
 import com.babyfs.tk.galaxy.demo.BadService;
-import com.babyfs.tk.galaxy.demo.BadServiceImpl;
 import com.babyfs.tk.galaxy.demo.Health;
-import com.babyfs.tk.galaxy.demo.HealthImpl;
 import com.babyfs.tk.galaxy.guice.*;
-import com.babyfs.tk.galaxy.server.IServer;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Module;
-import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
 
+@Ignore
 public class RpcClienitTest extends BaseTest {
     @Inject
     private IEncoder encoder;
@@ -36,18 +30,31 @@ public class RpcClienitTest extends BaseTest {
 
 
     @Test
-    public void test() {
+    public void test() throws Exception {
         Health health = injector.getInstance(Health.class);
         System.out.println(health);
-
-        {
+        for (int i = 0; i < 100; i++) {
+            try {
+                ServiceResponse<String> jsonTest = health.jsonTest(null);
+                printResponseMsg(jsonTest);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Thread.sleep(5000);
         }
+
+        System.out.println("wait finish");
+
+        System.in.read();
     }
 
     protected static List<Module> getSubModules() {
         List<Module> modules = Lists.newArrayList();
         modules.add(new RpcSupportModule());
         modules.add(new RpcClientSupportModule());
+        modules.add(new RpcServerSupportModule());
+        modules.add(new ZkServiceRegisterModule());
+        modules.add(new ZkServiceNamesModule());
         modules.add(new RpcClientServiceModule() {
             @Override
             protected void configure() {
@@ -55,7 +62,6 @@ public class RpcClienitTest extends BaseTest {
                 bindRPCService(BadService.class);
             }
         });
-        modules.add(new ConfigServiceModule("globalconf.xml"));
         return modules;
     }
 }

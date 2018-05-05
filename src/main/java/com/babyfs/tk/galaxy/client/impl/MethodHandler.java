@@ -8,7 +8,7 @@ import com.babyfs.tk.galaxy.client.IClient;
 import com.babyfs.tk.galaxy.codec.IDecoder;
 import com.babyfs.tk.galaxy.codec.IEncoder;
 import com.babyfs.tk.galaxy.register.ILoadBalance;
-import com.babyfs.tk.galaxy.register.ServiceInstance;
+import com.babyfs.tk.galaxy.register.ServiceServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,13 +28,13 @@ public final class MethodHandler {
     private final String urlPrefix;
 
     public MethodHandler(ServicePoint<?> target, IEncoder encoder, IDecoder decoder, IClient client, MethodMeta metadata, ILoadBalance loadBalance, String urlPrefix) {
-        this.target = checkNotNull(target, "target for %s", target);
-        this.decoder = checkNotNull(decoder, "decoder for %s", decoder);
-        this.metadata = checkNotNull(metadata, "metadata for %s", metadata);
-        this.encoder = checkNotNull(encoder, "encode for %s", encoder);
-        this.client = checkNotNull(client, "client for %s", client);
-        this.loadBalance = checkNotNull(loadBalance, "loadBalance for %s", loadBalance);
-        this.urlPrefix = checkNotNull(urlPrefix, "urlPrefix for %s", urlPrefix);
+        this.target = checkNotNull(target, "target");
+        this.decoder = checkNotNull(decoder, "decoder");
+        this.encoder = checkNotNull(encoder, "encode");
+        this.metadata = checkNotNull(metadata, "metadata");
+        this.client = checkNotNull(client, "client");
+        this.loadBalance = checkNotNull(loadBalance, "loadBalance");
+        this.urlPrefix = checkNotNull(urlPrefix, "urlPrefix");
 
     }
 
@@ -49,13 +49,13 @@ public final class MethodHandler {
     public Object invoke(Object[] argv) {
         byte[] body = encoder.encode(createRequest(argv));
         String interfaceName = target.getType().getName();
-        ServiceInstance serviceInstance = loadBalance.getServerByName(interfaceName);
-        if (serviceInstance == null) {
-            LOGGER.error("no serviceInstance by appName:" + interfaceName);
-            throw new RpcException("no serviceInstance by appName:" + interfaceName);
+        ServiceServer serviceServer = loadBalance.findServer(interfaceName);
+        if (serviceServer == null) {
+            LOGGER.error("no serviceInstance for:" + interfaceName);
+            throw new RpcException("no serviceInstance for:" + interfaceName);
         }
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("http://").append(serviceInstance.getHost()).append(":").append(serviceInstance.getPort());
+        stringBuilder.append("http://").append(serviceServer.getHost()).append(":").append(serviceServer.getPort());
         String url = stringBuilder.append(urlPrefix).toString();
         try {
             byte[] content = client.execute(url, body);

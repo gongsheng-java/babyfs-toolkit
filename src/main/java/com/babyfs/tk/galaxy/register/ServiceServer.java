@@ -1,11 +1,18 @@
 package com.babyfs.tk.galaxy.register;
 
+import com.google.common.collect.Sets;
+
 import java.util.Objects;
+import java.util.Set;
 
 /**
- * 服务实例
+ * 服务的Server
  */
-public class ServiceInstance {
+public class ServiceServer {
+    /**
+     * 服务注册的token
+     */
+    private String token;
     /**
      * 应用的ip地址
      */
@@ -15,9 +22,23 @@ public class ServiceInstance {
      */
     private int port;
 
-    public ServiceInstance(String host, int port) {
+    private Set<String> servcies = Sets.newHashSet();
+
+    public ServiceServer() {
+    }
+
+    public ServiceServer(String token, String host, int port) {
+        this.token = token;
         this.host = host;
         this.port = port;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public void setPort(int port) {
@@ -37,11 +58,26 @@ public class ServiceInstance {
         return port;
     }
 
+    public Set<String> getServcies() {
+        return servcies;
+    }
+
+    public void setServcies(Set<String> servcies) {
+        this.servcies = servcies;
+    }
+
+    public void addService(Set<String> serviceNames) {
+        if (this.servcies == null) {
+            this.servcies = Sets.newHashSet();
+        }
+        this.servcies.addAll(serviceNames);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ServiceInstance that = (ServiceInstance) o;
+        ServiceServer that = (ServiceServer) o;
         return port == that.port &&
                 Objects.equals(host, that.host);
     }
@@ -51,6 +87,7 @@ public class ServiceInstance {
         return Objects.hash(host, port);
     }
 
+
     @Override
     public String toString() {
         return "ServiceInstance{" +
@@ -58,4 +95,5 @@ public class ServiceInstance {
                 ", port=" + port +
                 '}';
     }
+
 }

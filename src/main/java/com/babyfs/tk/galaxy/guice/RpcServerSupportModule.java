@@ -21,8 +21,4 @@ public class RpcServerSupportModule extends ServiceModule {
         bindService(IServer.class, ServerImpl.class);
         LifeServiceBindUtil.addLifeService(binder(), Key.get(IServer.class));
     }
-
-    public static class Init {
-
-    }
 }

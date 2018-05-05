@@ -28,30 +28,35 @@ public class ClientProxyFactoryImpl implements IClientProxyFactory {
     /**
      * 编码器
      */
-    @Inject
     private IEncoder encoder;
     /**
      * 解码器
      */
-    @Inject
     private IDecoder decoder;
     /**
      * 传输层采用的Client
      */
-    @Inject
     private IClient client;
     /**
      * 负载均衡器
      */
-    @Inject
     private ILoadBalance loadBalance;
 
     private final String urlPrefix;
 
+
     /**
-     * @param urlPrefix rpc调用的URL
+     * @param encoder
+     * @param decoder
+     * @param client
+     * @param loadBalance
+     * @param urlPrefix
      */
-    public ClientProxyFactoryImpl(String urlPrefix) {
+    public ClientProxyFactoryImpl(IEncoder encoder, IDecoder decoder, IClient client, ILoadBalance loadBalance, String urlPrefix) {
+        this.encoder = Preconditions.checkNotNull(encoder);
+        this.decoder = Preconditions.checkNotNull(decoder);
+        this.client = Preconditions.checkNotNull(client);
+        this.loadBalance = Preconditions.checkNotNull(loadBalance);
         if (!Strings.isNullOrEmpty(urlPrefix)) {
             this.urlPrefix = urlPrefix;
         } else {

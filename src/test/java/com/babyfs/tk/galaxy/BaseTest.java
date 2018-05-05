@@ -1,5 +1,6 @@
 package com.babyfs.tk.galaxy;
 
+import com.babyfs.tk.commons.config.guice.ConfigServiceModule;
 import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.commons.service.IStageActionRegistry;
 import com.babyfs.tk.commons.service.LifecycleModule;
@@ -44,6 +45,7 @@ public abstract class BaseTest {
             if (addon != null) {
                 modules.addAll(addon);
             }
+            modules.add(new ConfigServiceModule("globalconf.xml"));
             injector = Guice.createInjector(modules);
             initActionRegistry.execute();
         }

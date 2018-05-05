@@ -7,12 +7,17 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -72,5 +77,36 @@ public class Utils {
             MethodMeta metadata = new MethodMeta(method, methodSig);
             processor.apply(metadata);
         }
+    }
+
+    /**
+     * 构建curator
+     *
+     * @param zkRegisterUrl
+     * @param connectTimeout
+     * @param sessionTimeout
+     * @return
+     */
+    public static CuratorFramework buildAndStartCurator(String zkRegisterUrl, int connectTimeout, int sessionTimeout) {
+        checkNotNull(zkRegisterUrl, "zkRegisterUrl");
+        checkState(connectTimeout > 0, "connectTimeout > 0");
+        checkState(sessionTimeout > 0, "sessionTimeout > 0");
+
+        ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(1000, 3);
+        CuratorFramework curator = CuratorFrameworkFactory.builder().connectString(zkRegisterUrl).retryPolicy(retryPolicy)
+                .connectionTimeoutMs(connectTimeout)
+                .sessionTimeoutMs(sessionTimeout)
+                .build();
+        curator.start();
+        try {
+            boolean connected = curator.blockUntilConnected(connectTimeout, TimeUnit.MILLISECONDS);
+            LOGGER.info("connect to zk {},success {}", zkRegisterUrl, connected);
+            if (!connected) {
+                throw new RuntimeException("can't connect to zk in " + connectTimeout + " mills");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException("can't connect to zk", e);
+        }
+        return curator;
     }
 }
