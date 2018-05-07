@@ -76,6 +76,30 @@ public class BackoffHelper {
     }
 
     /**
+     * 在Executors中重复执行指定的Function
+     *
+     * @param function       被定期重复执行的函数,function的返回值为true,表示继续执行;false,表示停止执行
+     * @param delayMillis    延迟时间,单位毫秒
+     * @param intervalMillis 间隔,单位毫秒
+     */
+    public void doRepeatTask(final Function<Void, Boolean> function, long delayMillis, long intervalMillis) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Boolean repeat = function.apply(null);
+                    if (repeat == Boolean.TRUE) {
+                        executorService.schedule(this, delayMillis, TimeUnit.MILLISECONDS);
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("running repeat function at executor fail", e);
+                }
+            }
+        };
+        executorService.schedule(runnable, delayMillis, TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * 用于补偿的任务
      */
     private static final class BackoffTask implements Runnable {
