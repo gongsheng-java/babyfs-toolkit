@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BackoffHelperTest {
