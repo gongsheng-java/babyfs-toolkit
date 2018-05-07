@@ -2,17 +2,15 @@
 package com.babyfs.tk.galaxy.client.impl;
 
 
+import com.babyfs.tk.commons.codec.ICodec;
+import com.babyfs.tk.galaxy.ServicePoint;
 import com.babyfs.tk.galaxy.Utils;
-import com.babyfs.tk.galaxy.client.*;
-import com.babyfs.tk.galaxy.codec.IDecoder;
-import com.babyfs.tk.galaxy.codec.IEncoder;
+import com.babyfs.tk.galaxy.client.IClient;
+import com.babyfs.tk.galaxy.client.IClientProxyFactory;
 import com.babyfs.tk.galaxy.constant.RpcConstant;
 import com.babyfs.tk.galaxy.register.ILoadBalance;
-import com.babyfs.tk.galaxy.ServicePoint;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.elasticsearch.common.Strings;
 
 import java.lang.reflect.InvocationHandler;
@@ -20,19 +18,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkState;
-
 /**
  */
 public class ClientProxyFactoryImpl implements IClientProxyFactory {
     /**
      * 编码器
      */
-    private IEncoder encoder;
-    /**
-     * 解码器
-     */
-    private IDecoder decoder;
+    private ICodec codec;
     /**
      * 传输层采用的Client
      */
@@ -46,15 +38,13 @@ public class ClientProxyFactoryImpl implements IClientProxyFactory {
 
 
     /**
-     * @param encoder
-     * @param decoder
+     * @param codec
      * @param client
      * @param loadBalance
      * @param urlPrefix
      */
-    public ClientProxyFactoryImpl(IEncoder encoder, IDecoder decoder, IClient client, ILoadBalance loadBalance, String urlPrefix) {
-        this.encoder = Preconditions.checkNotNull(encoder);
-        this.decoder = Preconditions.checkNotNull(decoder);
+    public ClientProxyFactoryImpl(ICodec codec, IClient client, ILoadBalance loadBalance, String urlPrefix) {
+        this.codec = Preconditions.checkNotNull(codec);
         this.client = Preconditions.checkNotNull(client);
         this.loadBalance = Preconditions.checkNotNull(loadBalance);
         if (!Strings.isNullOrEmpty(urlPrefix)) {
@@ -101,7 +91,7 @@ public class ClientProxyFactoryImpl implements IClientProxyFactory {
 
         Utils.parseMethods(target.getType(), meta -> {
             Preconditions.checkNotNull(meta);
-            MethodHandler methodHandler = new MethodHandler(target, encoder, decoder, client, meta, loadBalance, urlPrefix);
+            MethodHandler methodHandler = new MethodHandler(target, codec, client, meta, loadBalance, urlPrefix);
             result.put(meta.getMethod(), methodHandler);
             return null;
         });

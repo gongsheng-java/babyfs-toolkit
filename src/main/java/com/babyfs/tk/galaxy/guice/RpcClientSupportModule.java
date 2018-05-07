@@ -1,14 +1,14 @@
 package com.babyfs.tk.galaxy.guice;
 
 import com.babyfs.tk.commons.MapConfig;
+import com.babyfs.tk.commons.codec.ICodec;
 import com.babyfs.tk.commons.config.IConfigService;
 import com.babyfs.tk.commons.service.ServiceModule;
+import com.babyfs.tk.galaxy.RpcCodec;
 import com.babyfs.tk.galaxy.client.IClient;
 import com.babyfs.tk.galaxy.client.IClientProxyFactory;
-import com.babyfs.tk.galaxy.client.impl.RpcOkHttpClient;
 import com.babyfs.tk.galaxy.client.impl.ClientProxyFactoryImpl;
-import com.babyfs.tk.galaxy.codec.IDecoder;
-import com.babyfs.tk.galaxy.codec.IEncoder;
+import com.babyfs.tk.galaxy.client.impl.RpcOkHttpClient;
 import com.babyfs.tk.galaxy.constant.RpcConstant;
 import com.babyfs.tk.galaxy.register.ILoadBalance;
 import com.babyfs.tk.galaxy.register.IRule;
@@ -54,15 +54,11 @@ public class RpcClientSupportModule extends ServiceModule {
         @Inject(optional = true)
         private IConfigService conf;
         /**
-         * 编码器
+         * 编解码器
          */
         @Inject
-        private IEncoder encoder;
-        /**
-         * 解码器
-         */
-        @Inject
-        private IDecoder decoder;
+        @RpcCodec
+        private ICodec codec;
         /**
          * 传输层采用的Client
          */
@@ -77,7 +73,7 @@ public class RpcClientSupportModule extends ServiceModule {
         @Override
         public IClientProxyFactory get() {
             String url = MapConfig.getString(RpcConstant.NAME_RPC_CLIENT_URL_PREFIX, conf, RpcConstant.RPC_URL_PREFIX_DEFAULT);
-            ClientProxyFactoryImpl factory = new ClientProxyFactoryImpl(encoder, decoder, client, loadBalance, url);
+            ClientProxyFactoryImpl factory = new ClientProxyFactoryImpl(codec, client, loadBalance, url);
             return factory;
         }
     }

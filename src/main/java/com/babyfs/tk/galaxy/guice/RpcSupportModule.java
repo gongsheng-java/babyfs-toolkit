@@ -1,10 +1,9 @@
 package com.babyfs.tk.galaxy.guice;
 
+import com.babyfs.tk.commons.codec.ICodec;
+import com.babyfs.tk.commons.codec.impl.HessianCodec;
 import com.babyfs.tk.commons.service.ServiceModule;
-import com.babyfs.tk.galaxy.codec.IDecoder;
-import com.babyfs.tk.galaxy.codec.IEncoder;
-import com.babyfs.tk.galaxy.codec.impl.HessianDecoder;
-import com.babyfs.tk.galaxy.codec.impl.HessianEncoder;
+import com.babyfs.tk.galaxy.RpcCodec;
 
 /**
  * 提供RPC公共的module
@@ -12,7 +11,7 @@ import com.babyfs.tk.galaxy.codec.impl.HessianEncoder;
 public class RpcSupportModule extends ServiceModule {
     @Override
     protected void configure() {
-        bind(IEncoder.class).to(HessianEncoder.class).asEagerSingleton();
-        bind(IDecoder.class).to(HessianDecoder.class).asEagerSingleton();
+        //注册code
+        bind(ICodec.class).annotatedWith(RpcCodec.class).to(HessianCodec.class).asEagerSingleton();
     }
 }

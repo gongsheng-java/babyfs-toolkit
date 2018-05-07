@@ -1,16 +1,15 @@
 package com.babyfs.tk.galaxy.server.impl;
 
-import com.babyfs.tk.commons.enums.ShutdownOrder;
+import com.babyfs.tk.commons.codec.ICodec;
 import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.commons.service.LifeServiceSupport;
-import com.babyfs.tk.galaxy.Utils;
+import com.babyfs.tk.galaxy.RpcCodec;
 import com.babyfs.tk.galaxy.RpcRequest;
-import com.babyfs.tk.galaxy.codec.IDecoder;
-import com.babyfs.tk.galaxy.codec.IEncoder;
+import com.babyfs.tk.galaxy.ServicePoint;
+import com.babyfs.tk.galaxy.Utils;
 import com.babyfs.tk.galaxy.constant.RpcConstant;
 import com.babyfs.tk.galaxy.register.IServcieRegister;
 import com.babyfs.tk.galaxy.server.IServer;
-import com.babyfs.tk.galaxy.ServicePoint;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -23,10 +22,7 @@ import org.springframework.core.annotation.Order;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * rpc server接口实现
@@ -35,9 +31,8 @@ import static com.google.common.base.Preconditions.checkState;
 public class ServerImpl extends LifeServiceSupport implements IServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerImpl.class.getName());
 
-    private IDecoder decoder;
+    private ICodec codec;
 
-    private IEncoder encoder;
 
     private final Map<ServicePoint, Object> services;
 
@@ -47,10 +42,9 @@ public class ServerImpl extends LifeServiceSupport implements IServer {
     private IServcieRegister servcieRegister;
 
     @Inject
-    public ServerImpl(@Named(RpcConstant.NAME_RPC_SERVER_EXPOSE) Map<ServicePoint, Object> services, IDecoder decoder, IEncoder encoder) {
+    public ServerImpl(@Named(RpcConstant.NAME_RPC_SERVER_EXPOSE) Map<ServicePoint, Object> services, @RpcCodec ICodec codec) {
         this.services = services;
-        this.decoder = Preconditions.checkNotNull(decoder);
-        this.encoder = Preconditions.checkNotNull(encoder);
+        this.codec = Preconditions.checkNotNull(codec);
     }
 
 
@@ -61,7 +55,7 @@ public class ServerImpl extends LifeServiceSupport implements IServer {
             return ServiceResponse.PARAM_ERROR_RESPONSE;
         }
 
-        Object decoded = decoder.decode(content);
+        Object decoded = codec.decode(content);
         if (!(decoded instanceof RpcRequest)) {
             return ServiceResponse.PARAM_ERROR_RESPONSE;
         }
@@ -70,7 +64,7 @@ public class ServerImpl extends LifeServiceSupport implements IServer {
         if (ret.isFailure()) {
             return ServiceResponse.createFailResponse(ret.getCode(), ret.getMsg());
         } else {
-            byte[] code = encoder.encode(ret.getData());
+            byte[] code = codec.encode(ret.getData());
             return ServiceResponse.createSuccessResponse(code);
         }
     }

@@ -1,8 +1,7 @@
 package com.babyfs.tk.galaxy;
 
+import com.babyfs.tk.commons.codec.ICodec;
 import com.babyfs.tk.commons.model.ServiceResponse;
-import com.babyfs.tk.galaxy.codec.IDecoder;
-import com.babyfs.tk.galaxy.codec.IEncoder;
 import com.babyfs.tk.galaxy.demo.BadService;
 import com.babyfs.tk.galaxy.demo.Health;
 import com.babyfs.tk.galaxy.guice.*;
@@ -16,12 +15,10 @@ import org.junit.Test;
 import java.util.List;
 
 @Ignore
-public class RpcClienitTest extends BaseTest {
+public class RpcClientTest extends BaseTest {
     @Inject
-    private IEncoder encoder;
-
-    @Inject
-    private IDecoder decoder;
+    @RpcCodec
+    private ICodec codec;
 
     @BeforeClass
     public static void setUp() throws Exception {

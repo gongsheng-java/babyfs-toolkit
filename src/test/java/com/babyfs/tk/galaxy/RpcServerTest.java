@@ -1,14 +1,16 @@
 package com.babyfs.tk.galaxy;
 
+import com.babyfs.tk.commons.codec.ICodec;
 import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.commons.service.ServiceModule;
-import com.babyfs.tk.galaxy.codec.IDecoder;
-import com.babyfs.tk.galaxy.codec.IEncoder;
 import com.babyfs.tk.galaxy.demo.BadService;
 import com.babyfs.tk.galaxy.demo.BadServiceImpl;
 import com.babyfs.tk.galaxy.demo.Health;
 import com.babyfs.tk.galaxy.demo.HealthImpl;
-import com.babyfs.tk.galaxy.guice.*;
+import com.babyfs.tk.galaxy.guice.RpcServerServiceModule;
+import com.babyfs.tk.galaxy.guice.RpcServerSupportModule;
+import com.babyfs.tk.galaxy.guice.RpcSupportModule;
+import com.babyfs.tk.galaxy.guice.ZkServiceRegisterModule;
 import com.babyfs.tk.galaxy.server.IServer;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -20,15 +22,13 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Ignore
 public class RpcServerTest extends BaseTest {
     @Inject
-    private IEncoder encoder;
+    @RpcCodec
+    private ICodec codec;
 
-    @Inject
-    private IDecoder decoder;
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -60,10 +60,10 @@ public class RpcServerTest extends BaseTest {
                 }
 
                 {
-                    ServiceResponse<byte[]> handle1 = server.handle(encoder.encode(request));
+                    ServiceResponse<byte[]> handle1 = server.handle(codec.encode(request));
                     printResponseMsg(handle1);
                     if (handle1.isSuccess()) {
-                        ServiceResponse data = (ServiceResponse) decoder.decode(handle1.getData());
+                        ServiceResponse data = (ServiceResponse) codec.decode(handle1.getData());
                         Assert.assertTrue(data.isSuccess());
                         System.out.println("call " + request + " result:" + data.getData());
                     }
