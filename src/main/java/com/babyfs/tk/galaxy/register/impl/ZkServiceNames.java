@@ -11,6 +11,7 @@ import com.google.common.base.Splitter;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.TreeCache;
+import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent.Type;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.utils.ZKPaths;
@@ -46,7 +47,6 @@ public final class ZkServiceNames extends LifeServiceSupport implements IService
      * 监控serverRoot的cache
      */
     private final TreeCache cache;
-    private TreeCacheListener listener;
 
     private final BackoffHelper backoffHelper = new BackoffHelper();
     private volatile boolean running;
@@ -81,12 +81,12 @@ public final class ZkServiceNames extends LifeServiceSupport implements IService
             return;
         }
 
-        super.execStop();
+        super.execStart();
 
-        listener = (curatorFramework, treeCacheEvent) -> {
+        TreeCacheListener listener = (curatorFramework, treeCacheEvent) -> {
             Type type = treeCacheEvent.getType();
             ChildData data = treeCacheEvent.getData();
-            LOGGER.info("event type:{},path:{}", type, data != null ? data.getPath() : null);
+            LOGGER.info("event type:{},path:{}", type, (data != null ? data.getPath() : null));
             switch (type) {
                 case NODE_ADDED: {
                     ServiceServer server = parseServiceServer(data);
@@ -104,6 +104,9 @@ public final class ZkServiceNames extends LifeServiceSupport implements IService
                 }
                 case CONNECTION_RECONNECTED:
                     this.backoffHelper.doUntilSuccessAtExecutor(input -> loadServices());
+                    break;
+                default:
+                    LOGGER.info("skip event type:{}", type);
                     break;
             }
         };

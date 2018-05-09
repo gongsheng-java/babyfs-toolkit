@@ -54,14 +54,14 @@ final class ServiceServerCache {
 
         //处理新增
         for (String addedServcie : addServcies) {
-            ServiceServers serviceServers = getOrAddServiceServersIfAbsent(addedServcie);
-            serviceServers.addServer(server);
+            ServiceServers found = getOrAddServiceServersIfAbsent(addedServcie);
+            found.addServer(server);
         }
 
         //处理删除
         for (String removedService : removedServices) {
-            ServiceServers serviceServers = getOrAddServiceServersIfAbsent(removedService);
-            serviceServers.removeServer(server);
+            ServiceServers found = getOrAddServiceServersIfAbsent(removedService);
+            found.removeServer(server);
         }
         allServers.put(server, server);
         LOGGER.debug("after update:{}", this);

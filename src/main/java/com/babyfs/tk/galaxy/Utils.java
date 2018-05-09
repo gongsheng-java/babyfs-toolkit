@@ -23,13 +23,17 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * 工具类
  */
-public class Utils {
+public final class Utils {
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
     /**
      * 禁止代理的方法集合:
      * {@link Object}中的方法都不代理
      */
     public static final ImmutableSet<Method> FORBIDDEN_METHODS = new ImmutableSet.Builder<Method>().add(Object.class.getMethods()).build();
+
+    private Utils() {
+
+    }
 
     /**
      * 生成代理对象的方法签名

@@ -7,6 +7,7 @@ import com.babyfs.tk.galaxy.ServicePoint;
 /**
  * rpc client代理工厂
  */
+@FunctionalInterface
 public interface IClientProxyFactory {
     /**
      * 生成代理的实例

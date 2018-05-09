@@ -126,7 +126,7 @@ public class ServerImpl extends LifeServiceSupport implements IServer {
             Class type = p.getType();
 
             String interfaceName = p.getInterfaceName();
-            Preconditions.checkState(type.isAssignableFrom(svr.getClass()), "interface name:" + interfaceName);
+            Preconditions.checkState(type.isAssignableFrom(svr.getClass()), "interface name %s", interfaceName);
 
             Map<String, Method> methods = parseMethods(type);
             serviceDispatcher.put(interfaceName, new Dispatcher(methods, svr));

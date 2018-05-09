@@ -73,8 +73,7 @@ public class RpcClientSupportModule extends ServiceModule {
         @Override
         public IClientProxyFactory get() {
             String url = MapConfig.getString(RpcConstant.NAME_RPC_CLIENT_URL_PREFIX, conf, RpcConstant.RPC_URL_PREFIX_DEFAULT);
-            ClientProxyFactoryImpl factory = new ClientProxyFactoryImpl(codec, client, loadBalance, url);
-            return factory;
+            return new ClientProxyFactoryImpl(codec, client, loadBalance, url);
         }
     }
 }

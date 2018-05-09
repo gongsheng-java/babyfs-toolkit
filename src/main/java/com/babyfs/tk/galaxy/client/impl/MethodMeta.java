@@ -8,8 +8,7 @@ import java.lang.reflect.Method;
 /**
  * 方法元数据
  */
-public final class MethodMeta implements Serializable {
-    private static final long serialVersionUID = 1L;
+public final class MethodMeta {
     /**
      *
      */

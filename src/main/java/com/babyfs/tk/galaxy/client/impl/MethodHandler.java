@@ -48,7 +48,7 @@ public final class MethodHandler {
         String interfaceName = target.getType().getName();
         ServiceServer serviceServer = loadBalance.findServer(interfaceName);
         if (serviceServer == null) {
-            LOGGER.error("no serviceInstance for:" + interfaceName);
+            LOGGER.error("no serviceInstance for {}", interfaceName);
             throw new RpcException("no serviceInstance for:" + interfaceName);
         }
         StringBuilder stringBuilder = new StringBuilder();

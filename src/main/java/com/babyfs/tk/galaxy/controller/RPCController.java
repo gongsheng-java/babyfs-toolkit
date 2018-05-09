@@ -56,21 +56,12 @@ public class RPCController {
     }
 
     private static byte[] getBody(HttpServletRequest request) {
-        ByteArrayOutputStream outputStream = null;
-        try {
-            outputStream = new ByteArrayOutputStream(request.getContentLength());
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(request.getContentLength());) {
             ByteStreams.copy(request.getInputStream(), outputStream);
             return outputStream.toByteArray();
         } catch (IOException e) {
             // ignore
-        } finally {
-            try {
-                Closeables.close(outputStream, true);
-            } catch (IOException e) {
-                // ignore
-            }
         }
         return null;
     }
-
 }

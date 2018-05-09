@@ -1,18 +1,17 @@
 package com.babyfs.tk.commons.service.internal;
 
-import com.babyfs.tk.commons.enums.ShutdownOrder;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import com.babyfs.tk.commons.Constants;
+import com.babyfs.tk.commons.enums.ShutdownOrder;
 import com.babyfs.tk.commons.service.ILifeService;
 import com.babyfs.tk.commons.service.IStageActionRegistry;
 import com.babyfs.tk.commons.service.annotation.LifecycleServiceRegistry;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.annotation.OrderUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;

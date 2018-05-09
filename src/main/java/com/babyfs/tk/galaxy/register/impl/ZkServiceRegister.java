@@ -14,19 +14,16 @@ import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
-import org.apache.curator.framework.state.ConnectionState;
-import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
-import org.elasticsearch.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -110,6 +107,7 @@ public class ZkServiceRegister extends LifeServiceSupport implements IServcieReg
             return;
         }
 
+        super.execStart();
         listener = (curatorFramework, treeCacheEvent) -> {
             TreeCacheEvent.Type type = treeCacheEvent.getType();
             ChildData data = treeCacheEvent.getData();
@@ -126,7 +124,7 @@ public class ZkServiceRegister extends LifeServiceSupport implements IServcieReg
         try {
             cache.start();
             if (!this.interfaceNames.isEmpty()) {
-                if (!this.backoffHelper.doUntilSuccess((input) -> doRegister(), TimeUnit.SECONDS.toMillis(5))) {
+                if (!this.backoffHelper.doUntilSuccess(input -> doRegister(), TimeUnit.SECONDS.toMillis(5))) {
                     LOGGER.error("registe services fail");
                 }
             }
@@ -145,6 +143,8 @@ public class ZkServiceRegister extends LifeServiceSupport implements IServcieReg
             }
 
             cache.close();
+            super.execStop();
+
             String nodePath = getNodePath();
             LOGGER.info("will delete node {}", nodePath);
             try {
