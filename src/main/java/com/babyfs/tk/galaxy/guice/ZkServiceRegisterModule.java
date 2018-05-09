@@ -8,6 +8,7 @@ import com.babyfs.tk.galaxy.Utils;
 import com.babyfs.tk.galaxy.constant.RpcConstant;
 import com.babyfs.tk.galaxy.register.IServcieRegister;
 import com.babyfs.tk.galaxy.register.impl.ZkServiceRegister;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
@@ -30,6 +31,7 @@ public class ZkServiceRegisterModule extends ServiceModule {
             String zkRegisterUrl = MapConfig.getString(RpcConstant.ZK_BOOTSTRAP_SERVERS, conf, RpcConstant.ZK_BOOTSTRAP_SERVERS_DEFAULT);
             String ip = MapConfig.getString(RpcConstant.SERVER_IP, conf, "127.0.0.1");
             int port = MapConfig.getInt(RpcConstant.SERVER_PORT, conf, 0);
+            Preconditions.checkState(port > 0, "port");
             int connectTimeout = MapConfig.getInt(RpcConstant.ZK_CONNECT_TIMEOUT, conf, RpcConstant.ZK_CONNECT_TIMEOUT_DEFAULT);
             int sessionTimeout = MapConfig.getInt(RpcConstant.ZK_SESSION_TIMEOUT, conf, RpcConstant.ZK_SESSION_TIMEOUT_DEFAULT);
             String serverRoot = MapConfig.getString(RpcConstant.ZK_REGISTER_ROOT, conf, RpcConstant.ZK_REGISTER_ROOT_DEFAULT);
