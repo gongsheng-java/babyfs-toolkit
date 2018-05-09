@@ -13,9 +13,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * 执行补偿任务的帮助类,所谓补偿是指当某一项任务或者操作失败后,可以采取一定的补救措施。
  * 本类提供了两种补偿方式：
- * {@link #doUntilSuccess(com.google.common.base.Function)} 同步地持续地调用指定的Function,直到成功为止
+ * {@link #doUntilSuccess(com.google.common.base.Function, long)} 同步地持续地调用指定的Function,直到成功为止
  * {@link #doUntilSuccessAtExecutor}} 异步地持续地调用指定的Function,直到成功为止
- *
  */
 public class BackoffHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(BackoffHelper.class);
@@ -36,8 +35,9 @@ public class BackoffHelper {
      *
      * @param function
      */
-    public void doUntilSuccess(Function<Void, Boolean> function) {
+    public boolean doUntilSuccess(Function<Void, Boolean> function, long maxWaitMS) {
         BackoffTask task = new BackoffTask(function);
+        long wait = 0;
         while (!task.isSuccess()) {
             try {
                 task.run();
@@ -46,7 +46,12 @@ public class BackoffHelper {
             }
             if (!task.isSuccess()) {
                 try {
-                    Thread.sleep(task.calcNextWaitTime());
+                    if (maxWaitMS > 0 && wait >= maxWaitMS) {
+                        throw new RuntimeException("max wait " + maxWaitMS);
+                    }
+                    long nextWaitTime = task.calcNextWaitTime();
+                    Thread.sleep(nextWaitTime);
+                    wait += nextWaitTime;
                 } catch (InterruptedException e) {
                     LOGGER.error("Interruptted by other thread.", e);
                     Thread.currentThread().interrupt();
@@ -55,6 +60,7 @@ public class BackoffHelper {
                 break;
             }
         }
+        return task.isSuccess();
     }
 
     /**
@@ -67,6 +73,30 @@ public class BackoffHelper {
         final BackoffTask task = new BackoffTask(function);
         Runnable runnable = new BackoffTaskRunnable(task);
         executorService.schedule(runnable, 0, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * 在Executors中重复执行指定的Function
+     *
+     * @param function       被定期重复执行的函数,function的返回值为true,表示继续执行;false,表示停止执行
+     * @param delayMillis    延迟时间,单位毫秒
+     * @param intervalMillis 间隔,单位毫秒
+     */
+    public void doRepeatTask(final Function<Void, Boolean> function, long delayMillis, long intervalMillis) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Boolean repeat = function.apply(null);
+                    if (repeat == Boolean.TRUE) {
+                        executorService.schedule(this, delayMillis, TimeUnit.MILLISECONDS);
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("running repeat function at executor fail", e);
+                }
+            }
+        };
+        executorService.schedule(runnable, delayMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -137,10 +167,10 @@ public class BackoffHelper {
             }
             if (!task.isSuccess()) {
                 long nextTime = task.calcNextWaitTime();
-                LOGGER.info("Reschedule the function {} at executor within {} ms .", task.getFunction(),nextTime);
+                LOGGER.info("Reschedule the function {} at executor within {} ms .", task.getFunction(), nextTime);
                 executorService.schedule(this, nextTime, TimeUnit.MILLISECONDS);
-            }else{
-                LOGGER.info("Function {} exec succsss.",task.getFunction());
+            } else {
+                LOGGER.info("Function {} exec succsss.", task.getFunction());
             }
         }
     }

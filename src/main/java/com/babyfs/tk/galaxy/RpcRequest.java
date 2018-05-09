@@ -7,13 +7,18 @@ import java.util.Arrays;
  * rpc调用过程客户端传递到服务端的pojo对象
  */
 public class RpcRequest implements Serializable {
-
     private static final long serialVersionUID = 2003969790677366364L;
-    //接口名称
+    /**
+     * 接口名称
+     */
     private String interfaceName;
-    //方法签名
+    /**
+     * 方法签名
+     */
     private String methodSign;
-    //方法参数
+    /**
+     * 方法参数
+     */
     private Object[] parameters;
 
     public String getInterfaceName() {
@@ -25,11 +30,11 @@ public class RpcRequest implements Serializable {
     }
 
     public Object[] getParameters() {
-        return parameters.clone();
+        return parameters;
     }
 
     public void setParameters(Object[] parameters) {
-        this.parameters = parameters.clone();
+        this.parameters = parameters;
     }
 
     public String getMethodSign() {
