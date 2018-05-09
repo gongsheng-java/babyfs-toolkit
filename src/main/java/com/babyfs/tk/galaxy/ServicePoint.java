@@ -41,8 +41,12 @@ public final class ServicePoint<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ServicePoint<?> that = (ServicePoint<?>) o;
         return Objects.equals(type, that.type) &&
                 Objects.equals(name, that.name);

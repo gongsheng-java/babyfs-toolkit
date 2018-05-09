@@ -23,7 +23,7 @@ public abstract class RpcServerServiceModule extends ServiceModule {
     protected <T> void exposeRPCService(final Class<T> serviceInterface) {
         MapBinder<ServicePoint, Object> mapBinder = MapBinder.newMapBinder(binder(), ServicePoint.class, Object.class, Names.named(RpcConstant.NAME_RPC_SERVER_EXPOSE));
 
-        ServicePoint<T> servicePoint = new ServicePoint<T>(serviceInterface, null);
+        ServicePoint<T> servicePoint = new ServicePoint<>(serviceInterface, null);
         mapBinder.addBinding(servicePoint).to(Key.get(serviceInterface)).asEagerSingleton();
     }
 
@@ -37,7 +37,7 @@ public abstract class RpcServerServiceModule extends ServiceModule {
     protected <T> void exposeRPCService(final Class<T> serviceInterface, String name) {
         MapBinder<ServicePoint, Object> mapBinder = MapBinder.newMapBinder(binder(), ServicePoint.class, Object.class, Names.named(RpcConstant.NAME_RPC_SERVER_EXPOSE));
 
-        ServicePoint<T> servicePoint = new ServicePoint<T>(serviceInterface, name);
+        ServicePoint<T> servicePoint = new ServicePoint<>(serviceInterface, name);
         mapBinder.addBinding(servicePoint).to(Key.get(serviceInterface, Names.named(name))).asEagerSingleton();
     }
 }

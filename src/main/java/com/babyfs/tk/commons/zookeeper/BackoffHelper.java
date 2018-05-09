@@ -89,7 +89,7 @@ public class BackoffHelper {
                 try {
                     Boolean repeat = function.apply(null);
                     if (repeat == Boolean.TRUE) {
-                        executorService.schedule(this, delayMillis, TimeUnit.MILLISECONDS);
+                        executorService.schedule(this, intervalMillis, TimeUnit.MILLISECONDS);
                     }
                 } catch (Exception e) {
                     LOGGER.error("running repeat function at executor fail", e);
