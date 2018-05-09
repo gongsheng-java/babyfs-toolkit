@@ -5,7 +5,6 @@ import com.babyfs.tk.galaxy.server.IServer;
 import com.babyfs.tk.service.basic.utils.ResponseUtil;
 import com.babyfs.tk.service.biz.base.annotation.InternalAccess;
 import com.google.common.io.ByteStreams;
-import com.google.common.io.Closeables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;

@@ -2,7 +2,6 @@ package com.babyfs.tk.galaxy.client.impl;
 
 import com.google.common.base.Preconditions;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
 
 /**
