@@ -1,5 +1,7 @@
 package com.babyfs.tk.probe.metrics;
 
+import com.babyfs.tk.commons.base.Pair;
+import com.babyfs.tk.commons.utils.ListUtil;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Snapshot;
@@ -9,6 +11,7 @@ import com.codahale.metrics.jvm.FileDescriptorRatioGauge;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -18,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Metric探针
@@ -91,22 +95,11 @@ public class MetricsProbe {
     }
 
     /**
-     * 收集所有的Timer数据,并格式化为k=v
-     *
-     * @return
-     */
-    public static List<String> collectAllTimer() {
-        List<String> result = Lists.newLinkedList();
-        collectAllTimer(result);
-        return result;
-    }
-
-    /**
      * 收集所有的Timer数据,格式为k=v,将结果保存到result中
      *
      * @param result
      */
-    public static void collectAllTimer(List<String> result) {
+    public static void collectAllTimer(List<String> result, MetricsFormat format) {
         SortedMap<String, Timer> timers = registry.getTimers();
         if (timers == null || timers.isEmpty()) {
             return;
@@ -115,27 +108,17 @@ public class MetricsProbe {
             return;
         }
         for (Map.Entry<String, Timer> kv : timers.entrySet()) {
-            formatTimer(kv.getKey(), kv.getValue(), result);
+            formatTimer(kv.getKey(), kv.getValue(), result, format);
         }
     }
 
-    /**
-     * 收集所有的Gauge数据,并格式化为k=v
-     *
-     * @return
-     */
-    public static List<String> collectAllGauage() {
-        List<String> result = Lists.newLinkedList();
-        collectAllGauage(result);
-        return result;
-    }
 
     /**
-     * 收集所有的Gauge数据,并格式化为k=v,将结果保存到result中
+     * 收集所有的Gauge数据,按照format格式化,将结果保存到result中
      *
      * @param result
      */
-    public static void collectAllGauage(List<String> result) {
+    public static void collectAllGauage(List<String> result, MetricsFormat format) {
         SortedMap<String, Gauge> gauges = registry.getGauges();
         if (gauges == null || gauges.isEmpty()) {
             return;
@@ -144,7 +127,7 @@ public class MetricsProbe {
             return;
         }
         for (Map.Entry<String, Gauge> kv : gauges.entrySet()) {
-            formatGuage(kv.getKey(), kv.getValue(), result);
+            formatGuage(kv.getKey(), kv.getValue(), result, format);
         }
     }
 
@@ -164,23 +147,83 @@ public class MetricsProbe {
      * @param timer  timer
      * @param result 结果列表
      */
-    private static void formatTimer(String name, Timer timer, List<String> result) {
+    private static void formatTimer(String name, Timer timer, List<String> result, MetricsFormat format) {
         if (Strings.isNullOrEmpty(name) || timer == null || result == null) {
             return;
         }
+
+
         Snapshot snapshot = timer.getSnapshot();
-        result.add(formatInteger(name, "count", timer.getCount()));
-        result.add(formatFloat(name, "rate1", timer.getOneMinuteRate()));
-        result.add(formatFloat(name, "rate5", timer.getFiveMinuteRate()));
-        result.add(formatFloat(name, "ratemeanr", timer.getMeanRate()));
-        result.add(formatInteger(name, "min", snapshot.getMin() / ONE_MILLIS_NANOS));
-        result.add(formatInteger(name, "max", snapshot.getMax() / ONE_MILLIS_NANOS));
-        result.add(formatFloat(name, "mean", snapshot.getMean() / ONE_MILLIS_NANOS));
-        result.add(formatFloat(name, "75th", snapshot.get75thPercentile() / ONE_MILLIS_NANOS));
-        result.add(formatFloat(name, "90th", snapshot.getValue(0.9) / ONE_MILLIS_NANOS));
-        result.add(formatFloat(name, "99th", snapshot.get99thPercentile() / ONE_MILLIS_NANOS));
-        result.add(formatFloat(name, "99.9th", snapshot.get999thPercentile() / ONE_MILLIS_NANOS));
+
+        List<Pair<String, String>> nameTagList = Lists.newArrayList();
+        if (format == MetricsFormat.PROMETHEUS) {
+            List<String> nameList = Splitter.on('$').splitToList(name);
+            if (ListUtil.isEmpty(nameList) || nameList.size() < 2) {
+                return;
+            }
+            name = nameList.get(0);
+
+            String tags = nameList.get(1);
+            List<String> tagList = Splitter.on(':').splitToList(tags);
+            if (ListUtil.isEmpty(tagList) || tagList.size() < 3) {
+                return;
+            }
+            String module = tagList.get(1);
+            String success = tagList.get(2);
+            nameTagList.add(Pair.of("module", module));
+            nameTagList.add(Pair.of("result", success));
+        }
+
+
+        {
+            String metricsName = format.formatName(name, "count");
+            String nameTags = "";
+            if (format == MetricsFormat.PROMETHEUS) {
+                result.add(String.format("# TYPE %s counter", metricsName));
+                nameTags = getTags(nameTagList);
+            }
+            result.add(format.formatIntValue(metricsName + nameTags, timer.getCount()));
+        }
+
+        List<Pair<String, Object>> rateItems = Lists.newArrayList(Pair.of("rate1", timer.getOneMinuteRate()),
+                Pair.of("rate5", timer.getFiveMinuteRate()),
+                Pair.of("ratemean", timer.getMeanRate()));
+
+        formatTimerItem("rate", name, result, format, nameTagList, rateItems);
+
+        List<Pair<String, Object>> responseItems = Lists.newArrayList(Pair.of("min", snapshot.getMin() / ONE_MILLIS_NANOS),
+                Pair.of("max", snapshot.getMax() / ONE_MILLIS_NANOS),
+                Pair.of("mean", snapshot.getMean() / ONE_MILLIS_NANOS),
+                Pair.of("75th", snapshot.get75thPercentile() / ONE_MILLIS_NANOS),
+                Pair.of("90th", snapshot.getValue(0.9) / ONE_MILLIS_NANOS),
+                Pair.of("99th", snapshot.get99thPercentile() / ONE_MILLIS_NANOS),
+                Pair.of("999th", snapshot.get999thPercentile() / ONE_MILLIS_NANOS));
+
+        formatTimerItem("response", name, result, format, nameTagList, responseItems);
     }
+
+    private static void formatTimerItem(String timerTypeName, String name, List<String> result, MetricsFormat format, List<Pair<String, String>> nameTagList, List<Pair<String, Object>> rateItems) {
+        String proMetricsName = format.formatName(name, timerTypeName);
+        if (format == MetricsFormat.PROMETHEUS) {
+            result.add(String.format("# TYPE %s gauge", proMetricsName));
+        }
+
+        for (Pair<String, Object> item : rateItems) {
+            final String metricsName;
+            final String nameTags;
+            if (format != MetricsFormat.PROMETHEUS) {
+                metricsName = format.formatName(name, item.first);
+                nameTags = "";
+            } else {
+                metricsName = proMetricsName;
+                List<Pair<String, String>> allTags = Lists.newArrayList(nameTagList);
+                allTags.add(Pair.of("timer_type", item.first));
+                nameTags = getTags(allTags);
+            }
+            result.add(format.formatObjectValue(metricsName + nameTags, item.second));
+        }
+    }
+
 
     /**
      * 格式化输出Gauge的数据到result中,格式为[name].val=value
@@ -189,7 +232,7 @@ public class MetricsProbe {
      * @param gauge  gauage
      * @param result 结果列表
      */
-    private static void formatGuage(String name, Gauge gauge, List<String> result) {
+    private static void formatGuage(String name, Gauge gauge, List<String> result, MetricsFormat format) {
         if (Strings.isNullOrEmpty(name) || gauge == null || result == null) {
             return;
         }
@@ -197,26 +240,16 @@ public class MetricsProbe {
         if (!(value instanceof Number)) {
             return;
         }
-        result.add(formatObject(name, "", value));
-    }
 
-    private static String formatInteger(String name, String itemName, long value) {
-        return String.format("%s=%d", getName(name, itemName), value);
-    }
-
-
-    private static String formatFloat(String name, String itemName, double value) {
-        return String.format("%s=%f", getName(name, itemName), value);
-    }
-
-    private static String formatObject(String name, String itemName, Object value) {
-        return String.format("%s=%s", getName(name, itemName), value.toString());
-    }
-
-    private static String getName(String name, String itemName) {
-        if (Strings.isNullOrEmpty(itemName)) {
-            return name;
+        String metricsName = format.formatName(name, "");
+        if (format == MetricsFormat.PROMETHEUS) {
+            result.add(String.format("# TYPE %s gauge", metricsName));
         }
-        return name + "." + itemName;
+
+        result.add(format.formatObjectValue(metricsName, value));
+    }
+
+    private static String getTags(List<Pair<String, String>> nameTagList) {
+        return "{" + Joiner.on(",").join(nameTagList.stream().map(t -> String.format("%s=\"%s\"", t.first, t.second)).collect(Collectors.toList())) + "}";
     }
 }
