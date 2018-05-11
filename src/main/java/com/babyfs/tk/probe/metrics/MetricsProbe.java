@@ -250,6 +250,6 @@ public class MetricsProbe {
     }
 
     private static String getTags(List<Pair<String, String>> nameTagList) {
-        return "{" + Joiner.on(",").join(nameTagList.stream().map(t -> String.format("%s=\"%s\"", t.first, t.second)).collect(Collectors.toList())) + "}";
+        return " {" + Joiner.on(",").join(nameTagList.stream().map(t -> String.format("%s=\"%s\"", t.first, t.second)).collect(Collectors.toList())) + "}";
     }
 }
