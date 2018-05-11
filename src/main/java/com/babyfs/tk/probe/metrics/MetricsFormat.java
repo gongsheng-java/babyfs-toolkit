@@ -58,7 +58,11 @@ public enum MetricsFormat {
     }
 
     private static String normalizeNameForPrometheus(String name) {
-        return name.replace(".", "_").replace("-", "_");
+        String replace = name.replace(".", "_").replace("-", "_");
+        if(replace.endsWith("_count")){
+            replace += "er";
+        }
+        return replace;
     }
 
 }

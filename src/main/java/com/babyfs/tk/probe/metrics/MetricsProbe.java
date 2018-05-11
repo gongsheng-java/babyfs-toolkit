@@ -176,11 +176,14 @@ public class MetricsProbe {
 
 
         {
-            String metricsName = format.formatName(name, "count");
+            String metricsName = "";
             String nameTags = "";
             if (format == MetricsFormat.PROMETHEUS) {
+                metricsName =   format.formatName(name, "total");
                 result.add(String.format("# TYPE %s counter", metricsName));
                 nameTags = getTags(nameTagList);
+            }else{
+                metricsName =   format.formatName(name, "count");
             }
             result.add(format.formatIntValue(metricsName + nameTags, timer.getCount()));
         }
