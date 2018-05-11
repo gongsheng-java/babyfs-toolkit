@@ -25,7 +25,7 @@ public enum MetricsFormat {
             if (Strings.isNullOrEmpty(itemName)) {
                 return name.replace(".", "_");
             }
-            return (name + this.nameSep + itemName).replace(".", "_");
+            return (name + this.nameSep + itemName).replace(".", "_").replace("-","_");
         }
 
     };
