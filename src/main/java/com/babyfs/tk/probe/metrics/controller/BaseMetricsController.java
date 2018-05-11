@@ -54,10 +54,10 @@ public class BaseMetricsController {
         MetricsProbe.collectAllGauage(metrics, format);
         MetricsProbe.collectAllTimer(metrics, format);
 
-        String result = Joiner.on("\n").join(metrics);
+        String result = Joiner.on("\n").join(metrics)+"\n\n";
         response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
         response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/plain;charset=UTF-8");
+        response.setContentType("text/plain");
         PrintWriter writer;
         try {
             writer = response.getWriter();

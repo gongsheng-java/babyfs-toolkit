@@ -176,11 +176,14 @@ public class MetricsProbe {
 
 
         {
-            String metricsName = format.formatName(name, "count");
+            String metricsName = "";
             String nameTags = "";
             if (format == MetricsFormat.PROMETHEUS) {
+                metricsName =   format.formatName(name, "total");
                 result.add(String.format("# TYPE %s counter", metricsName));
                 nameTags = getTags(nameTagList);
+            }else{
+                metricsName =   format.formatName(name, "count");
             }
             result.add(format.formatIntValue(metricsName + nameTags, timer.getCount()));
         }
@@ -217,7 +220,7 @@ public class MetricsProbe {
             } else {
                 metricsName = proMetricsName;
                 List<Pair<String, String>> allTags = Lists.newArrayList(nameTagList);
-                allTags.add(Pair.of("timer_type", item.first));
+                allTags.add(Pair.of("timertype", item.first));
                 nameTags = getTags(allTags);
             }
             result.add(format.formatObjectValue(metricsName + nameTags, item.second));
@@ -250,6 +253,6 @@ public class MetricsProbe {
     }
 
     private static String getTags(List<Pair<String, String>> nameTagList) {
-        return " {" + Joiner.on(",").join(nameTagList.stream().map(t -> String.format("%s=\"%s\"", t.first, t.second)).collect(Collectors.toList())) + "}";
+        return "{" + Joiner.on(",").join(nameTagList.stream().map(t -> String.format("%s=\"%s\"", t.first, t.second)).collect(Collectors.toList())) + "}";
     }
 }
