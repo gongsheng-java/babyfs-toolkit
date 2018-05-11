@@ -23,9 +23,9 @@ public enum MetricsFormat {
     PROMETHEUS("_", " ") {
         public String formatName(String name, String itemName) {
             if (Strings.isNullOrEmpty(itemName)) {
-                return name.replace(".", "_");
+                return MetricsFormat.normalizeNameForPrometheus(name);
             }
-            return (name + this.nameSep + itemName).replace(".", "_").replace("-","_");
+            return MetricsFormat.normalizeNameForPrometheus(name + this.nameSep + itemName);
         }
 
     };
@@ -56,4 +56,9 @@ public enum MetricsFormat {
         }
         return String.format("%s%s%s", name, valSep, val.toString());
     }
+
+    private static String normalizeNameForPrometheus(String name) {
+        return name.replace(".", "_").replace("-", "_");
+    }
+
 }
