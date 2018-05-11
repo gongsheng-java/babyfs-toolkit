@@ -1,6 +1,5 @@
 package com.babyfs.tk.probe.metrics.controller;
 
-import com.babyfs.tk.commons.utils.ListUtil;
 import com.babyfs.tk.probe.metrics.MetricsFormat;
 import com.babyfs.tk.probe.metrics.MetricsProbe;
 import com.babyfs.tk.service.biz.base.annotation.InternalAccess;
