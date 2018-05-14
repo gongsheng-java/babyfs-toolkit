@@ -33,7 +33,7 @@ public class RpcClientSupportModule extends ServiceModule {
         bind(ILoadBalance.class).to(LoadBalanceImpl.class).asEagerSingleton();
         bind(IClient.class).toProvider(OkHttpClientProvider.class).asEagerSingleton();
         bind(IClientProxyFactory.class).toProvider(ClientProxyFactoryProvider.class).asEagerSingleton();
-        install(new ZkServiceNamesModule());
+        install(new RpcServiceNamesModule());
     }
 
     public static class OkHttpClientProvider implements Provider<IClient> {

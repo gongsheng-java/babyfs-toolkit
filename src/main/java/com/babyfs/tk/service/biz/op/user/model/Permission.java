@@ -23,5 +23,5 @@ public interface Permission {
      *
      * @return
      */
-    Operation getOperation();
+    IOperation getOperation();
 }

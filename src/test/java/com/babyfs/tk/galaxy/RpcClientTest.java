@@ -2,6 +2,7 @@ package com.babyfs.tk.galaxy;
 
 import com.babyfs.tk.commons.codec.ICodec;
 import com.babyfs.tk.commons.model.ServiceResponse;
+import com.babyfs.tk.galaxy.constant.RpcConstant;
 import com.babyfs.tk.galaxy.demo.BadService;
 import com.babyfs.tk.galaxy.demo.Health;
 import com.babyfs.tk.galaxy.guice.*;
@@ -22,6 +23,7 @@ public class RpcClientTest extends BaseTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
+        System.setProperty(RpcConstant.REGISTER_MODE,RpcConstant.REGISTER_MODE_ZK);
         BaseTest.setUp(getSubModules());
     }
 
@@ -50,8 +52,6 @@ public class RpcClientTest extends BaseTest {
         modules.add(new RpcSupportModule());
         modules.add(new RpcClientSupportModule());
         modules.add(new RpcServerSupportModule());
-        modules.add(new ZkServiceRegisterModule());
-        modules.add(new ZkServiceNamesModule());
         modules.add(new RpcClientServiceModule() {
             @Override
             protected void configure() {
