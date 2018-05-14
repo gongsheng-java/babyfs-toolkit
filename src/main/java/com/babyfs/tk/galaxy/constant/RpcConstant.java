@@ -1,6 +1,29 @@
 package com.babyfs.tk.galaxy.constant;
 
+/**
+ * RPC相关的常量
+ */
 public class RpcConstant {
+    /**
+     * 注册中心模式
+     */
+    public static final String REGISTER_MODE = "rpc.register.mode";
+
+    /**
+     * 注册中心模式:本地
+     */
+    public static final String REGISTER_MODE_LOCAL = "local";
+
+    /**
+     * 注册中心模式:Zookeeper
+     */
+    public static final String REGISTER_MODE_ZK = "zk";
+
+    /**
+     * 本地注册模式下,RPC服务列表,格式为ip:port,ip:port
+     */
+    public static final String REGISTER_LOCAL_SERVERS = "rpc.register.local.servers";
+
     public static final String ZK_REGISTER_ROOT = "rpc.zk.register.root";
 
     public static final String ZK_REGISTER_ROOT_DEFAULT = "/galaxy/register";

@@ -1,6 +1,7 @@
 package com.babyfs.tk.service.biz.op.user.model.entity;
 
 import com.babyfs.tk.dal.orm.AutoIdEntity;
+import com.babyfs.tk.service.biz.op.user.model.IOperation;
 import com.babyfs.tk.service.biz.op.user.model.Operation;
 import com.babyfs.tk.service.biz.op.user.model.Resource;
 import com.babyfs.tk.service.biz.op.user.model.Permission;
@@ -111,7 +112,7 @@ public class RolePermissionEntity extends AutoIdEntity implements Permission {
     }
 
     @Override
-    public Operation getOperation() {
+    public IOperation getOperation() {
         return operation;
     }
 

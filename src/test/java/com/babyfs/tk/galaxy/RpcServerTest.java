@@ -3,6 +3,7 @@ package com.babyfs.tk.galaxy;
 import com.babyfs.tk.commons.codec.ICodec;
 import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.commons.service.ServiceModule;
+import com.babyfs.tk.galaxy.constant.RpcConstant;
 import com.babyfs.tk.galaxy.demo.BadService;
 import com.babyfs.tk.galaxy.demo.BadServiceImpl;
 import com.babyfs.tk.galaxy.demo.Health;
@@ -32,7 +33,9 @@ public class RpcServerTest extends BaseTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
+        System.setProperty(RpcConstant.REGISTER_MODE,RpcConstant.REGISTER_MODE_ZK);
         BaseTest.setUp(getSubModules());
+
     }
 
 
@@ -101,14 +104,13 @@ public class RpcServerTest extends BaseTest {
         List<Module> modules = Lists.newArrayList();
         modules.add(new RpcSupportModule());
         modules.add(new RpcServerSupportModule());
-        modules.add(new ZkServiceRegisterModule());
 
         //注册业务
         modules.add(new ServiceModule() {
             @Override
             protected void configure() {
-                bind(Health.class).to(HealthImpl.class).asEagerSingleton();
-                bind(BadService.class).to(BadServiceImpl.class).asEagerSingleton();
+                bindService(Health.class, HealthImpl.class);
+                bindService(BadService.class, BadServiceImpl.class);
             }
         });
 
