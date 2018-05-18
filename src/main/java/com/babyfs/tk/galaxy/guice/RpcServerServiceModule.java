@@ -24,8 +24,8 @@ public abstract class RpcServerServiceModule extends ServiceModule {
     protected <T> void exposeRPCService(final Class<T> serviceInterface) {
         Multibinder<ServicePoint> multibinder = Multibinder.newSetBinder(binder(), ServicePoint.class, Names.named(RpcConstant.NAME_RPC_SERVER_EXPOSE));
 
-        Key<T> targetKey = Key.get(serviceInterface);
-        ServicePoint<T> servicePoint = new ServicePoint<>(serviceInterface, null, targetKey);
+        Key<T> key = Key.get(serviceInterface);
+        ServicePoint<T> servicePoint = new ServicePoint<>(serviceInterface, null, key);
         multibinder.addBinding().toInstance(servicePoint);
     }
 
@@ -39,8 +39,8 @@ public abstract class RpcServerServiceModule extends ServiceModule {
     protected <T> void exposeRPCService(final Class<T> serviceInterface, String name) {
         Multibinder<ServicePoint> multibinder = Multibinder.newSetBinder(binder(), ServicePoint.class, Names.named(RpcConstant.NAME_RPC_SERVER_EXPOSE));
 
-        Key<T> tKey = Key.get(serviceInterface, Names.named(name));
-        ServicePoint<T> servicePoint = new ServicePoint<>(serviceInterface, name, tKey);
+        Key<T> key = Key.get(serviceInterface, Names.named(name));
+        ServicePoint<T> servicePoint = new ServicePoint<>(serviceInterface, name, key);
         multibinder.addBinding().toInstance(servicePoint);
     }
 }
