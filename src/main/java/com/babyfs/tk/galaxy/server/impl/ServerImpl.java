@@ -15,6 +15,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.springframework.core.annotation.Order;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * rpc server接口实现
@@ -34,17 +36,20 @@ public class ServerImpl extends LifeServiceSupport implements IServer {
     private ICodec codec;
 
 
-    private final Map<ServicePoint, Object> services;
+    private final Set<ServicePoint> services;
 
     private volatile Map<String, Dispatcher> serviceDispatchers;
 
     @Inject(optional = true)
     private IServcieRegister servcieRegister;
 
+    private Injector injector;
+
     @Inject
-    public ServerImpl(@Named(RpcConstant.NAME_RPC_SERVER_EXPOSE) Map<ServicePoint, Object> services, @RpcCodec ICodec codec) {
+    public ServerImpl(@Named(RpcConstant.NAME_RPC_SERVER_EXPOSE) Set<ServicePoint> services, @RpcCodec ICodec codec, Injector injector) {
         this.services = services;
         this.codec = Preconditions.checkNotNull(codec);
+        this.injector = injector;
     }
 
 
@@ -120,12 +125,11 @@ public class ServerImpl extends LifeServiceSupport implements IServer {
     protected void execStart() {
         super.execStart();
         Map<String, Dispatcher> serviceDispatcher = Maps.newHashMap();
-        for (Map.Entry<ServicePoint, Object> entry : this.services.entrySet()) {
-            ServicePoint p = Preconditions.checkNotNull(entry.getKey());
-            Object svr = Preconditions.checkNotNull(entry.getValue());
-            Class type = p.getType();
+        for (ServicePoint entry : this.services) {
+            Object svr = injector.getInstance(entry.getGuiceKey());
+            Class type = entry.getType();
 
-            String interfaceName = p.getInterfaceName();
+            String interfaceName = entry.getInterfaceName();
             Preconditions.checkState(type.isAssignableFrom(svr.getClass()), "interface name %s", interfaceName);
 
             Map<String, Method> methods = parseMethods(type);

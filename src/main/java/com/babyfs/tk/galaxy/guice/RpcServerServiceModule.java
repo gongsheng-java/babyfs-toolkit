@@ -5,6 +5,7 @@ import com.babyfs.tk.galaxy.constant.RpcConstant;
 import com.babyfs.tk.galaxy.ServicePoint;
 import com.google.inject.Key;
 import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 /**
@@ -21,10 +22,11 @@ public abstract class RpcServerServiceModule extends ServiceModule {
      * @param <T>
      */
     protected <T> void exposeRPCService(final Class<T> serviceInterface) {
-        MapBinder<ServicePoint, Object> mapBinder = MapBinder.newMapBinder(binder(), ServicePoint.class, Object.class, Names.named(RpcConstant.NAME_RPC_SERVER_EXPOSE));
+        Multibinder<ServicePoint> multibinder = Multibinder.newSetBinder(binder(), ServicePoint.class, Names.named(RpcConstant.NAME_RPC_SERVER_EXPOSE));
 
-        ServicePoint<T> servicePoint = new ServicePoint<>(serviceInterface, null);
-        mapBinder.addBinding(servicePoint).to(Key.get(serviceInterface)).asEagerSingleton();
+        Key<T> targetKey = Key.get(serviceInterface);
+        ServicePoint<T> servicePoint = new ServicePoint<>(serviceInterface, null, targetKey);
+        multibinder.addBinding().toInstance(servicePoint);
     }
 
     /**
@@ -35,9 +37,10 @@ public abstract class RpcServerServiceModule extends ServiceModule {
      * @param <T>
      */
     protected <T> void exposeRPCService(final Class<T> serviceInterface, String name) {
-        MapBinder<ServicePoint, Object> mapBinder = MapBinder.newMapBinder(binder(), ServicePoint.class, Object.class, Names.named(RpcConstant.NAME_RPC_SERVER_EXPOSE));
+        Multibinder<ServicePoint> multibinder = Multibinder.newSetBinder(binder(), ServicePoint.class, Names.named(RpcConstant.NAME_RPC_SERVER_EXPOSE));
 
-        ServicePoint<T> servicePoint = new ServicePoint<>(serviceInterface, name);
-        mapBinder.addBinding(servicePoint).to(Key.get(serviceInterface, Names.named(name))).asEagerSingleton();
+        Key<T> tKey = Key.get(serviceInterface, Names.named(name));
+        ServicePoint<T> servicePoint = new ServicePoint<>(serviceInterface, name, tKey);
+        multibinder.addBinding().toInstance(servicePoint);
     }
 }
