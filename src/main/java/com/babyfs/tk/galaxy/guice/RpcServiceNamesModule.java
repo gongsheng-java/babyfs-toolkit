@@ -2,6 +2,8 @@ package com.babyfs.tk.galaxy.guice;
 
 import com.babyfs.tk.commons.service.ServiceModule;
 import com.babyfs.tk.galaxy.constant.RpcConstant;
+import com.babyfs.tk.galaxy.guice.register.LocalServiceNamesModule;
+import com.babyfs.tk.galaxy.guice.register.ZkServiceNamesModule;
 import com.babyfs.tk.galaxy.register.IServiceNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

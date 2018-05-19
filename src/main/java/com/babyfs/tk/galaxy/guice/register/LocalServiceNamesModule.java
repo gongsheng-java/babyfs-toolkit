@@ -1,4 +1,4 @@
-package com.babyfs.tk.galaxy.guice;
+package com.babyfs.tk.galaxy.guice.register;
 
 import com.babyfs.tk.commons.MapConfig;
 import com.babyfs.tk.commons.config.IConfigService;

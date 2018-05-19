@@ -1,4 +1,4 @@
-package com.babyfs.tk.galaxy.guice;
+package com.babyfs.tk.galaxy.guice.register;
 
 import com.babyfs.tk.commons.service.ServiceModule;
 import com.babyfs.tk.galaxy.register.IServcieRegister;
