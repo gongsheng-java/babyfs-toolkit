@@ -8,6 +8,6 @@ import java.util.Map;
 /**
  *
  */
-public interface IMapTest extends ILifeService {
+public interface IMapService extends ILifeService {
     Map<ServicePoint,Object> getSvrs();
 }

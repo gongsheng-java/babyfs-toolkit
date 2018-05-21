@@ -11,13 +11,13 @@ import java.util.concurrent.ExecutorService;
 /**
  *
  */
-public class MapTest extends LifeServiceSupport implements IMapTest {
+public class MapService extends LifeServiceSupport implements IMapService {
     private final Map<ServicePoint, Object> svrs;
     private final ExecutorService be;
 
 
     @Inject
-    public MapTest(@Named("ok") Map<ServicePoint, Object> svrs, @Named("back") ExecutorService be) {
+    public MapService(@Named("ok") Map<ServicePoint, Object> svrs, @Named("back") ExecutorService be) {
         this.svrs = svrs;
         this.be = be;
     }
