@@ -26,14 +26,14 @@ public class MapBinderTest {
     public void test() {
         ServicePoint health = new ServicePoint(Health.class, null);
         ServicePoint bad = new ServicePoint(BadService.class, null);
-        ServicePoint mapTest = new ServicePoint(MapTest.class, null);
+        ServicePoint mapTest = new ServicePoint(MapService.class, null);
 
         ExecutorServiceModule executorServiceModule = new ExecutorServiceModule("back");
         ConfigServiceModule configServiceModule = new ConfigServiceModule("globalconf.xml");
 
         final Key<BadService> badServiceKey = Key.get(BadService.class);
         final Key<Health> healthKey = Key.get(Health.class);
-        final Key<IMapTest> mapTestKey = Key.get(IMapTest.class);
+        final Key<IMapService> mapTestKey = Key.get(IMapService.class);
         Module module = new ServiceModule() {
             @Override
             protected void configure() {
@@ -63,8 +63,8 @@ public class MapBinderTest {
         Module webModule = new ServiceModule() {
             @Override
             protected void configure() {
-                bindService(IMapTest.class, MapTest.class);
-                LifeServiceBindUtil.addLifeService(binder(), IMapTest.class);
+                bindService(IMapService.class, MapService.class);
+                LifeServiceBindUtil.addLifeService(binder(), IMapService.class);
                 install(executorServiceModule);
                 install(configServiceModule);
                 install(new LifecycleModule());
