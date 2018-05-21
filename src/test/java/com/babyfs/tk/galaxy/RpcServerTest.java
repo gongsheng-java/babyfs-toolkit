@@ -11,7 +11,6 @@ import com.babyfs.tk.galaxy.demo.HealthImpl;
 import com.babyfs.tk.galaxy.guice.RpcServerServiceModule;
 import com.babyfs.tk.galaxy.guice.RpcServerSupportModule;
 import com.babyfs.tk.galaxy.guice.RpcSupportModule;
-import com.babyfs.tk.galaxy.guice.ZkServiceRegisterModule;
 import com.babyfs.tk.galaxy.server.IServer;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;

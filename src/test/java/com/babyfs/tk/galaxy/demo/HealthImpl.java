@@ -1,6 +1,9 @@
 package com.babyfs.tk.galaxy.demo;
 
 import com.babyfs.tk.commons.model.ServiceResponse;
+import com.babyfs.tk.service.basic.mq.kafka.IKafkaProducer;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import java.util.List;
 import java.util.Map;
