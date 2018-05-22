@@ -7,6 +7,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.babyfs.tk.commons.model.ServiceResponse;
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
@@ -15,6 +16,7 @@ import org.elasticsearch.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.alibaba.fastjson.serializer.SerializerFeature.DisableCircularReferenceDetect;
@@ -157,6 +159,35 @@ public class BaseESServcieImpl {
      */
     protected String createDoc(Object o, SerializeFilter[] filters) {
         return JSONObject.toJSONString(o, SerializeConfig.getGlobalInstance(), filters, DisableCircularReferenceDetect);
+    }
+
+    /**
+     * 批量新增索引文档
+     *
+     * @param map 文档的id,not null  文档的内容,not null
+     * @return 索引是否成功
+     */
+    public ServiceResponse<Void> bulkDoc(Map<String, String> map) {
+
+        Preconditions.checkNotNull(map);
+
+
+        BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
+
+        for(String docId : map.keySet()){
+            IndexRequestBuilder builder = client.prepareIndex(this.indexName, this.docName, docId);
+            builder.setSource(map.get(docId));
+
+            bulkRequestBuilder.add(builder);
+        }
+
+        try {
+            bulkRequestBuilder.execute().actionGet(TIMEOUT, TimeUnit.SECONDS);
+            return ServiceResponse.succResponse();
+        } catch (Exception e) {
+            LOGGER.error("Index " + this.indexName + "." + this.docName, e);
+            return ServiceResponse.createFailResponse(ServiceResponse.FAIL_KEY, e.getMessage());
+        }
     }
 
 }
