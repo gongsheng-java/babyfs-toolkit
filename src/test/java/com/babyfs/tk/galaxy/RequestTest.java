@@ -3,10 +3,12 @@ package com.babyfs.tk.galaxy;
 
 import com.alibaba.fastjson.JSON;
 import com.babyfs.tk.commons.codec.impl.HessianCodec;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.*;
 
+@Ignore
 public class RequestTest {
 
     @Test
