@@ -43,7 +43,7 @@ public class RpcOkHttpClient implements IClient {
                 .url(uri)
                 .post(RequestBody.create(BINARY, requestBody))
                 .build();
-
+        LOGGER.info("request = {} ",request.toString());
         try (Response response = client.newCall(request).execute()) {
             if (response.code() != 200) {
                 LOGGER.info("response = {} ",response.toString());
