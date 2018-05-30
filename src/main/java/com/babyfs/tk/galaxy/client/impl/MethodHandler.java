@@ -8,6 +8,8 @@ import com.babyfs.tk.galaxy.ServicePoint;
 import com.babyfs.tk.galaxy.client.IClient;
 import com.babyfs.tk.galaxy.register.ILoadBalance;
 import com.babyfs.tk.galaxy.register.ServiceServer;
+import com.babyfs.tk.probe.metrics.MetricsProbe;
+import com.google.common.base.Splitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +46,7 @@ public final class MethodHandler {
      * @throws Throwable
      */
     public Object invoke(Object[] argv) {
+        RpcRequest request = createRequest(argv);
         byte[] body = codec.encode(createRequest(argv));
         String interfaceName = target.getType().getName();
         ServiceServer serviceServer = loadBalance.findServer(interfaceName);
@@ -54,12 +57,17 @@ public final class MethodHandler {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("http://").append(serviceServer.getHost()).append(":").append(serviceServer.getPort());
         String url = stringBuilder.append(urlPrefix).toString();
+        final long st = System.nanoTime();
+        boolean success = true;
         try {
             byte[] content = client.execute(url, body);
             return codec.decode(content);
         } catch (Exception e) {
+            success = false;
             LOGGER.error("rpc invoke remote method fail", e);
             throw new RpcException("rpc invoke remote method fail", e);
+        }finally {
+            metric(getMetricItemName(request, serviceServer), st, success);
         }
     }
 
@@ -75,5 +83,34 @@ public final class MethodHandler {
         rpcRequest.setMethodSign(metadata.getSig());
         rpcRequest.setInterfaceName(target.getInterfaceName());
         return rpcRequest;
+    }
+
+    /**
+     * 使用metric探针记录timer
+     * @param itemName
+     * @param start
+     * @param success
+     */
+    private void metric(String itemName, long start, boolean success) {
+        MetricsProbe.timerUpdateNSFromStart("rpc", itemName, start, success);
+    }
+
+    /**
+     * 构建itemName
+     * @param request
+     * @param server
+     * @return
+     */
+    private String getMetricItemName(RpcRequest request, ServiceServer server) {
+        String className = request.getInterfaceName();
+        int dotIndex = className.lastIndexOf('.');
+        String simpleName = (dotIndex == -1) ? className : className.substring(dotIndex + 1);
+        String simpleMethod = Splitter.on("#").splitToList(request.getMethodSign()).get(0);
+        StringBuilder builder = new StringBuilder();
+        builder.append(server.getHost()).append(":")
+                .append(server.getPort())
+                .append(":").append(simpleName)
+                .append(".").append(simpleMethod);
+        return builder.toString();
     }
 }
