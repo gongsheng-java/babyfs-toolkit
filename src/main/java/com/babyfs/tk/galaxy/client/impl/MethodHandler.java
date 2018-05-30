@@ -107,9 +107,9 @@ public final class MethodHandler {
         String simpleName = (dotIndex == -1) ? className : className.substring(dotIndex + 1);
         String simpleMethod = Splitter.on("#").splitToList(request.getMethodSign()).get(0);
         StringBuilder builder = new StringBuilder();
-        builder.append(server.getHost()).append(":")
+        builder.append(server.getHost()).append(".")
                 .append(server.getPort())
-                .append(":").append(simpleName)
+                .append(".").append(simpleName)
                 .append(".").append(simpleMethod);
         return builder.toString();
     }
