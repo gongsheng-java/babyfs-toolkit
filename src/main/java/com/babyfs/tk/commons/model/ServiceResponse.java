@@ -34,7 +34,7 @@ public class ServiceResponse<T> implements Serializable {
     /**
      * 通用的未找到数据的失败响应
      */
-    public static final ServiceResponse FAIL_NOT_FOUND_RESPONSE = createFailResponse(ErrorCode.NODATA_ERROR, null);
+    public static final ServiceResponse FAIL_NOT_FOUND_RESPONSE = createFailResponse(ErrorCode.NODATA_ERROR, "未找到数据");
 
     /**
      * 通用的未找到数据的失败响应
