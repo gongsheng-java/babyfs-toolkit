@@ -16,6 +16,8 @@
 
 package com.babyfs.tk.commons.base;
 
+import java.io.Serializable;
+
 /**
  * A simple object that holds onto a pair of object references, first and second.
  *
@@ -24,7 +26,7 @@ package com.babyfs.tk.commons.base;
  * @author Inderjeet Singh
  * @author Joel Leitch
  */
-public final class Pair<FIRST, SECOND> {
+public final class Pair<FIRST, SECOND> implements Serializable {
     public final FIRST first;
     public final SECOND second;
 

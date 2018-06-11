@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 
@@ -429,39 +430,25 @@ public class HttpClientService {
      * @throws IOException
      */
     public String sendMultipartPost(String url, Map<String, String> headers, Map<String, String> params, Map<Pair<String, String>, InputStream> streams) throws IOException {
-        HttpPost httpPost = new HttpPost(url);
-        MultipartEntityBuilder multiPartBuilder = MultipartEntityBuilder.create();
-        if (headers != null) {
-            for (Map.Entry<String, String> entry : headers.entrySet()) {
-                String name = entry.getKey();
-                String value = entry.getValue();
-                httpPost.setHeader(name, value);
-            }
-        }
-
-        if (params != null) {
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                String name = entry.getKey();
-                String value = entry.getValue();
-                if (!Strings.isNullOrEmpty(name) && !Strings.isNullOrEmpty(value)) {
-                    multiPartBuilder.addPart(name, new StringBody(value, TEXT_UTF8));
-                    multiPartBuilder.addPart(name, new StringBody(value, TEXT_UTF8));
-                }
-            }
-        }
-
-        if (streams != null) {
-            for (Map.Entry<Pair<String, String>, InputStream> entry : streams.entrySet()) {
-                String fieldName = entry.getKey().getFirst();
-                String fileName = entry.getKey().getSecond();
-                multiPartBuilder.addBinaryBody(fieldName, entry.getValue(), ContentType.DEFAULT_BINARY, fileName);
-            }
-        }
-
-        HttpEntity entity = multiPartBuilder.build();
-        httpPost.setEntity(entity);
+        HttpPost httpPost = builderMultipartPost(url,headers, params, streams);
         return this.sendRequest(httpPost, Constants.UTF_8);
     }
+
+    /**
+     * 发送MutilPart请求
+     *
+     * @param url     请求的URL
+     * @param headers 请求头
+     * @param params  参数
+     * @param streams key,{@link Pair#getFirst()} 字段名,{@link Pair#getSecond()} 文件名
+     * @return
+     * @throws IOException
+     */
+    public String sendMultipartPostBytes(String url, Map<String, String> headers, Map<String, String> params, Map<Pair<String, String>, byte[]> streams) throws IOException {
+        HttpPost httpPost = builderMultipartPost(url,headers, params, streams);
+        return this.sendRequest(httpPost, Constants.UTF_8);
+    }
+
 
     /**
      * 发送指定Http方法的请求，并接收response的二进制流
@@ -596,5 +583,56 @@ public class HttpClientService {
             }
         }
         return entity.getContent();
+    }
+
+    /**
+     * 构建MultipartPost
+     *
+     * @param url     请求的URL
+     * @param headers 请求头
+     * @param params  参数
+     * @param streams key,{@link Pair#getFirst()} 字段名,{@link Pair#getSecond()} 文件名。value 只适用{@link InputStream} 和 byte[]
+     * @return
+     */
+    private <T> HttpPost builderMultipartPost(String url, Map<String, String> headers, Map<String, String> params, Map<Pair<String, String>, T> streams) {
+        HttpPost httpPost = new HttpPost(url);
+        MultipartEntityBuilder multiPartBuilder = MultipartEntityBuilder.create();
+        if (headers != null) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                String name = entry.getKey();
+                String value = entry.getValue();
+                httpPost.setHeader(name, value);
+            }
+        }
+
+        if (params != null) {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                String name = entry.getKey();
+                String value = entry.getValue();
+                if (!Strings.isNullOrEmpty(name) && !Strings.isNullOrEmpty(value)) {
+                    multiPartBuilder.addPart(name, new StringBody(value, TEXT_UTF8));
+                    multiPartBuilder.addPart(name, new StringBody(value, TEXT_UTF8));
+                }
+            }
+        }
+
+        if (streams != null) {
+            for (Map.Entry<Pair<String, String>, T> entry : streams.entrySet()) {
+                String fieldName = entry.getKey().getFirst();
+                String fileName = entry.getKey().getSecond();
+                T value = entry.getValue();
+                if (value instanceof InputStream) {
+                    multiPartBuilder.addBinaryBody(fieldName, (InputStream) entry.getValue(), ContentType.DEFAULT_BINARY, fileName);
+                }else if (value instanceof byte[]) {
+                    multiPartBuilder.addBinaryBody(fieldName, (byte[]) entry.getValue(), ContentType.DEFAULT_BINARY, fileName);
+                }else {
+                    throw new IllegalArgumentException("illegal value type");
+                }
+            }
+        }
+
+        HttpEntity entity = multiPartBuilder.build();
+        httpPost.setEntity(entity);
+        return httpPost;
     }
 }

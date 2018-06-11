@@ -3,6 +3,8 @@ package com.babyfs.tk.galaxy.client.impl;
 import com.babyfs.tk.galaxy.RpcException;
 import com.babyfs.tk.galaxy.client.IClient;
 import okhttp3.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -14,6 +16,7 @@ import static java.lang.String.format;
  * 枚举实现单例模式
  */
 public class RpcOkHttpClient implements IClient {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RpcOkHttpClient.class);
     public static final MediaType BINARY = MediaType.parse("application/octet-stream; charset=utf-8");
 
     private OkHttpClient client;
@@ -40,9 +43,10 @@ public class RpcOkHttpClient implements IClient {
                 .url(uri)
                 .post(RequestBody.create(BINARY, requestBody))
                 .build();
-
+        LOGGER.info("request = {} ",request.toString());
         try (Response response = client.newCall(request).execute()) {
             if (response.code() != 200) {
+                LOGGER.info("response = {} ",response.toString());
                 throw new RpcException(format("error message(%s) ", response.message()));
             }
 
