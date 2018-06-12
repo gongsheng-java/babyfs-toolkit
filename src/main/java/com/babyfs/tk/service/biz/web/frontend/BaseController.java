@@ -19,6 +19,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -367,6 +368,10 @@ public abstract class BaseController {
 
     protected double getDoubleParameter(HttpServletRequest request, String name) {
         return ServletRequestUtils.getDoubleParameter(request, name, 0.0);
+    }
+
+    protected boolean getBooleanParameter(HttpServletRequest request, String name) {
+        return ServletRequestUtils.getBooleanParameter(request, name, false);
     }
 
 }
