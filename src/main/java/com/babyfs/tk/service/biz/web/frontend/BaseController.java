@@ -369,4 +369,8 @@ public abstract class BaseController {
         return ServletRequestUtils.getDoubleParameter(request, name, 0.0);
     }
 
+    protected boolean getBooleanParameter(HttpServletRequest request, String name, boolean defaultVal) {
+        return ServletRequestUtils.getBooleanParameter(request, name, defaultVal);
+    }
+
 }
