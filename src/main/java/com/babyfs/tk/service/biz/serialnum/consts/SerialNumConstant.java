@@ -1,4 +1,4 @@
-package com.babyfs.tk.service.biz.serialnum.constant;
+package com.babyfs.tk.service.biz.serialnum.consts;
 
 public class SerialNumConstant {
 

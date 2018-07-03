@@ -4,7 +4,7 @@ import com.babyfs.tk.commons.MapConfig;
 import com.babyfs.tk.commons.application.LifeServiceBindUtil;
 import com.babyfs.tk.commons.config.IConfigService;
 import com.babyfs.tk.service.biz.serialnum.ISerialNumServiceRegister;
-import com.babyfs.tk.service.biz.serialnum.constant.SerialNumConstant;
+import com.babyfs.tk.service.biz.serialnum.consts.SerialNumConstant;
 import com.babyfs.tk.service.biz.serialnum.impl.ZkSerialNumServiceRegister;
 import com.babyfs.tk.commons.service.ServiceModule;
 import com.babyfs.tk.galaxy.constant.RpcConstant;
