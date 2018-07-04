@@ -6,7 +6,7 @@ import java.util.List;
 
 public enum SerialNumType implements IndexedEnum {
     FISSION_TRANSACTION(1, "分销交易"),
-    RETAILERS_ORDER(2,"商城订单");
+    RETAILERS_ORDER(2, "商城订单");
 
     private static final List<SerialNumType> INDEXS = Util.toIndexes(SerialNumType.values());
 

@@ -98,7 +98,8 @@ public class NetUtils {
                 } finally {
                     try {
                         socket.close();
-                    } catch (Throwable e) {}
+                    } catch (Throwable e) {
+                    }
                 }
             } catch (Exception e) {
                 LOGGER.warn(String.format("Failed to retriving local address by connecting to dest host:port(%s:%s) false, e=%s", host,
@@ -146,6 +147,7 @@ public class NetUtils {
         String name = address.getHostAddress();
         return (name != null && !ANYHOST.equals(name) && !LOCALHOST.equals(name) && IP_PATTERN.matcher(name).matches());
     }
+
     //return ip to avoid lookup dns
     public static String getHostName(SocketAddress socketAddress) {
         if (socketAddress == null) {
@@ -154,7 +156,7 @@ public class NetUtils {
 
         if (socketAddress instanceof InetSocketAddress) {
             InetAddress addr = ((InetSocketAddress) socketAddress).getAddress();
-            if(addr != null){
+            if (addr != null) {
                 return addr.getHostAddress();
             }
         }

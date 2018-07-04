@@ -29,8 +29,8 @@ public class ZkSNServiceRegisterModule extends ServiceModule {
         @Override
         public ZkSerialNumServiceRegister get() {
             String zkRegisterUrl = MapConfig.getString(SerialNumConstant.ZK_BOOTSTRAP_SERVERS, conf, SerialNumConstant.ZK_BOOTSTRAP_SERVERS_DEFAULT);
-            int connectTimeout = MapConfig.getInt(SerialNumConstant.ZK_CONNECT_TIMEOUT, conf, RpcConstant.ZK_CONNECT_TIMEOUT_DEFAULT);
-            int sessionTimeout = MapConfig.getInt(SerialNumConstant.ZK_SESSION_TIMEOUT, conf, RpcConstant.ZK_SESSION_TIMEOUT_DEFAULT);
+            int connectTimeout = MapConfig.getInt(SerialNumConstant.ZK_CONNECT_TIMEOUT, conf, SerialNumConstant.ZK_CONNECT_TIMEOUT_DEFAULT);
+            int sessionTimeout = MapConfig.getInt(SerialNumConstant.ZK_SESSION_TIMEOUT, conf, SerialNumConstant.ZK_SESSION_TIMEOUT_DEFAULT);
             String zkRoot = MapConfig.getString(SerialNumConstant.ZK_SERIAL_NUMBER_ROOT, conf, SerialNumConstant.ZK_SERIAL_NUMBER_ROOT_DEFAULT);
             String zkNode = MapConfig.getString(SerialNumConstant.ZK_SERIAL_NUMBER_NODE, conf, SerialNumConstant.ZK_SERIAL_NUMBER_NODE_DEFAULT);
             CuratorFramework curator = buildAndStartCurator(zkRegisterUrl, connectTimeout, sessionTimeout);

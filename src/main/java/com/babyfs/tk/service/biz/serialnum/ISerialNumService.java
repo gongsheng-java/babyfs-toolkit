@@ -3,7 +3,8 @@ package com.babyfs.tk.service.biz.serialnum;
 import com.babyfs.tk.service.biz.serialnum.enums.SerialNumType;
 
 /**
- * 流水号服务，支持1024台机器和千万流水
+ * 流水号服务，支持1024台机器和日千万流水
+ * 使用时需要集成{@link com.babyfs.tk.service.biz.counter.IDSequenceService}
  */
 public interface ISerialNumService {
 

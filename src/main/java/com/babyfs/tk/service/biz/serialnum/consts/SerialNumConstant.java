@@ -20,6 +20,6 @@ public class SerialNumConstant {
 
     public static final String ZK_SERIAL_NUMBER_NODE = "zk.serial.num.node";
 
-    public static final String ZK_SERIAL_NUMBER_NODE_DEFAULT = "/node";
+    public static final String ZK_SERIAL_NUMBER_NODE_DEFAULT = "node";
 
 }

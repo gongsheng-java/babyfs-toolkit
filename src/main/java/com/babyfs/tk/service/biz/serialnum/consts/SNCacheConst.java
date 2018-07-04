@@ -6,7 +6,7 @@ import com.babyfs.tk.service.biz.constants.CacheConst;
 /**
  * 流水服务缓存配置
  */
-public final class SNCacheConst extends CacheConst{
+public final class SNCacheConst extends CacheConst {
     /**
      * 流水服务相关前缀
      */

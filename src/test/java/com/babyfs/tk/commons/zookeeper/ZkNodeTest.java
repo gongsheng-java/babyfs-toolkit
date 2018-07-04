@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 @Ignore
 public class ZkNodeTest {
 
@@ -19,8 +21,8 @@ public class ZkNodeTest {
         CuratorFramework curator = Utils.buildAndStartCurator("127.0.0.1:2181", 5000, 5000);
 //        Stat state = curator.checkExists().forPath("/tesssss");
 //        System.out.println(JSON.toJSONString(state));
-//        List<String> children = curator.getChildren().forPath(root);
-//        children.forEach(t -> System.out.println(t));
+        List<String> children = curator.getChildren().forPath("/serialnum");
+        children.forEach(t -> System.out.println(t));
         String test = root + "/test";
         System.out.println(curator.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT_SEQUENTIAL).forPath(test));
     }

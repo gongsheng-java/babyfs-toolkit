@@ -50,7 +50,7 @@ public class ZkSerialNumServiceRegister extends LifeServiceSupport implements IS
         this.zkNode = Preconditions.checkNotNull(zkNode);
         this.curator = Preconditions.checkNotNull(curator);
         this.ip = Preconditions.checkNotNull(NetUtils.getLocalAddress().getHostAddress());
-        this.zkPath = this.zkRoot + this.zkNode;
+        this.zkPath = this.zkRoot + "/" + this.zkNode;
         this.running = false;
     }
 
@@ -61,17 +61,20 @@ public class ZkSerialNumServiceRegister extends LifeServiceSupport implements IS
         }
 
         try {
+            //root目录是否存在
             Stat state = curator.checkExists().forPath(zkRoot);
             if (null == state) {
                 curator.create().withMode(CreateMode.PERSISTENT).forPath(zkRoot);
                 LOGGER.info("create persistent zkRoot : {}", zkRoot);
             }
+            //存在子目录
             if (state.getNumChildren() > 0) {
                 List<String> childs = curator.getChildren().forPath(zkRoot);
                 for (String node : childs) {
                     byte[] data = curator.getData().forPath(zkRoot + "/" + node);
                     RegisterEntity entity = JSON.parseObject(data, RegisterEntity.class);
                     if (null != entity) {
+                        //转换成id
                         int id = getNumberFromNode(node);
                         if (id != -1) {
                             clients.put(entity.ip, id);
@@ -81,10 +84,11 @@ public class ZkSerialNumServiceRegister extends LifeServiceSupport implements IS
             }
 
             if (state.getNumChildren() == 0 || !clients.containsKey(ip)) {
+                //新建永久序列节点
                 String path = curator.create().withMode(CreateMode.PERSISTENT_SEQUENTIAL).forPath(zkPath);
                 LOGGER.info("create persistent sequential zknode : {}", path);
                 byte[] data = JSON.toJSONBytes(new RegisterEntity(this.ip, System.currentTimeMillis()));
-                curator.setData().forPath(zkPath, data);
+                curator.setData().forPath(path, data);
                 int id = getNumberFromNode(path);
                 if (id != -1) {
                     clients.put(this.ip, id);
