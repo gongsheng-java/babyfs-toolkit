@@ -38,6 +38,11 @@ public class CacheConst {
      * 临时计数器统一前缀
      */
     public static final String TEMPOAL_COUNTER_PREFIX = "tcc_";
+
+    /**
+     * 流水号服务相关缓存统一前缀
+     */
+    public static final String SERIAL_NUM_KEY_PREFIX = "sn_";
     /**
      * Entity相关的缓存组
      */
@@ -58,6 +63,7 @@ public class CacheConst {
      * 暂存的计数器,用于非关键业务计数
      */
     public static final String DEFAULT_TEMPORAL_COUNTER_GROUP = "temporal_counter";
+
     /**
      * Freq相关的缓存组
      */
