@@ -1,5 +1,6 @@
 package com.babyfs.tk.http.client;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.io.Closeables;
 import com.google.common.net.MediaType;
 import com.babyfs.tk.commons.Constants;
@@ -10,6 +11,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.*;
@@ -178,6 +180,30 @@ public final class HttpClientUtils {
             default:
                 throw new IllegalArgumentException();
         }
+    }
+
+    /**
+     * 组装拼接post请求参数
+     *
+     * @param postMethod post方法
+     * @param postParams post参数，可以为null或长度为0
+     */
+    public static void assemblyPostParamsRaw(HttpPost postMethod, Map<String, String> postParams) {
+        if (postParams == null || postParams.size() == 0) {
+            return;
+        }
+
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        for (Map.Entry<String, String> entry : postParams.entrySet()) {
+            nvps.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+        }
+        try {
+            StringEntity postingString = new StringEntity(JSON.toJSONString(postParams));
+            postMethod.setEntity(postingString);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 }
