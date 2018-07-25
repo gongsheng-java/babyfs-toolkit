@@ -220,7 +220,7 @@ public class KafkaConsumerWorkerService extends LifeServiceSupport {
                                         try {
                                             processRet = processor.process(topic, key, message, reTryCount++);
                                         } catch (Throwable e) {
-//                                            LOGGER.error("Process message error for topic " + topic, e);
+                                            LOGGER.error("Process message error for topic " + topic, e);
                                         }
                                         if (!processRet) {
                                             if (strictMode && !stop) {
