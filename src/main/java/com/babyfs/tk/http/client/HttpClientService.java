@@ -635,4 +635,22 @@ public class HttpClientService {
         httpPost.setEntity(entity);
         return httpPost;
     }
+
+    /**
+     * 发送post请求Body Raw,返回response的二进制流,
+     * <p/>
+     * 主要应用于图片下载, 返回数据无压缩
+     *
+     * @param url        请求的URL
+     * @param postParams POST请求参数
+     * @return 返回contentType和response二进制流
+     */
+    public Pair<String, byte[]> sendPostForBodyRaw(String url, Map<String, String> postParams) throws IOException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(url), "URL can not be empty or null.");
+        LOGGER.info("Post Request:{}", url);
+        HttpPost post = new HttpPost(url);
+        HttpClientUtils.assemblyPostParamsRaw(post, postParams);
+        HttpClientUtils.assemblyHeaders(post, null);
+        return sendRequestForRaw(post);
+    }
 }
