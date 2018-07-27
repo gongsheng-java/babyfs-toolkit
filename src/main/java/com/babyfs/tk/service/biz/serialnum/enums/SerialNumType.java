@@ -5,6 +5,7 @@ import com.babyfs.tk.commons.enums.IndexedEnum;
 import java.util.List;
 
 public enum SerialNumType implements IndexedEnum {
+    //最多32个枚举类型
     FISSION_TRANSACTION(1, "分销交易"),
     RETAILERS_ORDER(2, "商城订单");
 
