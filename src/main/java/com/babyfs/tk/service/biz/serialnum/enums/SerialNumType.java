@@ -7,7 +7,8 @@ import java.util.List;
 public enum SerialNumType implements IndexedEnum {
     //最多32个枚举类型
     FISSION_TRANSACTION(1, "分销交易"),
-    RETAILERS_ORDER(2, "商城订单");
+    RETAILERS_ORDER(2, "商城订单"),
+    RETAILERS_REFUND(3, "商城退款订单");
 
     private static final List<SerialNumType> INDEXS = Util.toIndexes(SerialNumType.values());
 
