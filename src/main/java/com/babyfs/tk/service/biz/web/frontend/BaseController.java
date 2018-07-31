@@ -361,6 +361,10 @@ public abstract class BaseController {
         return ServletRequestUtils.getIntParameter(request, name, 0);
     }
 
+    protected int getIntParameter(HttpServletRequest request, String name, int defaultVal) {
+        return ServletRequestUtils.getIntParameter(request, name, defaultVal);
+    }
+
     protected long getLongParameter(HttpServletRequest request, String name) {
         return ServletRequestUtils.getLongParameter(request, name, 0L);
     }
