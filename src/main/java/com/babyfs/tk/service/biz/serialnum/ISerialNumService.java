@@ -10,7 +10,7 @@ public interface ISerialNumService {
 
     /**
      * 根据类型获取流水号
-     * 总共28位，14位时间，4位机器号，2位类型，8位递增序列
+     * 总共22位，12位时间，2位机器号，2位类型，6位递增序列
      * @param type
      * @return
      */

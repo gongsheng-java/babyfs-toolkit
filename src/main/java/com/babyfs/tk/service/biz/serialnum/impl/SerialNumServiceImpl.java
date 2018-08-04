@@ -18,10 +18,10 @@ import java.util.Date;
 public class SerialNumServiceImpl implements ISerialNumService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SerialNumServiceImpl.class);
 
-    private static final int CLIENT_MAX = 1 << 11;
-    private static final int CLIENT_MIN = 1 << 10;
-    private static final long NUM_MAX = 1 << 25;
-    private static final long NUM_MIN = 1 << 24;
+    private static final int CLIENT_MAX = 1 << 6;
+    private static final int CLIENT_MIN = 1 << 5;
+    private static final long NUM_MAX = 1 << 19;
+    private static final long NUM_MIN = 1 << 18;
     private static final int TYPE_MAX = 1 << 6;
     private static final int TYPE_MIN = 1 << 5;
 
@@ -40,11 +40,11 @@ public class SerialNumServiceImpl implements ISerialNumService {
     public String getSerialNum(SerialNumType type) {
         try {
             StringBuilder builder = new StringBuilder();
-            //14位
-            String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            //12位
+            String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
             builder.append(date);
             int num = serviceRegister.getSerialNum();
-            //4位
+            //2位
             int clientNum = (num & (CLIENT_MAX - 1)) | CLIENT_MIN;
             builder.append(clientNum);
             //2位
@@ -54,7 +54,7 @@ public class SerialNumServiceImpl implements ISerialNumService {
             String key = SNCacheConst.SN_INCR_CACHE_PARAM.getCacheKey(num + "_" + type.getIndex());
             long id = sequenceService.getDailyNext(key, new Date());
             long newId = (id & (NUM_MAX - 1)) | NUM_MIN;
-            //8位
+            //6位
             builder.append(newId);
             return builder.toString();
         } catch (Exception e) {
