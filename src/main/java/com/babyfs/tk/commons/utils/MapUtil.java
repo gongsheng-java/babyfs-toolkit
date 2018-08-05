@@ -5,7 +5,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.babyfs.tk.commons.base.Pair;
 
-import java.util.IllegalFormatException;
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -193,5 +194,29 @@ public final class MapUtil {
      */
     public static boolean isNotEmpty(Map<?, ?> map) {
         return !isEmpty(map);
+    }
+
+    /**
+     * 实体转map
+     *
+     * @param obj
+     * @return
+     */
+    public static Map<String, Object> object2Map(Object obj) {
+        Map<String, Object> map = new HashMap<>();
+        if (obj == null) {
+            return map;
+        }
+        Class clazz = obj.getClass();
+        Field[] fields = clazz.getDeclaredFields();
+        try {
+            for (Field field : fields) {
+                field.setAccessible(true);
+                map.put(field.getName(), field.get(obj));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return map;
     }
 }
