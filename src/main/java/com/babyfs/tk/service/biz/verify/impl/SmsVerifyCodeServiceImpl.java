@@ -120,6 +120,12 @@ public class SmsVerifyCodeServiceImpl implements ISmsVerifyCodeService {
         CacheUtils.delete(redisKey, CACHE_PARAM, redisService);
     }
 
+    @Override
+    public void delete(String mobile, int type){
+        String redisKey = getRedisKey(type, mobile);
+        CacheUtils.delete(redisKey, CACHE_PARAM, redisService);
+    }
+
     /**
      * 获取存储在Redis中的键值
      *
