@@ -53,4 +53,6 @@ public interface ISmsVerifyCodeService {
      * @param parameter
      */
     void delete(SmsCodeParameter parameter);
+
+    void delete(String mobile, int type);
 }
