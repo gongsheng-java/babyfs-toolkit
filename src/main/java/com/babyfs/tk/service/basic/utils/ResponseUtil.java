@@ -45,6 +45,17 @@ public class ResponseUtil {
      *
      * @param httpResponse
      * @param serviceResponse
+     * @return
+     */
+    public static boolean writeJSONResult(HttpServletResponse httpResponse, ServiceResponse serviceResponse) {
+        return writeJSONResult(httpResponse, serviceResponse, null, null);
+    }
+
+    /**
+     * 将serviceResponse转为JSON结果写入httpResponse
+     *
+     * @param httpResponse
+     * @param serviceResponse
      * @param config          JSON序列化配置
      * @param filters         JSON属性过列表
      * @return 成功返回 true,失败返回false.
