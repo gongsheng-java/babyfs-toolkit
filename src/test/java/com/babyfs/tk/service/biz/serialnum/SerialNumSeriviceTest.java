@@ -23,6 +23,11 @@ public class SerialNumSeriviceTest extends BaseTest {
     }
 
     @Test
+    public void createNumber2() {
+        System.out.println(service.getSFSerialNum(SerialNumType.FISSION_TRANSACTION));
+    }
+
+    @Test
     public void asnyCreateNum() {
         int pool = 500;
         ExecutorService executor = Executors.newFixedThreadPool(pool);
@@ -31,6 +36,26 @@ public class SerialNumSeriviceTest extends BaseTest {
             List<CompletableFuture<Void>> list = new ArrayList<>();
             for (int i = 0; i < pool; i++) {
                 CompletableFuture<Void> future = CompletableFuture.runAsync(() -> System.out.println(service.getSerialNum(SerialNumType.FISSION_TRANSACTION)), executor);
+                list.add(future);
+            }
+            CompletableFuture[] newList = list.toArray(new CompletableFuture[0]);
+            CompletableFuture<Void> all = CompletableFuture.allOf(newList);
+            all.join();
+            count++;
+            if (count > 20) break;
+        }
+    }
+
+
+    @Test
+    public void asnyCreateNum2() {
+        int pool = 500;
+        ExecutorService executor = Executors.newFixedThreadPool(pool);
+        int count = 0;
+        for (;;) {
+            List<CompletableFuture<Void>> list = new ArrayList<>();
+            for (int i = 0; i < pool; i++) {
+                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> System.out.println(service.getSFSerialNum(SerialNumType.FISSION_TRANSACTION)), executor);
                 list.add(future);
             }
             CompletableFuture[] newList = list.toArray(new CompletableFuture[0]);
