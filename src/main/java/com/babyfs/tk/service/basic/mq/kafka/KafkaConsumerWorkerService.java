@@ -225,7 +225,7 @@ public class KafkaConsumerWorkerService extends LifeServiceSupport {
                                         if (!processRet) {
                                             if (strictMode && !stop) {
                                                 if (reTryCount % 5 == 1) {
-                                                    LOGGER.warn("Process message fail,retry:{} {}", reTryCount, topicMsg.toJSONString());
+                                                    LOGGER.debug("Process message fail,retry:{} {}", reTryCount, topicMsg.toJSONString());
                                                 }
                                                 try {
                                                     Thread.sleep(50);
