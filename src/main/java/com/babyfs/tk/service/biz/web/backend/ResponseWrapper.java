@@ -58,7 +58,6 @@ public class ResponseWrapper extends HttpServletResponseWrapper {
     public byte[] getBytes() throws IOException {
         flushBuffer();
         byte[] retBytes = bytes.toByteArray();
-        this.getOutputStream().write(retBytes);
         return retBytes;
     }
 

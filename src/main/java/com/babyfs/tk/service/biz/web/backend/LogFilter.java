@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map;
 import java.util.UUID;
 
@@ -59,10 +60,14 @@ public class LogFilter implements Filter {
             chain.doFilter(requestWrapper, responseWrapper);
 
             String outParam = null;
-            if (responseWrapper.getContentType() != exportContentType)
+            if (responseWrapper.getContentType() != exportContentType) {
                 outParam = new String(responseWrapper.getBytes(), responseWrapper.getCharacterEncoding());
-            if (outParam != null && outParam != "")
                 logger.info(String.format("%s result：%s", traceId, outParam));
+
+                writeResponse(response,outParam);
+            }
+
+
         }
         catch (Exception ex) {
             logger.error(String.format("%s logfilter error",traceId),ex);
@@ -72,5 +77,13 @@ public class LogFilter implements Filter {
     @Override
     public void destroy() {
 
+    }
+
+    private void writeResponse(ServletResponse response, String responseString)
+            throws IOException {
+        PrintWriter out = response.getWriter();
+        out.print(responseString);
+        out.flush();
+        out.close();
     }
 }
