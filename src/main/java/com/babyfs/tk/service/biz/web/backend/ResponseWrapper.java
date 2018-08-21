@@ -14,49 +14,52 @@ public class ResponseWrapper extends HttpServletResponseWrapper {
 
     private ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     private HttpServletResponse response;
+    private ServletOutputStream out = null;
     private PrintWriter pwrite;
 
-    public ResponseWrapper(HttpServletResponse response) {
+    public ResponseWrapper(HttpServletResponse response) throws UnsupportedEncodingException {
         super(response);
         this.response = response;
+        bytes = new ByteArrayOutputStream();// 真正存储数据的流
+        out = new MyServletOutputStream(bytes);
     }
 
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
-        return new MyServletOutputStream(bytes); // 将数据写到 byte 中
+        return out; // 将数据写到 byte 中
     }
 
     /**
      * 重写父类的 getWriter() 方法，将响应数据缓存在 PrintWriter 中
      */
     @Override
-    public PrintWriter getWriter() throws IOException {
-        try{
-            pwrite = new PrintWriter(new OutputStreamWriter(bytes, "utf-8"));
-        } catch(UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+    public PrintWriter getWriter() throws UnsupportedEncodingException {
+        pwrite = new PrintWriter(new OutputStreamWriter(bytes, "utf-8"));
         return pwrite;
     }
 
-    /**
-     * 获取缓存在 PrintWriter 中的响应数据
-     * @return
-     */
-    public byte[] getBytes() {
-        if(null != pwrite) {
-            pwrite.close();
-            return bytes.toByteArray();
+    /** 重载父类获取flushBuffer的方法 */
+    @Override
+    public void flushBuffer() throws IOException {
+        if (out != null) {
+            out.flush();
         }
+        if (pwrite != null) {
+            pwrite.flush();
+        }
+    }
 
-        if(null != bytes) {
-            try {
-                bytes.flush();
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return bytes.toByteArray();
+    @Override
+    public void reset() {
+        bytes.reset();
+    }
+
+    /** 将out、writer中的数据强制输出到WapperedResponse的buffer里面，否则取不到数据 */
+    public byte[] getBytes() throws IOException {
+        flushBuffer();
+        byte[] retBytes = bytes.toByteArray();
+        this.getOutputStream().write(retBytes);
+        return retBytes;
     }
 
     class MyServletOutputStream extends ServletOutputStream {
@@ -69,6 +72,11 @@ public class ResponseWrapper extends HttpServletResponseWrapper {
         @Override
         public void write(int b) throws IOException {
             ostream.write(b); // 将数据写到 stream　中
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            ostream.write(b, 0, b.length);
         }
 
     }
