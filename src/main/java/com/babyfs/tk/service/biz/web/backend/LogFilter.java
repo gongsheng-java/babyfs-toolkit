@@ -54,7 +54,8 @@ public class LogFilter implements Filter {
             if (resp.isFailure()) {
                 logSwitch = false;
             }
-            logSwitch = (Boolean) resp.getData().getParsed();
+            Integer integer =(Integer) resp.getData().getParsed();
+            logSwitch = integer==null?false:integer.intValue()==1;
         }
         catch (Exception ex){
             logSwitch = false;
