@@ -66,7 +66,7 @@ public class LogFilter implements Filter {
 
         //开关关闭，不打印请求日志
         if(!logSwitch) {
-            chain.doFilter(requestWrapper, responseWrapper);
+            chain.doFilter(request, response);
             return;
         }
 
@@ -74,14 +74,14 @@ public class LogFilter implements Filter {
         try {
             // 请求html页面、js不打印日志
             if (url.matches(ignoreUrlRegex)) {
-                chain.doFilter(requestWrapper, responseWrapper);
+                chain.doFilter(request, response);
                 return;
             }
 
             // 打印form格式的入参信息
             Map params = request.getParameterMap();
             if (null != params && params.size() != 0) {
-                logger.info(String.format("%s url:%s;parameters：%s", traceId, url,JSON.toJSONString(params)));
+                logger.info(String.format("%s url:%s;parameters：%s", traceId, url, JSON.toJSONString(params)));
             } else {
                 // 打印json格式的入参信息
                 String charEncoding = requestWrapper.getCharacterEncoding() != null ? requestWrapper.getCharacterEncoding() : "UTF-8";
@@ -91,17 +91,14 @@ public class LogFilter implements Filter {
             chain.doFilter(requestWrapper, responseWrapper);
 
             String outParam = null;
-            if (responseWrapper.getContentType() != exportContentType) {
-                outParam = new String(responseWrapper.getBytes(), responseWrapper.getCharacterEncoding());
-                if(outParam!=null&&outParam!="") {
-                    if(outParam.length()>200)
-                        outParam = outParam.substring(0,200)+"...";
-                    logger.info(String.format("%s result：%s", traceId, outParam));
-                }
+            outParam = new String(responseWrapper.getBytes(), responseWrapper.getCharacterEncoding());
+            writeResponse(response, outParam);
 
-                writeResponse(response,outParam);
+            if (outParam != null && outParam != "" && responseWrapper.getContentType() != exportContentType) {
+                if (outParam.length() > 200)
+                    outParam = outParam.substring(0, 200) + "...";
+                logger.info(String.format("%s result：%s", traceId, outParam));
             }
-
 
         }
         catch (Exception ex) {
