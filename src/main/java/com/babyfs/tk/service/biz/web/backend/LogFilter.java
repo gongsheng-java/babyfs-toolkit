@@ -47,7 +47,7 @@ public class LogFilter implements Filter {
         try {
             if(kvConfService==null) {
                 ApplicationContext ac1 = WebApplicationContextUtils.getRequiredWebApplicationContext(request.getServletContext());
-                kvConfService = (IKVConfService) ac1.getBean("kvConfService");
+                kvConfService = ac1.getBean(IKVConfService.class);
             }
             ServiceResponse<ParsedEntity<KVConfEntity, Object>> resp = kvConfService.getByNameWithLocalCache(swithName);
 
