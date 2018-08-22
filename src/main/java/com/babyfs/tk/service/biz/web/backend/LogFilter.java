@@ -35,10 +35,13 @@ public class LogFilter implements Filter {
 
     @Inject
     IKVConfService kvConfService;
-    Boolean logSwitch = false;
+    Boolean logSwitch = null;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+    }
+
+    private void getSwitch() {
         try {
             ServiceResponse<ParsedEntity<KVConfEntity, Object>> resp = kvConfService.getByNameWithLocalCache(swithName);
 
@@ -48,12 +51,14 @@ public class LogFilter implements Filter {
             logSwitch = (Boolean) resp.getData().getParsed();
         }
         catch (Exception ex){
+            logSwitch = false;
             logger.warn(String.format("获取配置kv-%s，错误",swithName),ex);
         }
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        getSwitch();
         String traceId = UUID.randomUUID().toString();
         ResponseWrapper responseWrapper = new ResponseWrapper((HttpServletResponse) response);
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
