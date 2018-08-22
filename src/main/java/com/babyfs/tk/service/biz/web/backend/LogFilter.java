@@ -7,7 +7,9 @@ import com.babyfs.tk.service.biz.kvconf.IKVConfService;
 import com.babyfs.tk.service.biz.kvconf.model.KVConfEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.inject.Inject;
 import javax.servlet.*;
@@ -33,16 +35,20 @@ public class LogFilter implements Filter {
     static final String exportContentType = "application/vnd.ms-excel";
     static final String swithName = "_sys.toolkit.logfilter.switch";
 
+    Boolean logSwitch = null;
     @Inject
     IKVConfService kvConfService;
-    Boolean logSwitch = null;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
-    private void getSwitch() {
+    private void getSwitch(ServletRequest request) {
         try {
+            if(kvConfService==null) {
+                ApplicationContext ac1 = WebApplicationContextUtils.getRequiredWebApplicationContext(request.getServletContext());
+                kvConfService = (IKVConfService) ac1.getBean("kvConfService");
+            }
             ServiceResponse<ParsedEntity<KVConfEntity, Object>> resp = kvConfService.getByNameWithLocalCache(swithName);
 
             if (resp.isFailure()) {
@@ -58,7 +64,7 @@ public class LogFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        getSwitch();
+        getSwitch(request);
         String traceId = UUID.randomUUID().toString();
         ResponseWrapper responseWrapper = new ResponseWrapper((HttpServletResponse) response);
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
