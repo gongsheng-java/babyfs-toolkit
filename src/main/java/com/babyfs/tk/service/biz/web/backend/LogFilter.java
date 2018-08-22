@@ -1,10 +1,15 @@
 package com.babyfs.tk.service.biz.web.backend;
 
 import com.alibaba.fastjson.JSON;
+import com.babyfs.tk.commons.model.ServiceResponse;
+import com.babyfs.tk.service.biz.base.model.ParsedEntity;
+import com.babyfs.tk.service.biz.kvconf.IKVConfService;
+import com.babyfs.tk.service.biz.kvconf.model.KVConfEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
+import javax.inject.Inject;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
@@ -26,10 +31,25 @@ public class LogFilter implements Filter {
     static final Log logger = LogFactory.getLog(LogFilter.class);
     static final String ignoreUrlRegex = ".*((pay/)|(/index)|(/index/.*)|([.]((html)|(jsp)|(css)|(js)|(gif)|(png))))$";
     static final String exportContentType = "application/vnd.ms-excel";
+    static final String swithName = "_sys.toolkit.logfilter.switch";
+
+    @Inject
+    IKVConfService kvConfService;
+    Boolean logSwitch = false;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        try {
+            ServiceResponse<ParsedEntity<KVConfEntity, Object>> resp = kvConfService.getByNameWithLocalCache(swithName);
 
+            if (resp.isFailure()) {
+                logSwitch = false;
+            }
+            logSwitch = (Boolean) resp.getData().getParsed();
+        }
+        catch (Exception ex){
+            logger.warn(String.format("获取配置kv-%s，错误",swithName),ex);
+        }
     }
 
     @Override
@@ -38,6 +58,12 @@ public class LogFilter implements Filter {
         ResponseWrapper responseWrapper = new ResponseWrapper((HttpServletResponse) response);
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         RequestWrapper requestWrapper = new RequestWrapper(httpServletRequest);
+
+        //开关关闭，不打印请求日志
+        if(!logSwitch) {
+            chain.doFilter(requestWrapper, responseWrapper);
+            return;
+        }
 
         String url = httpServletRequest.getRequestURI();
         try {
@@ -50,7 +76,7 @@ public class LogFilter implements Filter {
             // 打印form格式的入参信息
             Map params = request.getParameterMap();
             if (null != params && params.size() != 0) {
-                logger.info(String.format("%s parameters：%s", traceId, JSON.toJSONString(params)));
+                logger.info(String.format("%s url:%s;parameters：%s", traceId, url,JSON.toJSONString(params)));
             } else {
                 // 打印json格式的入参信息
                 String charEncoding = requestWrapper.getCharacterEncoding() != null ? requestWrapper.getCharacterEncoding() : "UTF-8";
@@ -62,7 +88,11 @@ public class LogFilter implements Filter {
             String outParam = null;
             if (responseWrapper.getContentType() != exportContentType) {
                 outParam = new String(responseWrapper.getBytes(), responseWrapper.getCharacterEncoding());
-                logger.info(String.format("%s result：%s", traceId, outParam));
+                if(outParam!=null&&outParam!="") {
+                    if(outParam.length()>200)
+                        outParam = outParam.substring(0,200)+"...";
+                    logger.info(String.format("%s result：%s", traceId, outParam));
+                }
 
                 writeResponse(response,outParam);
             }
