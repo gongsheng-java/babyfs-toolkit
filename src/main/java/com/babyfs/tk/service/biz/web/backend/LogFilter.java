@@ -97,8 +97,7 @@ public class LogFilter implements Filter {
 
             chain.doFilter(requestWrapper, responseWrapper);
 
-            String outParam = null;
-            outParam = new String(responseWrapper.getBytes(), responseWrapper.getCharacterEncoding());
+            String outParam = new String(responseWrapper.getBytes(), responseWrapper.getCharacterEncoding());
             writeResponse(response, outParam);
 
             if (outParam != null && outParam != "" && responseWrapper.getContentType() != exportContentType) {
