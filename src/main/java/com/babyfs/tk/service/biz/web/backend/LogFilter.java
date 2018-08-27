@@ -40,6 +40,11 @@ public class LogFilter implements Filter {
     IKVConfService kvConfService;
 
     @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
@@ -85,14 +90,16 @@ public class LogFilter implements Filter {
                 return;
             }
 
+            StringBuilder stringBuilder = new StringBuilder();
+
             // 打印form格式的入参信息
             Map params = request.getParameterMap();
             if (null != params && params.size() != 0) {
-                logger.info(String.format("%s url:%s;parameters：%s", traceId, url, JSON.toJSONString(params)));
+                stringBuilder.append(String.format("%s url:%s;parameters：%s", traceId, url, JSON.toJSONString(params)));
             } else {
                 // 打印json格式的入参信息
                 String charEncoding = requestWrapper.getCharacterEncoding() != null ? requestWrapper.getCharacterEncoding() : "UTF-8";
-                logger.info(String.format("%s parameters：%s", traceId, new String(requestWrapper.toByteArray(), charEncoding)));
+                stringBuilder.append(String.format("%s parameters：%s", traceId, new String(requestWrapper.toByteArray(), charEncoding)));
             }
 
             chain.doFilter(requestWrapper, responseWrapper);
@@ -101,11 +108,13 @@ public class LogFilter implements Filter {
             writeResponse(response, outParam);
 
             if (outParam != null && outParam != "" && responseWrapper.getContentType() != exportContentType) {
-                if (outParam.length() > 200)
-                    outParam = outParam.substring(0, 200) + "...";
-                logger.info(String.format("%s result：%s", traceId, outParam));
+                if (outParam.length() > 500)
+                    outParam = outParam.substring(0, 500) + "...";
+                stringBuilder.append(String.format("%s result：%s", traceId, outParam));
             }
 
+            if(stringBuilder.length()>0)
+                logger.info(stringBuilder.toString());
         }
         catch (Exception ex) {
             logger.error(String.format("%s logfilter error",traceId),ex);
