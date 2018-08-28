@@ -118,7 +118,7 @@ public class LogFilter implements Filter {
 
             String outParam = new String(responseWrapper.getBytes(), responseWrapper.getCharacterEncoding());
 
-            byte[] respNew = outParam.getBytes(response.getCharacterEncoding());
+            byte[] respNew = outParam.getBytes("UTF-8");
 
             if (outParam != null && outParam != "" && responseWrapper.getContentType() != exportContentType) {
                 if (outParam.length() > 500)

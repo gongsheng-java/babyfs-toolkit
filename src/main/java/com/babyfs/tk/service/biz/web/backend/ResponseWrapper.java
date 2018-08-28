@@ -20,7 +20,7 @@ public class ResponseWrapper extends HttpServletResponseWrapper {
         super(response);
         bytes = new ByteArrayOutputStream();// 真正存储数据的流
         out = new MyServletOutputStream(bytes);
-        pwrite = new PrintWriter(new OutputStreamWriter(bytes, this.getCharacterEncoding()));
+        pwrite = new PrintWriter(new OutputStreamWriter(bytes, "UTF-8"));
     }
 
     @Override
