@@ -103,21 +103,22 @@ public class LogFilter implements Filter {
             }
 
             StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(traceId);
 
             // 打印form格式的入参信息
             Map params = request.getParameterMap();
             if (null != params && params.size() != 0) {
-                stringBuilder.append(String.format("%s url:%s;getParameterMaps：%s", traceId, url, JSON.toJSONString(params)));
+                stringBuilder.append(String.format(" url:%s;getParameterMaps：%s", url, JSON.toJSONString(params)));
             } else {
                 // 打印json格式的入参信息
                 String charEncoding = requestWrapper.getCharacterEncoding() != null ? requestWrapper.getCharacterEncoding() : "UTF-8";
-                stringBuilder.append(String.format("%s url:%s;requestWrapper：%s", traceId,url, new String(requestWrapper.getContentAsByteArray(), charEncoding)));
+                stringBuilder.append(String.format(" url:%s;requestWrapper：%s",url, new String(requestWrapper.getContentAsByteArray(), charEncoding)));
             }
 
             //打印header信息
             HashMap<String,String> headerMap = (HashMap<String,String>)getHeaderMap(httpServletRequest);
             if(headerMap!=null)
-                stringBuilder.append(String.format("%s header is %s",traceId,JSON.toJSONString(headerMap)));
+                stringBuilder.append(String.format(" header is %s",JSON.toJSONString(headerMap)));
 
             chain.doFilter(requestWrapper, responseWrapper);
 
@@ -128,7 +129,7 @@ public class LogFilter implements Filter {
             if (outParam != null && outParam != "" && responseWrapper.getContentType() != exportContentType) {
                 if (outParam.length() > maxLength)
                     outParam = outParam.substring(0, maxLength) + "...";
-                stringBuilder.append(String.format("%s result：%s", traceId, outParam));
+                stringBuilder.append(String.format(" result：%s", outParam));
             }
 
             if(stringBuilder.length()>0)
