@@ -102,7 +102,7 @@ public class LogFilter implements Filter {
             } else {
                 // 打印json格式的入参信息
                 String charEncoding = requestWrapper.getCharacterEncoding() != null ? requestWrapper.getCharacterEncoding() : "UTF-8";
-                stringBuilder.append(String.format("%s parameters：%s", traceId, new String(requestWrapper.toByteArray(), charEncoding)));
+                stringBuilder.append(String.format("%s url:%s;parameters：%s", traceId,url, new String(requestWrapper.toByteArray(), charEncoding)));
             }
 
             chain.doFilter(requestWrapper, responseWrapper);
