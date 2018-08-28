@@ -1,11 +1,11 @@
 package com.babyfs.tk.service.biz.web.backend;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.service.biz.base.model.ParsedEntity;
 import com.babyfs.tk.service.biz.kvconf.IKVConfService;
 import com.babyfs.tk.service.biz.kvconf.model.KVConfEntity;
-import com.fasterxml.jackson.core.JsonEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
@@ -19,7 +19,6 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,8 +37,10 @@ public class LogFilter implements Filter {
     static final String ignoreUrlRegex = ".*((pay/)|(/index)|(/index/.*)|([.]((html)|(jsp)|(css)|(js)|(gif)|(png))))$";
     static final String exportContentType = "application/vnd.ms-excel";
     static final String swithName = "_sys.toolkit.logfilter.switch";
+    static final int defaultLength = 500;
 
     Boolean logSwitch = null;
+    int maxLength;
     @Inject
     IKVConfService kvConfService;
 
@@ -52,8 +53,8 @@ public class LogFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
-    private void getSwitch(ServletRequest request) {
-        /*
+    private void getConfig(ServletRequest request) {
+
         try {
             if(kvConfService==null) {
                 ApplicationContext ac1 = WebApplicationContextUtils.getRequiredWebApplicationContext(request.getServletContext());
@@ -64,20 +65,24 @@ public class LogFilter implements Filter {
             if (resp.isFailure()) {
                 logSwitch = false;
             }
-            LogSwitch switchKV =(LogSwitch) resp.getData().getParsed();
-            logSwitch = switchKV==null?false:switchKV.isLogSwitch();
+            JSONObject object = (JSONObject) resp.getData().getParsed();
+            logSwitch = object.getBoolean("logSwitch");
+            maxLength = object.getIntValue("maxLength");
         }
         catch (Exception ex){
             logSwitch = false;
             logger.warn(String.format("获取配置kv-%s，错误",swithName),ex);
         }
-        */
-        logSwitch = true;
+
+        if(logSwitch==null)
+            logSwitch = false;
+        if(maxLength==0)
+            maxLength = defaultLength;
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        getSwitch(request);
+        getConfig(request);
         String traceId = UUID.randomUUID().toString();
         ResponseWrapper responseWrapper = new ResponseWrapper((HttpServletResponse) response);
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
@@ -121,8 +126,8 @@ public class LogFilter implements Filter {
             byte[] respNew = outParam.getBytes("UTF-8");
 
             if (outParam != null && outParam != "" && responseWrapper.getContentType() != exportContentType) {
-                if (outParam.length() > 500)
-                    outParam = outParam.substring(0, 500) + "...";
+                if (outParam.length() > maxLength)
+                    outParam = outParam.substring(0, maxLength) + "...";
                 stringBuilder.append(String.format("%s result：%s", traceId, outParam));
             }
 
