@@ -37,6 +37,10 @@ public class RequestWrapper extends HttpServletRequestWrapper {
         return new BufferedReader(new InputStreamReader(getInputStream()));
     }
 
+    public String getParameter(String name) {
+        return super.getParameter(name);
+    }
+
     public byte[] toByteArray(){
         return data;
     }

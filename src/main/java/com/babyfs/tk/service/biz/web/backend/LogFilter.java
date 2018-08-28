@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import javax.inject.Inject;
 import javax.servlet.*;
@@ -80,7 +81,7 @@ public class LogFilter implements Filter {
         String traceId = UUID.randomUUID().toString();
         ResponseWrapper responseWrapper = new ResponseWrapper((HttpServletResponse) response);
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        RequestWrapper requestWrapper = new RequestWrapper(httpServletRequest);
+        ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(httpServletRequest);
 
         //开关关闭，不打印请求日志
         if(!logSwitch) {
@@ -105,7 +106,7 @@ public class LogFilter implements Filter {
             } else {
                 // 打印json格式的入参信息
                 String charEncoding = requestWrapper.getCharacterEncoding() != null ? requestWrapper.getCharacterEncoding() : "UTF-8";
-                stringBuilder.append(String.format("%s url:%s;requestWrapper：%s", traceId,url, new String(requestWrapper.toByteArray(), charEncoding)));
+                stringBuilder.append(String.format("%s url:%s;requestWrapper：%s", traceId,url, new String(requestWrapper.getContentAsByteArray(), charEncoding)));
             }
 
             //打印header信息
