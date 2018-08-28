@@ -12,16 +12,15 @@ import java.io.*;
  */
 public class ResponseWrapper extends HttpServletResponseWrapper {
 
-    private ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    private HttpServletResponse response;
-    private ServletOutputStream out = null;
+    private ByteArrayOutputStream bytes;
+    private ServletOutputStream out;
     private PrintWriter pwrite;
 
-    public ResponseWrapper(HttpServletResponse response) throws UnsupportedEncodingException {
+    public ResponseWrapper(HttpServletResponse response) throws IOException {
         super(response);
-        this.response = response;
         bytes = new ByteArrayOutputStream();// 真正存储数据的流
         out = new MyServletOutputStream(bytes);
+        pwrite = new PrintWriter(new OutputStreamWriter(bytes, this.getCharacterEncoding()));
     }
 
     @Override
@@ -34,7 +33,6 @@ public class ResponseWrapper extends HttpServletResponseWrapper {
      */
     @Override
     public PrintWriter getWriter() throws UnsupportedEncodingException {
-        pwrite = new PrintWriter(new OutputStreamWriter(bytes, "utf-8"));
         return pwrite;
     }
 

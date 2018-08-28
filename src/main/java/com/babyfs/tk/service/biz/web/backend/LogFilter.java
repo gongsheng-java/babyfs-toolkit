@@ -108,7 +108,8 @@ public class LogFilter implements Filter {
             chain.doFilter(requestWrapper, responseWrapper);
 
             String outParam = new String(responseWrapper.getBytes(), responseWrapper.getCharacterEncoding());
-            writeResponse(response, outParam);
+
+            byte[] respNew = outParam.getBytes(response.getCharacterEncoding());
 
             if (outParam != null && outParam != "" && responseWrapper.getContentType() != exportContentType) {
                 if (outParam.length() > 500)
@@ -118,6 +119,10 @@ public class LogFilter implements Filter {
 
             if(stringBuilder.length()>0)
                 logger.info(stringBuilder.toString());
+
+            //会写response
+            writeResponse(response, respNew);
+
         }
         catch (Exception ex) {
             logger.error(String.format("%s logfilter error",traceId),ex);
@@ -129,11 +134,10 @@ public class LogFilter implements Filter {
 
     }
 
-    private void writeResponse(ServletResponse response, String responseString)
+    private void writeResponse(ServletResponse response, byte[] respnew)
             throws IOException {
-        PrintWriter out = response.getWriter();
-        out.print(responseString);
+        ServletOutputStream out = response.getOutputStream()
+        out.write(respnew);
         out.flush();
-        out.close();
     }
 }
