@@ -5,9 +5,7 @@ import org.apache.commons.io.IOUtils;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * @ClassName RequestWrapper
@@ -29,8 +27,14 @@ public class RequestWrapper extends HttpServletRequestWrapper {
         data = IOUtils.toByteArray(request.getInputStream());
     }
 
+    @Override
     public ServletInputStream getInputStream(){
         return new MyServletInputStream(new ByteArrayInputStream(data));
+    }
+
+    @Override
+    public BufferedReader getReader() throws IOException {
+        return new BufferedReader(new InputStreamReader(getInputStream()));
     }
 
     public byte[] toByteArray(){
