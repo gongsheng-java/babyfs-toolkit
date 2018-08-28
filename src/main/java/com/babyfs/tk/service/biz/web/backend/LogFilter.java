@@ -136,7 +136,7 @@ public class LogFilter implements Filter {
 
     private void writeResponse(ServletResponse response, byte[] respnew)
             throws IOException {
-        ServletOutputStream out = response.getOutputStream()
+        ServletOutputStream out = response.getOutputStream();
         out.write(respnew);
         out.flush();
     }
