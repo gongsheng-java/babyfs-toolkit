@@ -49,6 +49,7 @@ public class LogFilter implements Filter {
     }
 
     private void getSwitch(ServletRequest request) {
+        /*
         try {
             if(kvConfService==null) {
                 ApplicationContext ac1 = WebApplicationContextUtils.getRequiredWebApplicationContext(request.getServletContext());
@@ -66,6 +67,8 @@ public class LogFilter implements Filter {
             logSwitch = false;
             logger.warn(String.format("获取配置kv-%s，错误",swithName),ex);
         }
+        */
+        logSwitch = true;
     }
 
     @Override
