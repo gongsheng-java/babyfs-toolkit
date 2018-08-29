@@ -6,6 +6,8 @@ import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.service.biz.base.model.ParsedEntity;
 import com.babyfs.tk.service.biz.kvconf.IKVConfService;
 import com.babyfs.tk.service.biz.kvconf.model.KVConfEntity;
+import com.google.common.base.Strings;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
@@ -34,7 +36,7 @@ import java.util.UUID;
 public class LogFilter implements Filter {
 
     static final Log logger = LogFactory.getLog(LogFilter.class);
-    static final String ignoreUrlRegex = ".*((pay/)|(/index)|(/index/.*)|([.]((html)|(jsp)|(css)|(js)|(gif)|(png))))$";
+    static String ignoreUrlRegex = ".*((pay/)|(/index)|(/rpc)|(/index/.*)|([.]((html)|(jsp)|(css)|(js)|(gif)|(png))))$";
     static final String exportContentType = "application/vnd.ms-excel";
     static final String swithName = "_sys.toolkit.logfilter.switch";
     static final int defaultLength = 500;
@@ -53,6 +55,7 @@ public class LogFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
+    //获取替换配置
     private void getConfig(ServletRequest request) {
 
         try {
@@ -68,6 +71,9 @@ public class LogFilter implements Filter {
             JSONObject object = (JSONObject) resp.getData().getParsed();
             logSwitch = object.getBoolean("logSwitch");
             maxLength = object.getIntValue("maxLength");
+            if(!Strings.isNullOrEmpty(object.getString("ignoreUrl"))){
+                ignoreUrlRegex = object.getString("ignoreUrl");
+            }
         }
         catch (Exception ex){
             logSwitch = false;
@@ -103,32 +109,33 @@ public class LogFilter implements Filter {
             }
 
             StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(traceId);
 
             // 打印form格式的入参信息
             Map params = request.getParameterMap();
             if (null != params && params.size() != 0) {
-                stringBuilder.append(String.format("%s url:%s;getParameterMaps：%s", traceId, url, JSON.toJSONString(params)));
+                stringBuilder.append(String.format(" url:%s;getParameterMaps：%s", url, JSON.toJSONString(params)));
             } else {
                 // 打印json格式的入参信息
                 String charEncoding = requestWrapper.getCharacterEncoding() != null ? requestWrapper.getCharacterEncoding() : "UTF-8";
-                stringBuilder.append(String.format("%s url:%s;requestWrapper：%s", traceId,url, new String(requestWrapper.getContentAsByteArray(), charEncoding)));
+                stringBuilder.append(String.format(" url:%s;requestWrapper：%s",url, new String(requestWrapper.getContentAsByteArray(), charEncoding)));
             }
 
             //打印header信息
             HashMap<String,String> headerMap = (HashMap<String,String>)getHeaderMap(httpServletRequest);
             if(headerMap!=null)
-                stringBuilder.append(String.format("%s header is %s",traceId,JSON.toJSONString(headerMap)));
+                stringBuilder.append(String.format(" header is %s",JSON.toJSONString(headerMap)));
 
             chain.doFilter(requestWrapper, responseWrapper);
 
-            String outParam = new String(responseWrapper.getBytes(), responseWrapper.getCharacterEncoding());
+            byte[] respNew = responseWrapper.getBytes();
 
-            byte[] respNew = outParam.getBytes("UTF-8");
+            String outParam = new String(respNew, responseWrapper.getCharacterEncoding());
 
             if (outParam != null && outParam != "" && responseWrapper.getContentType() != exportContentType) {
                 if (outParam.length() > maxLength)
                     outParam = outParam.substring(0, maxLength) + "...";
-                stringBuilder.append(String.format("%s result：%s", traceId, outParam));
+                stringBuilder.append(String.format(" result：%s", outParam));
             }
 
             if(stringBuilder.length()>0)
