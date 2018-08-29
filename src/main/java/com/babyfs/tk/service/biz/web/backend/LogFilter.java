@@ -6,6 +6,8 @@ import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.service.biz.base.model.ParsedEntity;
 import com.babyfs.tk.service.biz.kvconf.IKVConfService;
 import com.babyfs.tk.service.biz.kvconf.model.KVConfEntity;
+import com.google.common.base.Strings;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
@@ -34,7 +36,7 @@ import java.util.UUID;
 public class LogFilter implements Filter {
 
     static final Log logger = LogFactory.getLog(LogFilter.class);
-    static final String ignoreUrlRegex = ".*((pay/)|(/index)|(/index/.*)|([.]((html)|(jsp)|(css)|(js)|(gif)|(png))))$";
+    static String ignoreUrlRegex = ".*((pay/)|(/index)|(/rpc)|(/index/.*)|([.]((html)|(jsp)|(css)|(js)|(gif)|(png))))$";
     static final String exportContentType = "application/vnd.ms-excel";
     static final String swithName = "_sys.toolkit.logfilter.switch";
     static final int defaultLength = 500;
@@ -53,6 +55,7 @@ public class LogFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
+    //获取替换配置
     private void getConfig(ServletRequest request) {
 
         try {
@@ -68,6 +71,9 @@ public class LogFilter implements Filter {
             JSONObject object = (JSONObject) resp.getData().getParsed();
             logSwitch = object.getBoolean("logSwitch");
             maxLength = object.getIntValue("maxLength");
+            if(!Strings.isNullOrEmpty(object.getString("ignoreUrl"))){
+                ignoreUrlRegex = object.getString("ignoreUrl");
+            }
         }
         catch (Exception ex){
             logSwitch = false;
@@ -122,9 +128,9 @@ public class LogFilter implements Filter {
 
             chain.doFilter(requestWrapper, responseWrapper);
 
-            String outParam = new String(responseWrapper.getBytes(), responseWrapper.getCharacterEncoding());
+            byte[] respNew = responseWrapper.getBytes();
 
-            byte[] respNew = outParam.getBytes("UTF-8");
+            String outParam = new String(respNew, responseWrapper.getCharacterEncoding());
 
             if (outParam != null && outParam != "" && responseWrapper.getContentType() != exportContentType) {
                 if (outParam.length() > maxLength)
