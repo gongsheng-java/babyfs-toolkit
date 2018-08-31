@@ -108,23 +108,24 @@ public class LogFilter implements Filter {
                 return;
             }
 
+            long startStamps = System.currentTimeMillis();
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(traceId);
 
             // 打印form格式的入参信息
             Map params = request.getParameterMap();
             if (null != params && params.size() != 0) {
-                stringBuilder.append(String.format(" url:%s;getParameterMaps：%s", url, JSON.toJSONString(params)));
+                stringBuilder.append(String.format(" url:%s;getParameterMaps:%s", url, JSON.toJSONString(params)));
             } else {
                 // 打印json格式的入参信息
                 String charEncoding = requestWrapper.getCharacterEncoding() != null ? requestWrapper.getCharacterEncoding() : "UTF-8";
-                stringBuilder.append(String.format(" url:%s;requestWrapper：%s",url, new String(requestWrapper.getContentAsByteArray(), charEncoding)));
+                stringBuilder.append(String.format(" url:%s;requestWrapper:%s", url, new String(requestWrapper.getContentAsByteArray(), charEncoding)));
             }
 
             //打印header信息
-            HashMap<String,String> headerMap = (HashMap<String,String>)getHeaderMap(httpServletRequest);
-            if(headerMap!=null)
-                stringBuilder.append(String.format(" header is %s",JSON.toJSONString(headerMap)));
+            HashMap<String, String> headerMap = (HashMap<String, String>) getHeaderMap(httpServletRequest);
+            if (headerMap != null)
+                stringBuilder.append(String.format(" header:%s", JSON.toJSONString(headerMap)));
 
             chain.doFilter(requestWrapper, responseWrapper);
 
@@ -135,14 +136,20 @@ public class LogFilter implements Filter {
             if (outParam != null && outParam != "" && responseWrapper.getContentType() != exportContentType) {
                 if (outParam.length() > maxLength)
                     outParam = outParam.substring(0, maxLength) + "...";
-                stringBuilder.append(String.format(" result：%s", outParam));
+                stringBuilder.append(String.format(" result:%s", outParam));
             }
 
-            if(stringBuilder.length()>0)
-                logger.info(stringBuilder.toString());
+            long duration = System.currentTimeMillis() - startStamps;
+            stringBuilder.append(String.format(" time:%s",duration));
 
-            //会写response
-            writeResponse(response, respNew);
+            if (stringBuilder.length() > 0)
+                logger.info(stringBuilder.toString());
+            if (!response.isCommitted()) {
+
+                //会写response
+                response.setCharacterEncoding(responseWrapper.getCharacterEncoding());
+                writeResponse(response, respNew);
+            }
 
         }
         catch (Exception ex) {
