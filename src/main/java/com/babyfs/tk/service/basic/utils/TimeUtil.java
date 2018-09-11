@@ -40,6 +40,7 @@ public final class TimeUtil {
     public static final DateTimeFormatter YYYY_MM_DD_HH_MM_SS_FORMATTER = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
     public static final DateTimeFormatter YYYYMMDD_FORMATTER = DateTimeFormatter.ofPattern(TimeUtil.YYYYMMDD);
     public static final DateTimeFormatter YYYY_MM_DD_FORMATTER = DateTimeFormatter.ofPattern(TimeUtil.YYYY_MM_DD);
+    public static final DateTimeFormatter YYYY_MM_DD_HH_MM_FORMATTER = DateTimeFormatter.ofPattern(TimeUtil.YYYY_MM_DD_HH_MM);
 
     private static final Map<String, FastDateFormat> FAST_DATE_FORMAT_MAP = initFormatMap();
 
