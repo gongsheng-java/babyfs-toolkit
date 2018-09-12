@@ -12,7 +12,7 @@ public class RpcConstant {
     /**
      * 注册中心模式:本地
      */
-    public static final String REGISTER_MODE_LOCAL = "zk";
+    public static final String REGISTER_MODE_LOCAL = "local";
 
     /**
      * 注册中心模式:Zookeeper
