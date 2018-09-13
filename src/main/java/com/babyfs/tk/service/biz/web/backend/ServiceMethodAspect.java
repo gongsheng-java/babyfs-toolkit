@@ -42,11 +42,11 @@ public class ServiceMethodAspect {
             String[] paramNames = ((CodeSignature) thisJoinPointStaticPart
                     .getSignature()).getParameterNames();
             StringBuilder logLine = new StringBuilder(thisJoinPointStaticPart
-                    .getSignature().getName()).append("(");
+                    .getSignature().getName()).append("{request:{");
             if (paramNames.length != 0)
                 logParamValues(logLine, paramNames, paramValues);
-            logLine.append(") - finished");
-            logLine.append(" result:").append(JSONObject.toJSON(returnValue));
+            logLine.append("},result:").append(JSONObject.toJSON(returnValue));
+            logLine.append("}");
 
             _logger.info(logLine.toString());
         }
@@ -60,7 +60,7 @@ public class ServiceMethodAspect {
     private static void logParamValues(StringBuilder logLine,
                                       String[] paramNames, Object[] paramValues) {
         for (int i = 0; i < paramValues.length; i++) {
-            logLine.append(paramNames[i]).append("=")
+            logLine.append(paramNames[i]).append(":")
                     .append(toString(paramValues[i]));
             if (i < paramValues.length - 1)
                 logLine.append(", ");
@@ -71,20 +71,20 @@ public class ServiceMethodAspect {
     @SuppressWarnings("rawtypes")
     public static String toString(Object object) {
         if (object == null)
-            return "<null>";
+            return "null";
         else if (object instanceof String) {
-            if(((String) object).length() > 100)
-                return ((String) object).substring(0, 100) + "...[more]";
+            if(((String) object).length() > 200)
+                return ((String) object).substring(0, 200) + "...[more]";
             else return (String) object;
         }
         else if (object instanceof Long)
             return ((Long) object).toString();
         else if (object instanceof Boolean)
             return ((Boolean) object).toString();
-        else if (object instanceof Double)
-            return ((Double) object).toString();
         else if (object instanceof Integer)
             return ((Integer) object).toString();
+        else if (object instanceof Double)
+            return object.toString();
         else
             return JSONObject.toJSONString(object);
     }
