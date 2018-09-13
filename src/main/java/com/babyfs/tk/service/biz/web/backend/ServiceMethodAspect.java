@@ -26,7 +26,7 @@ import java.util.List;
 public class ServiceMethodAspect {
     private static final Logger _logger = LoggerFactory.getLogger(ServiceMethodAspect.class);
 
-    @Around(value = "execution(public * com.babyfs..*.*Impl.*(..))")
+    @Around(value = "execution(public * com.babyfs..*Impl.*(..))")
     public Object MethodAccess(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
 
         Object returnValue = proceedingJoinPoint.proceed();
