@@ -26,7 +26,7 @@ import java.util.List;
 public class ServiceMethodAspect {
     private static final Logger _logger = LoggerFactory.getLogger(ServiceMethodAspect.class);
 
-    @Around(value = "execution(public * com.babyfs..*Impl.*(..))")
+    @Around(value = "execution(public * com.babyfs..*.*(..))")
     public Object MethodAccess(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
 
         Object returnValue = proceedingJoinPoint.proceed();
@@ -71,7 +71,7 @@ public class ServiceMethodAspect {
     @SuppressWarnings("rawtypes")
     public static String toString(Object object) {
         if (object == null)
-            return "null";
+            return "<null>";
         else if (object instanceof String) {
             if(((String) object).length() > 200)
                 return ((String) object).substring(0, 200) + "...[more]";
