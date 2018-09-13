@@ -22,7 +22,7 @@ import java.util.List;
  **/
 @Aspect
 @Component
-@Order(9999)
+@Order(9)
 public class ServiceMethodAspect {
     private static final Logger _logger = LoggerFactory.getLogger(ServiceMethodAspect.class);
 
@@ -31,13 +31,9 @@ public class ServiceMethodAspect {
 
         Object returnValue = proceedingJoinPoint.proceed();
 
-        try {
-//            MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
-//            Method method = methodSignature.getMethod();
-//            String methodName = method.getName();
-//            String className = method.getDeclaringClass().getSimpleName();
+        JoinPoint.StaticPart thisJoinPointStaticPart = proceedingJoinPoint.getStaticPart();
 
-            JoinPoint.StaticPart thisJoinPointStaticPart = proceedingJoinPoint.getStaticPart();
+        try {
             Object[] paramValues = proceedingJoinPoint.getArgs();
             String[] paramNames = ((CodeSignature) thisJoinPointStaticPart
                     .getSignature()).getParameterNames();
@@ -52,7 +48,8 @@ public class ServiceMethodAspect {
         }
         catch (Exception ex)
         {
-            _logger.error("ServiceMethodAspect记录方法ERROR",ex);
+            _logger.error(String.format("%s ServiceMethodAspect记录方法ERROR",thisJoinPointStaticPart
+                    .getSignature().getName()),ex);
         }
         return returnValue;
     }
