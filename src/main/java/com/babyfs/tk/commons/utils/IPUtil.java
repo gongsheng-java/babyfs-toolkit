@@ -63,22 +63,22 @@ public final class IPUtil {
         //X-Forwarded-For：Squid 服务代理
         String ipAddresses = request.getHeader("X-Forwarded-For");
 
-        if (isValidIp(ipAddresses)) {
+        if (!isValidIp(ipAddresses)) {
             //Proxy-Client-IP：apache 服务代理
             ipAddresses = request.getHeader("Proxy-Client-IP");
         }
 
-        if (isValidIp(ipAddresses)) {
+        if (!isValidIp(ipAddresses)) {
             //WL-Proxy-Client-IP：weblogic 服务代理
             ipAddresses = request.getHeader("WL-Proxy-Client-IP");
         }
 
-        if (isValidIp(ipAddresses)) {
+        if (!isValidIp(ipAddresses)) {
             //HTTP_CLIENT_IP：有些代理服务器
             ipAddresses = request.getHeader("HTTP_CLIENT_IP");
         }
 
-        if (isValidIp(ipAddresses)) {
+        if (!isValidIp(ipAddresses)) {
             //X-Real-IP：nginx服务代理
             ipAddresses = request.getHeader("X-Real-IP");
         }
@@ -89,7 +89,7 @@ public final class IPUtil {
         }
 
         //还是不能获取到，最后再通过request.getRemoteAddr();获取
-        if (isValidIp(ipAddresses)) {
+        if (!isValidIp(ip)) {
             ip = request.getRemoteAddr();
         }
         return ip;
