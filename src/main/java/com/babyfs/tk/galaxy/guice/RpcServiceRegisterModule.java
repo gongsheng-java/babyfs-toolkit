@@ -15,7 +15,7 @@ public class RpcServiceRegisterModule extends ServiceModule {
 
     @Override
     protected void configure() {
-        String model = System.getProperty(RpcConstant.REGISTER_MODE, RpcConstant.REGISTER_MODE_DEFAULT);
+        String model = System.getProperty(RpcConstant.REGISTER_MODE, RpcConstant.REGISTER_MODE_LOCAL);
         LOGGER.info("rpc register mode:{}", model);
 
         if (RpcConstant.REGISTER_MODE_LOCAL.equals(model)) {
