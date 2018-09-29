@@ -73,7 +73,7 @@ public final class XmlProperties {
             Properties properties = new Properties();
             properties.loadFromXML(in);
             Set<Map.Entry<Object, Object>> entries = properties.entrySet();
-            for (Map.Entry<Object, Object> entry : entries) {
+            for (Map.Entry<Object, Object> entry : entries) {//增加占位符替换
                 map.put((String) entry.getKey(), (String) entry.getValue());
             }
         } finally {
