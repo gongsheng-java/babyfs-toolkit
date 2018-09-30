@@ -1,5 +1,6 @@
 package com.babyfs.tk.commons.xml;
 
+import com.babyfs.tk.apollo.ConfigLoader;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
@@ -74,7 +75,7 @@ public final class XmlProperties {
             properties.loadFromXML(in);
             Set<Map.Entry<Object, Object>> entries = properties.entrySet();
             for (Map.Entry<Object, Object> entry : entries) {//增加占位符替换
-                map.put((String) entry.getKey(), (String) entry.getValue());
+                map.put((String) entry.getKey(), ConfigLoader.replacePlaceHolder((String) entry.getValue()));
             }
         } finally {
             Closeables.close(in, true);
