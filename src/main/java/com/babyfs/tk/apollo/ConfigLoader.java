@@ -58,8 +58,10 @@ public class ConfigLoader {
             configService = null;
         }
 
-        buildMap();
-        startWatchThread();
+        if(configService != null){
+            buildMap();
+            startWatchThread();
+        }
     }
 
     private static void buildMap(){
