@@ -10,10 +10,16 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
+/**
+ *
+ */
 public class ApolloModule  extends AbstractModule {
 
     private static Logger logger = LoggerFactory.getLogger(ApolloModule.class);
 
+    /**
+     * scan all the class with annotation Apollo, and register them into ioc container
+     */
     @Override
     protected void configure() {
         Reflections reflections = new Reflections(EnvConstants.AUTO_SCAN_PACKAGE);
@@ -26,6 +32,10 @@ public class ApolloModule  extends AbstractModule {
         }
     }
 
+    /**
+     * register a config class with apollo config loader
+     * @param tClass
+     */
     private void registerBean(Class tClass){
         Object config = ConfigLoader.getConfig(tClass);
 
