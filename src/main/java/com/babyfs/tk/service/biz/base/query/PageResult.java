@@ -1,12 +1,14 @@
 package com.babyfs.tk.service.biz.base.query;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 /**
  * 分页查询参数及结果封装
  */
-public final class PageResult<T> {
+public final class PageResult<T> implements Serializable {
+    private static final long serialVersionUID = 8950587005023808568L;
 
     /**
      * 总数
