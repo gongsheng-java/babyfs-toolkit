@@ -1,0 +1,6 @@
+
+<DubboClients>
+    <client version="1.0.0" url="127.0.0.1:30001" registry="N/A" type="com.babyfs.noteservice.api.NoteService"/>
+    <client version="1.0.0" url="127.0.0.1:30001" registry="N/A" type="com.babyfs.noteservice.api.ReportService"/>
+    <client version="1.0.0" url="127.0.0.1:30001" registry="N/A" type="com.babyfs.noteservice.api.UserService"/>
+</DubboClients>
