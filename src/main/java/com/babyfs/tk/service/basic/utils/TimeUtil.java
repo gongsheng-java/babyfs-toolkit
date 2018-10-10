@@ -36,11 +36,13 @@ public final class TimeUtil {
     public static final String YYYYMMDD = "yyyyMMdd";
     public static final String YYYYMM = "yyyyMM";
     public static final String YYMMDD = "yyMMdd";
+    public static final String MMDD = "MMdd";
 
     public static final DateTimeFormatter YYYY_MM_DD_HH_MM_SS_FORMATTER = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
     public static final DateTimeFormatter YYYYMMDD_FORMATTER = DateTimeFormatter.ofPattern(TimeUtil.YYYYMMDD);
     public static final DateTimeFormatter YYYY_MM_DD_FORMATTER = DateTimeFormatter.ofPattern(TimeUtil.YYYY_MM_DD);
     public static final DateTimeFormatter YYYY_MM_DD_HH_MM_FORMATTER = DateTimeFormatter.ofPattern(TimeUtil.YYYY_MM_DD_HH_MM);
+    public static final DateTimeFormatter MM_DD_FORMATTER = DateTimeFormatter.ofPattern(TimeUtil.MMDD);
 
     private static final Map<String, FastDateFormat> FAST_DATE_FORMAT_MAP = initFormatMap();
 
@@ -59,6 +61,7 @@ public final class TimeUtil {
         formatMap.put(YYYYMMDDHHMMSS, FastDateFormat.getInstance(YYYYMMDDHHMMSS));
         formatMap.put(YYYY_MM_DD_HH_MM_SS, FastDateFormat.getInstance(YYYY_MM_DD_HH_MM_SS));
         formatMap.put(YYMMDD, FastDateFormat.getInstance(YYMMDD));
+        formatMap.put(MMDD, FastDateFormat.getInstance(MMDD));
         return formatMap;
     }
 
