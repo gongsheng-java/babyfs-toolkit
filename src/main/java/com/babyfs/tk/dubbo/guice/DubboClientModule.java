@@ -3,7 +3,6 @@ package com.babyfs.tk.dubbo.guice;
 import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ReferenceConfig;
 import com.alibaba.dubbo.config.RegistryConfig;
-import com.babyfs.tk.commons.service.ServiceModule;
 import com.babyfs.tk.commons.xml.JAXBUtil;
 import com.babyfs.tk.dal.guice.DalXmlConfModule;
 import com.babyfs.tk.dubbo.xml.DubboClients;
@@ -18,7 +17,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
-public class DubboClientModule extends ServiceModule {
+public class DubboClientModule extends AbstractModule {
 
     private static final Logger logger = LoggerFactory.getLogger(DalXmlConfModule.class);
 
@@ -67,8 +66,9 @@ public class DubboClientModule extends ServiceModule {
             reference.setRegistry(registryConfig);
             reference.setInterface(tClass);
             reference.setVersion(client.getVersion());
-            Object ref = reference.get();
-            bindService(tClass, ref);
+
+            bind(tClass).toInstance(reference.get());
+
             logger.info("create dubbo client {} by registry {} succeed!", client.getType(), client.getRegistry());
         }else{
             ReferenceConfig<?> reference = new ReferenceConfig<>();
@@ -77,8 +77,7 @@ public class DubboClientModule extends ServiceModule {
             reference.setInterface(tClass);
             reference.setApplication(applicationConfig);
             reference.setVersion(client.getVersion());
-            Object ref = reference.get();
-            bindService(tClass, ref);
+            bind(tClass).toInstance(reference.get());
             logger.info("create dubbo client {} by url {} succeed!", client.getType(), url);
         }
     }
