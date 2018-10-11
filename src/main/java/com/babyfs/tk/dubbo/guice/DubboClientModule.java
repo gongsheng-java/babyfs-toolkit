@@ -22,10 +22,6 @@ public class DubboClientModule extends ServiceModule {
 
     private static final Logger logger = LoggerFactory.getLogger(DalXmlConfModule.class);
 
-    static{
-        System.setProperty("dubbo.application.logger", "slf4j");
-    }
-
     private boolean hasLoadConfig = false;
 
     private String application, xmlName;
@@ -63,14 +59,14 @@ public class DubboClientModule extends ServiceModule {
 
         if(hasRegistry(client.getRegistry())){
             RegistryConfig registryConfig = new RegistryConfig();
+
             registryConfig.setAddress(client.getRegistry());
-            registryConfig.setCheck(false);
+
             ReferenceConfig<?> reference = new ReferenceConfig<>();
             reference.setApplication(applicationConfig);
             reference.setRegistry(registryConfig);
             reference.setInterface(tClass);
             reference.setVersion(client.getVersion());
-            reference.setCheck(false);//设置懒加载
             Object ref = reference.get();
             bindService(tClass, ref);
             logger.info("create dubbo client {} by registry {} succeed!", client.getType(), client.getRegistry());
@@ -81,7 +77,6 @@ public class DubboClientModule extends ServiceModule {
             reference.setInterface(tClass);
             reference.setApplication(applicationConfig);
             reference.setVersion(client.getVersion());
-            reference.setCheck(false);//设置懒加载
             Object ref = reference.get();
             bindService(tClass, ref);
             logger.info("create dubbo client {} by url {} succeed!", client.getType(), url);
