@@ -8,6 +8,7 @@ import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.model.ConfigChange;
 import com.google.common.collect.Maps;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,18 +141,32 @@ public class ConfigLoader {
                 continue;
             }
             String key = fieldAnnotation.value();
-
-            Class<?> type = f.getType();
-            String value = getConfig(key);
-            if(value != null){
-                Object parse = ParserFactory.getParser(type).parse(value, type);
-                f.setAccessible(true);
-                try {
-                    f.set(result, parse);
-                } catch (IllegalAccessException e) {
-                    logger.error("set value error", e);
+            if(StringUtils.isNotEmpty(key)){
+                Class<?> type = f.getType();
+                String value = getConfig(key);
+                if(value != null){
+                    Object parse = ParserFactory.getParser(type).parse(value, type);
+                    f.setAccessible(true);
+                    try {
+                        f.set(result, parse);
+                    } catch (IllegalAccessException e) {
+                        logger.error("set value error", e);
+                    }
+                }
+            }else{//if there is no keys, parse recursively
+                Class<?> type = f.getType();
+                Object config = getConfig(type);
+                if(config != null){
+                    f.setAccessible(true);
+                    try {
+                        f.set(result, config);
+                    } catch (IllegalAccessException e) {
+                        logger.error("set value error", e);
+                    }
                 }
             }
+
+
         }
         return result;
     }
@@ -247,6 +262,7 @@ public class ConfigLoader {
             case TYPE: {
                 Object parse = ParserFactory.getParser(watchCache.classType).parse(value, watchCache.classType);
                 watchCache.consumer.accept(parse);
+                break;
             }
             case FIELD: {
                 Object parse = ParserFactory.getParser(watchCache.fieldClass).parse(value, watchCache.fieldClass);
@@ -254,7 +270,7 @@ public class ConfigLoader {
                 try {
                     clonedObject = BeanUtils.cloneBean(watchCache.originObject);
                 } catch (Exception e) {
-                    logger.error("error clone config object");
+                    logger.error("error clone config object", e);
                     return;
                 }
                 watchCache.field.setAccessible(true);
@@ -265,6 +281,7 @@ public class ConfigLoader {
                 }
                 watchCache.consumer.accept(clonedObject);
                 watchCache.originObject = clonedObject;
+                break;
             }
             case PLAIN://保留字段，以后实现运行时加载
             default:{
