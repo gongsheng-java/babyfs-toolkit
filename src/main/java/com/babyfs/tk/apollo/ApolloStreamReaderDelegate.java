@@ -9,8 +9,11 @@ import javax.xml.stream.util.StreamReaderDelegate;
  */
 public class ApolloStreamReaderDelegate extends StreamReaderDelegate {
 
-    public ApolloStreamReaderDelegate(XMLStreamReader reader){
+    private String namespace;
+
+    public ApolloStreamReaderDelegate(XMLStreamReader reader, String namespace){
         super(reader);
+        this.namespace = namespace;
     }
 
     @Override
@@ -22,12 +25,12 @@ public class ApolloStreamReaderDelegate extends StreamReaderDelegate {
     @Override
     public String getAttributeValue(int index) {
         String result = super.getAttributeValue(index);
-        return ConfigLoader.replacePlaceHolder(result);
+        return ConfigLoader.replacePlaceHolder(namespace, result);
     }
 
     @Override
     public String getAttributeValue(String namespaceUri, String localName) {
         String result = super.getAttributeValue(namespaceUri, localName);
-        return ConfigLoader.replacePlaceHolder(result);
+        return ConfigLoader.replacePlaceHolder(namespace, result);
     }
 }

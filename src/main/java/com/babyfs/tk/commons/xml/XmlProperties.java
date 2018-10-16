@@ -1,5 +1,6 @@
 package com.babyfs.tk.commons.xml;
 
+import com.babyfs.tk.apollo.ApolloUtil;
 import com.babyfs.tk.apollo.ConfigLoader;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -39,13 +40,13 @@ public final class XmlProperties {
             in = Resources.asByteSource(Resources.getResource(xmlPropertiesPath)).openStream();
             if (in != null) {
                 LOGGER.info("Found the xml properties [{}] in class path,use it", xmlPropertiesPath);
-                return loadFromXml(in);
+                return loadFromXml(in, xmlPropertiesPath);
             }
             File inFile = new File(xmlPropertiesPath);
             if (inFile.isFile()) {
                 LOGGER.info("Found the xml properties [{}] in file path,use it", xmlPropertiesPath);
                 in = new FileInputStream(new File(xmlPropertiesPath));
-                return loadFromXml(in);
+                return loadFromXml(in, xmlPropertiesPath);
             }
         } catch (Exception e) {
             LOGGER.error("Load xml properties [" + xmlPropertiesPath + "] error.", e);
@@ -67,15 +68,18 @@ public final class XmlProperties {
      * @return
      * @throws IOException
      */
-    public static Map<String, String> loadFromXml(InputStream in) throws IOException {
+    public static Map<String, String> loadFromXml(InputStream in, String fileName) throws IOException {
         Map<String, String> map = Maps.newHashMap();
         try {
             Preconditions.checkNotNull(in, "in");
             Properties properties = new Properties();
             properties.loadFromXML(in);
             Set<Map.Entry<Object, Object>> entries = properties.entrySet();
+            Map<String, String> configMapper = ConfigLoader.getMap(ApolloUtil.getNamespace(fileName, "xml"));
             for (Map.Entry<Object, Object> entry : entries) {//增加占位符替换
-                map.put((String) entry.getKey(), ConfigLoader.replacePlaceHolder((String) entry.getValue()));
+
+                map.put((String) entry.getKey(), ConfigLoader.replacePlaceHolder(configMapper
+                        ,(String) entry.getValue()));
             }
         } finally {
             Closeables.close(in, true);
@@ -92,7 +96,7 @@ public final class XmlProperties {
      */
     public static Map<String, String> loadFromXml(URL url) throws IOException {
         Preconditions.checkNotNull(url, "url");
-        return loadFromXml(url.openStream());
+        return loadFromXml(url.openStream(), null);
     }
 
     /**

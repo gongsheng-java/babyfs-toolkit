@@ -1,6 +1,7 @@
 package com.babyfs.tk.commons.xml;
 
 import com.babyfs.tk.apollo.ApolloStreamReaderDelegate;
+import com.babyfs.tk.apollo.ApolloUtil;
 import com.babyfs.tk.apollo.ConfigLoader;
 import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
@@ -49,7 +50,7 @@ public final class JAXBUtil {
             //增加占位符替换逻辑
             XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
             XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(reader);
-            StreamReaderDelegate streamReaderDelegate = new ApolloStreamReaderDelegate(xmlStreamReader);//替换占位符
+            StreamReaderDelegate streamReaderDelegate = new ApolloStreamReaderDelegate(xmlStreamReader, ApolloUtil.getNamespace(xmlInClassPath, "xml"));//替换占位符
             JAXBContext context = JAXBContext.newInstance(clazz);
             Unmarshaller unmarshaller = context.createUnmarshaller();
             unmarshaller.setEventHandler(UNMARSHALLER_HANDLER);
