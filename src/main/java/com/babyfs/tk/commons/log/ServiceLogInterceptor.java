@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 /*
@@ -76,8 +77,7 @@ public class ServiceLogInterceptor implements MethodInterceptor {
         if(rate >= 10) {
             return false;
         }
-
-        Random r = new Random();
-        return rate <= r.nextInt(10);
+        
+        return rate <= ThreadLocalRandom.current().nextInt(10);
     }
 }
