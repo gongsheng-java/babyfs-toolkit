@@ -197,7 +197,7 @@ public class ConfigLoader {
         return configCache.getConfig(tClass);
     }
 
-    public static <T>  T getConfig(Class<T> tClass) {
+    public static <T>  T  getConfig(Class<T> tClass) {
         return getConfig(DEFAULT_NAMESPACE, tClass);
     }
 

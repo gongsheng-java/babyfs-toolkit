@@ -14,8 +14,10 @@ public class ApolloUtil {
 
     static {
         String config = ConfigLoader.getConfig(KEY_SYSTEM_XML_NAMESPACES);
-        String[] split = config.split(",");
-        filteredSet.addAll(Arrays.asList(split));
+        if(config != null){
+            String[] split = config.split(",");
+            filteredSet.addAll(Arrays.asList(split));
+        }
     }
 
 

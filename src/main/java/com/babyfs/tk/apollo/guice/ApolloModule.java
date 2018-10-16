@@ -28,7 +28,8 @@ public class ApolloModule  extends AbstractModule {
 
         for (Class<?> annotatedClass :
                 classSet) {
-            registerBean(annotatedClass);
+            ApolloScan annotation = annotatedClass.getAnnotation(ApolloScan.class);
+            registerBean(annotatedClass, annotation.value());
         }
     }
 
@@ -36,8 +37,8 @@ public class ApolloModule  extends AbstractModule {
      * register a config class with apollo config loader
      * @param tClass
      */
-    private void registerBean(Class tClass){
-        Object config = ConfigLoader.getConfig(tClass);
+    private void registerBean(Class tClass, String namespace){
+        Object config = ConfigLoader.getConfig(namespace, tClass);
 
         bind(tClass).toInstance(config);
     }

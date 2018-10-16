@@ -19,7 +19,6 @@ public class ApolloTest {
 
     @Test
     public void testJsonConfig(){
-        System.setProperty("app.id", "testToolkit");
         Injector injector = Guice.createInjector(new ApolloModule());
 
 
@@ -30,7 +29,6 @@ public class ApolloTest {
 
     @Test
     public void testFieldConfig(){
-        System.setProperty("app.id", "testToolkit");
         Injector injector = Guice.createInjector(new ApolloModule());
         TestConfig testConfig = injector.getInstance(TestConfig.class);
         Assert.notNull(testConfig);
@@ -41,7 +39,6 @@ public class ApolloTest {
 
     @Test
     public void testWatch(){
-        System.setProperty("app.id", "testToolkit");
         ConfigLoader.watch(ApolloJsonTest.class, apolloJsonTest -> {
             test = apolloJsonTest;
             logger.info("after changed: {}-{}",test.getName(), test.getPath());
@@ -53,7 +50,7 @@ public class ApolloTest {
         });
 
         try {
-            Thread.sleep(100000);
+            Thread.sleep(10);
         } catch (InterruptedException e) {
         }
     }
