@@ -5,7 +5,7 @@ import javax.persistence.Column;
 /*
 * 带有operator信息的db基类
 * */
-public class BaseOperatorEntity extends BaseAssignIdEntity {
+public class BaseOperatorEntity extends BaseAutoIdEntity {
     /*
     * 创建人
     * */
