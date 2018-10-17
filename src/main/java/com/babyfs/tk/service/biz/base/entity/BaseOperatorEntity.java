@@ -9,15 +9,15 @@ public class BaseOperatorEntity extends BaseAutoIdEntity {
     /*
     * 创建人
     * */
-    @Column(name = "ct_operator")
     private String ctOperator;
 
     /*
     * 修改人
     * */
-    @Column(name = "ut_operator")
     private String utOperator;
 
+
+    @Column(name = "ct_operator")
     public String getCtOperator() {
         return ctOperator;
     }
@@ -26,6 +26,7 @@ public class BaseOperatorEntity extends BaseAutoIdEntity {
         this.ctOperator = ctOperator;
     }
 
+    @Column(name = "ut_operator")
     public String getUtOperator() {
         return utOperator;
     }
