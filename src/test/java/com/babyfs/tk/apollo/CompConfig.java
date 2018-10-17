@@ -15,5 +15,29 @@ public class CompConfig {
     public static class Node{
         @ConfigKey("name")
         private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public void setNode(Node node) {
+        this.node = node;
+    }
+
+    public ApolloJsonTest getJsonTest() {
+        return jsonTest;
+    }
+
+    public void setJsonTest(ApolloJsonTest jsonTest) {
+        this.jsonTest = jsonTest;
     }
 }

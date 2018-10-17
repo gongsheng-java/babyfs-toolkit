@@ -1,8 +1,10 @@
 package com.babyfs.tk.apollo;
 
 
+import com.alibaba.fastjson.JSON;
 import com.babyfs.tk.apollo.guice.ApolloModule;
 import com.babyfs.tk.service.basic.probe.Config;
+import com.babyfs.tk.service.basic.utils.JSONUtil;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.Test;
@@ -24,6 +26,7 @@ public class ApolloTest {
 
         ApolloJsonTest apolloJsonTest = injector.getInstance(ApolloJsonTest.class);
         Assert.notNull(apolloJsonTest);
+        logger.info("the result is : {}", JSON.toJSON(apolloJsonTest));
 
     }
 
@@ -32,6 +35,8 @@ public class ApolloTest {
         Injector injector = Guice.createInjector(new ApolloModule());
         TestConfig testConfig = injector.getInstance(TestConfig.class);
         Assert.notNull(testConfig);
+        logger.info("the result is : {}", JSON.toJSON(testConfig));
+
     }
 
     static ApolloJsonTest test;
@@ -50,7 +55,7 @@ public class ApolloTest {
         });
 
         try {
-            Thread.sleep(10);
+            Thread.sleep(1000000);
         } catch (InterruptedException e) {
         }
     }
@@ -60,6 +65,8 @@ public class ApolloTest {
         System.setProperty("app.id", "testToolkit");
         Injector injector = Guice.createInjector(new ApolloModule());
         CompConfig testConfig = injector.getInstance(CompConfig.class);
+
         Assert.notNull(testConfig);
+        logger.info(JSON.toJSONString(testConfig));
     }
 }

@@ -4,10 +4,12 @@ package com.babyfs.tk.apollo;
 import com.babyfs.tk.apollo.annotation.ConfigKey;
 import com.babyfs.tk.apollo.module.WatchCacheNode;
 import com.babyfs.tk.apollo.parser.ParserFactory;
+import com.babyfs.tk.commons.service.GuiceInjector;
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.model.ConfigChange;
 import com.google.common.collect.Maps;
+import com.google.inject.Guice;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -106,7 +108,7 @@ public class ConfigCache {
                 Set<String> keys = configChangeEvent.changedKeys();
                 for (String key :
                         keys) {
-                    if(getDevValue(key) == null){
+                    if(getDevValue(key) != null){
                         logger.info("local map contains key, ignore it");
                         continue;
                     }
