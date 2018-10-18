@@ -1,10 +1,12 @@
 package com.babyfs.tk.service.biz.base.query;
 
+import java.io.Serializable;
+
 /**
  * 分页请求的参数
  */
-public class PageParams {
-
+public class PageParams implements Serializable {
+    private static final long serialVersionUID = -6451618304432262725L;
     /**
      * 查询的页码
      */
