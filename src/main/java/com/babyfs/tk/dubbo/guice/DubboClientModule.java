@@ -7,14 +7,10 @@ import com.babyfs.tk.commons.service.ServiceModule;
 import com.babyfs.tk.commons.xml.JAXBUtil;
 import com.babyfs.tk.dal.guice.DalXmlConfModule;
 import com.babyfs.tk.dubbo.xml.DubboClients;
-
-import com.google.inject.AbstractModule;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-
 
 import java.util.List;
 
@@ -89,7 +85,7 @@ public class DubboClientModule extends ServiceModule {
     }
 
     private boolean hasRegistry(String registry){
-        return !StringUtils.isNotEmpty(registry) && !"N/A".equals(registry);
+        return StringUtils.isNotEmpty(registry) && !"N/A".equals(registry);
     }
 
     private void loadConfig(){
