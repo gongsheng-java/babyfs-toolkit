@@ -21,10 +21,25 @@ public class ApolloUtil {
     }
 
 
+    /**
+     * 去掉后缀名
+     * @param fileName
+     * @param pendfix
+     * @return
+     */
     public static String getNamespace(String fileName, String pendfix){
         if(StringUtils.isEmpty(fileName) || !filteredSet.contains(fileName)){
             return DEFAULT_NAMESPACE;
         }
-        return String.format("%s.%s", DEFAULT_DEPARTNAME, fileName.replace(String.format(".%s", pendfix), ""));
+        return getNamespace(fileName.replace(String.format(".%s", pendfix), ""));
+    }
+
+    /**
+     * 增加部门前缀
+     * @param rawName
+     * @return
+     */
+    public static String getNamespace(String rawName){
+        return String.format("%s.%s", ConfigLoader.DEPART_NAME, rawName);
     }
 }

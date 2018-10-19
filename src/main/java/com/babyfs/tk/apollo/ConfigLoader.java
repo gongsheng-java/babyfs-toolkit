@@ -4,6 +4,7 @@ import com.alipay.api.internal.util.StringUtils;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import org.apache.commons.lang.text.StrSubstitutor;
+import org.elasticsearch.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -28,6 +29,8 @@ public class ConfigLoader {
     private static final String PLACEHOLDER_PREFIX = "${";
     private static final String PLACEHOLDER_SUFFIX = "}";
 
+    public static String DEPART_NAME;
+
     private static Map<String, Map<String, String>> devLocalConfig;
 
     static{
@@ -38,9 +41,23 @@ public class ConfigLoader {
             configCacheMap.put(DEFAULT_NAMESPACE, defaultConfig);
             Assert.notNull(defaultConfig);
             isApolloReady = true;
+            initSystemProperty(defaultConfig);
+
         }catch (Exception e){
             logger.warn("get config error", e);
         }
+    }
+
+    private static void initSystemProperty(ConfigCache config){
+
+        String department = config.getConfig(KEY_SYSTEM_DEPART_NAME);
+        if(Strings.isNullOrEmpty(department)){
+            logger.warn("cannot find depart name config, use default depart name as babyfs");
+            DEPART_NAME = DEFAULT_DEPARTNAME;
+        }else{
+            DEPART_NAME = department;
+        }
+
     }
 
     /**

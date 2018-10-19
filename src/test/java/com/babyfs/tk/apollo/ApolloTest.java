@@ -55,7 +55,7 @@ public class ApolloTest {
         });
 
         try {
-            Thread.sleep(1000000);
+            Thread.sleep(10);
         } catch (InterruptedException e) {
         }
     }

@@ -12,7 +12,7 @@ public class SerialNumConstant {
 
     public static final String ZK_BOOTSTRAP_SERVERS = "zk.bootstrap.servers";
 
-    public static final String ZK_BOOTSTRAP_SERVERS_DEFAULT = "127.0.0.1:2181";
+    public static final String ZK_BOOTSTRAP_SERVERS_DEFAULT = "10.10.10.11:2181";
 
     public static final String ZK_SERIAL_NUMBER_ROOT = "zk.serial.num.root";
 
