@@ -27,6 +27,10 @@ public class Response<T> extends ResponseBase {
         return response;
     }
 
+    public static <T> Response<T> returnFailResponse(String message) {
+        return returnFailResponse(0, message);
+    }
+
     public static <T> Response<T> fromServiceResponse(ServiceResponse<T> serviceResponse) {
         Response<T> response = new Response<T>();
         response.setData(serviceResponse.getData());
