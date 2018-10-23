@@ -1,5 +1,6 @@
 package com.babyfs.tk.service.biz;
 
+import com.babyfs.tk.apollo.guice.ApolloModule;
 import com.babyfs.tk.commons.service.IVersion;
 import com.babyfs.tk.commons.service.ServiceModule;
 import com.babyfs.tk.commons.service.VersionModule;
@@ -72,6 +73,8 @@ public final class Modules {
     };
 
 
+    public static final ApolloModule BASE_MODULE_APOLLO = new ApolloModule();
+
     /**
      * 数据校验服务
      * <p/>
@@ -107,6 +110,7 @@ public final class Modules {
                 .add(BASIC_MODULE_REDIS_SERVICE)
                 .add(BASE_MODULE_VALIDATE_SERVICE)
                 .add(CRYPTO_SERVICE_MODULE)
+                .add(BASE_MODULE_APOLLO)
                 .build();
     }
 

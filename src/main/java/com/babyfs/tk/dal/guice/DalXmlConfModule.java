@@ -1,5 +1,6 @@
 package com.babyfs.tk.dal.guice;
 
+import com.babyfs.tk.apollo.ConfigLoader;
 import com.babyfs.tk.commons.base.Pair;
 import com.babyfs.tk.commons.utils.ListUtil;
 import com.babyfs.tk.commons.xml.JAXBUtil;
@@ -176,7 +177,8 @@ public class DalXmlConfModule extends AbstractModule {
             File file = new File(configDir, confPath);
             LOGGER.info("load dal config {} from file {}", file.getAbsolutePath());
             try {
-                String content = Files.toString(file, Charsets.UTF_8);
+                String content = Files.toString(file, Charsets.UTF_8);//替换占位符
+                content = ConfigLoader.replacePlaceHolder(content);
                 return JAXBUtil.unmarshalByContent(clazz, content);
             } catch (IOException e) {
                 throw new RuntimeException("can't read dal config from " + file, e);

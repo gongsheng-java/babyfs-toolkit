@@ -1,9 +1,16 @@
 package com.babyfs.tk.commons.xml;
 
+import com.babyfs.tk.apollo.ApolloStreamReaderDelegate;
+import com.babyfs.tk.apollo.ApolloUtil;
+import com.babyfs.tk.apollo.ConfigLoader;
 import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
 
 import javax.xml.bind.*;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.util.StreamReaderDelegate;
+import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URL;
 
@@ -40,10 +47,14 @@ public final class JAXBUtil {
         try {
             URL xmlUrl = Resources.getResource(xmlInClassPath);
             reader = new InputStreamReader(xmlUrl.openStream(), "UTF-8");
+            //增加占位符替换逻辑
+            XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
+            XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(reader);
+            StreamReaderDelegate streamReaderDelegate = new ApolloStreamReaderDelegate(xmlStreamReader, ApolloUtil.getNamespace(xmlInClassPath, "xml"));//替换占位符
             JAXBContext context = JAXBContext.newInstance(clazz);
             Unmarshaller unmarshaller = context.createUnmarshaller();
             unmarshaller.setEventHandler(UNMARSHALLER_HANDLER);
-            return (T) unmarshaller.unmarshal(reader);
+            return (T) unmarshaller.unmarshal(streamReaderDelegate);
         } catch (Exception e) {
             throw new RuntimeException("Failed to unmarshal object for class:" + clazz + " xml:" + xmlInClassPath, e);
         } finally {
