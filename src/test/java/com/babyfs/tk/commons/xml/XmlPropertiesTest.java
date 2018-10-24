@@ -38,7 +38,7 @@ public class XmlPropertiesTest {
                 "<entry key=\"desc\">&lt;hello&gt;</entry>\n" +
                 "</properties>";
         ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-        Map<String, String> map = XmlProperties.loadFromXml(in);
+        Map<String, String> map = XmlProperties.loadFromXml(in, "test.xml");
         Assert.assertNotNull(map);
         Assert.assertEquals("王东永", map.get("name1"));
         Assert.assertEquals("<hello>", map.get("desc"));
