@@ -11,4 +11,9 @@ public class CacheConst {
     * 当前请求操作人
     * */
     public static final String REQUEST_OPERATER = "request_context_operator";
+
+    /*
+    * 当前操作IP
+    * */
+    public static final String REQUEST_IP = "request_context_ip";
 }
