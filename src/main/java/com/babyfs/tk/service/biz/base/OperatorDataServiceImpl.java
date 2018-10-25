@@ -26,42 +26,31 @@ public class OperatorDataServiceImpl<T extends BaseOperatorEntity> extends BaseD
 
     @Override
     public T add(T entity, Operator operator) {
-        if(operator != null && !Strings.isNullOrEmpty(operator.getName())) {
-            entity.setCtOperator(operator.getName());
-        }
+        entity.appendCtOperator(operator);
         return this.add(entity);
     }
 
     @Override
     public boolean update(T entity, Operator operator) {
-        if(operator != null && !Strings.isNullOrEmpty(operator.getName())) {
-            entity.setUtOperator(operator.getName());
-        }
+        entity.appendUtOperator(operator);
         return this.update(entity);
     }
 
     @Override
     public boolean softDel(T entity, Operator operator) {
-        if(operator != null && !Strings.isNullOrEmpty(operator.getName())) {
-            entity.setUtOperator(operator.getName());
-        }
+        entity.appendUtOperator(operator);
         return this.softDel(entity);
     }
 
     @Override
     public boolean cancelSoftDel(T entity, Operator operator) {
-        if(operator != null && !Strings.isNullOrEmpty(operator.getName())) {
-            entity.setUtOperator(operator.getName());
-        }
+        entity.appendUtOperator(operator);
         return this.cancelSoftDel(entity);
     }
 
     @Override
     public boolean updateWithVersion(T entity, Operator operator) {
-        if(operator != null && !Strings.isNullOrEmpty(operator.getName())) {
-            entity.setUtOperator(operator.getName());
-        }
+        entity.appendUtOperator(operator);
         return this.updateWithVersion(entity);
     }
-
 }

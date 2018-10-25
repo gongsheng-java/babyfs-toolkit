@@ -11,11 +11,16 @@ public class ServiceRequest {
     private Operator operator;
 
     public ServiceRequest() {
+        this.operator = new Operator();
         //增加operator初始化机制，从web底层穿透到service层
         Object cache = RequestContextCache.get(CacheConst.REQUEST_OPERATER);
         if(cache != null) {
-            this.operator = new Operator();
             operator.setName(cache.toString());
+        }
+
+        Object ipCache = RequestContextCache.get(CacheConst.REQUEST_IP);
+        if(ipCache != null) {
+            operator.setIp(ipCache.toString());
         }
     }
 
