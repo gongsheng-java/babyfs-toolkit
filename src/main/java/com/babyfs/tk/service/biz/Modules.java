@@ -1,5 +1,6 @@
 package com.babyfs.tk.service.biz;
 
+import com.babyfs.tk.apollo.guice.ApolloModule;
 import com.babyfs.tk.commons.service.IVersion;
 import com.babyfs.tk.commons.service.ServiceModule;
 import com.babyfs.tk.commons.service.VersionModule;
@@ -36,6 +37,12 @@ public final class Modules {
      * 默认的DAL SHARD MODULE
      */
     public static final DalShardModule BASE_MODULE_DAL_SHARD = new DalShardModule();
+
+    /**
+     * apollo module
+     */
+
+    public static final ApolloModule BASE_MODULE_APOLLO = new ApolloModule();
 
     /**
      * 默认的Zookeeper 客户端Module
@@ -107,6 +114,7 @@ public final class Modules {
                 .add(BASIC_MODULE_REDIS_SERVICE)
                 .add(BASE_MODULE_VALIDATE_SERVICE)
                 .add(CRYPTO_SERVICE_MODULE)
+                .add(BASE_MODULE_APOLLO)
                 .build();
     }
 
