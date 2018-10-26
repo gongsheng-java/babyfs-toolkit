@@ -36,18 +36,18 @@ public class ConfigLoader {
     private static Map<String, Map<String, String>> devLocalConfig;
 
     static{
-//        loadDevProperties();
-//        try{
-//            ConfigCache defaultConfig = new ConfigCache();
-//            injectDev(DEFAULT_NAMESPACE, defaultConfig);
-//            configCacheMap.put(DEFAULT_NAMESPACE, defaultConfig);
-//            Assert.notNull(defaultConfig);
-//            isApolloReady = true;
-//            initSystemProperty(defaultConfig);
-//
-//        }catch (Exception e){
-//            logger.warn("get config error", e);
-//        }
+        loadDevProperties();
+        try{
+            ConfigCache defaultConfig = new ConfigCache();
+            injectDev(DEFAULT_NAMESPACE, defaultConfig);
+            configCacheMap.put(DEFAULT_NAMESPACE, defaultConfig);
+            Assert.notNull(defaultConfig);
+            isApolloReady = true;
+            initSystemProperty(defaultConfig);
+
+        }catch (Exception e){
+            logger.warn("get config error", e);
+        }
     }
 
     public static boolean isApolloReady(){
