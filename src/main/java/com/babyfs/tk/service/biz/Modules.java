@@ -39,6 +39,12 @@ public final class Modules {
     public static final DalShardModule BASE_MODULE_DAL_SHARD = new DalShardModule();
 
     /**
+     * apollo module
+     */
+
+    public static final ApolloModule BASE_MODULE_APOLLO = new ApolloModule();
+
+    /**
      * 默认的Zookeeper 客户端Module
      */
     public static final ZKClientModule BASE_MODULE_ZK_CLIENT = new ZKClientModule();

@@ -2,7 +2,6 @@ package com.babyfs.tk.commons.xml;
 
 import com.babyfs.tk.apollo.ApolloStreamReaderDelegate;
 import com.babyfs.tk.apollo.ApolloUtil;
-import com.babyfs.tk.apollo.ConfigLoader;
 import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
 
@@ -10,7 +9,6 @@ import javax.xml.bind.*;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.util.StreamReaderDelegate;
-import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URL;
 

@@ -21,10 +21,8 @@ import java.util.Set;
  */
 public final class XmlProperties {
     private static final Logger LOGGER = LoggerFactory.getLogger(XmlProperties.class);
-
     private XmlProperties() {
     }
-
     /**
      * 加载指定名称的XML配置文件,按照如下的顺序查找配置文件:
      * 1. class path
@@ -60,7 +58,6 @@ public final class XmlProperties {
         LOGGER.warn("Can't find the xml properties file [{}] in both class and file path", xmlPropertiesPath);
         return null;
     }
-
     /**
      * 从输入流中加载配置文件
      *
@@ -77,7 +74,6 @@ public final class XmlProperties {
             Set<Map.Entry<Object, Object>> entries = properties.entrySet();
             Map<String, String> configMapper = ConfigLoader.getMap(ApolloUtil.getNamespace(fileName, "xml"));
             for (Map.Entry<Object, Object> entry : entries) {//增加占位符替换
-
                 map.put((String) entry.getKey(), ConfigLoader.replacePlaceHolder(configMapper
                         ,(String) entry.getValue()));
             }
@@ -86,7 +82,6 @@ public final class XmlProperties {
         }
         return map;
     }
-
     /**
      * 从URL中加载配置文件
      *
@@ -98,7 +93,6 @@ public final class XmlProperties {
         Preconditions.checkNotNull(url, "url");
         return loadFromXml(url.openStream(), null);
     }
-
     /**
      * 将配置以xml格式写入到输出流中
      *

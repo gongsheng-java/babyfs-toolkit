@@ -11,7 +11,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.babyfs.tk.apollo.EnvConstants.*;
@@ -46,6 +48,10 @@ public class ConfigLoader {
         }catch (Exception e){
             logger.warn("get config error", e);
         }
+    }
+
+    public static boolean isApolloReady(){
+        return isApolloReady;
     }
 
     private static void initSystemProperty(ConfigCache config){
@@ -125,6 +131,9 @@ public class ConfigLoader {
     }
 
     public static Map<String,String> getMap(String nameSpace){
+        if(!isApolloReady) {
+            return Maps.newHashMap();
+        }
         return getOrBuildConfigCache(nameSpace).getConfigMap();
     }
 

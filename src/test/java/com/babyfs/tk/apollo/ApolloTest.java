@@ -3,8 +3,6 @@ package com.babyfs.tk.apollo;
 
 import com.alibaba.fastjson.JSON;
 import com.babyfs.tk.apollo.guice.ApolloModule;
-import com.babyfs.tk.service.basic.probe.Config;
-import com.babyfs.tk.service.basic.utils.JSONUtil;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.Test;
@@ -12,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import javax.inject.Inject;
 
 public class ApolloTest {
 
