@@ -78,9 +78,6 @@ public final class Modules {
         }
     };
 
-
-    public static final ApolloModule BASE_MODULE_APOLLO = new ApolloModule();
-
     /**
      * 数据校验服务
      * <p/>
