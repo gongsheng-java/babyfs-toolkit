@@ -1,5 +1,8 @@
 package com.babyfs.tk.service.biz.base.entity;
 
+import com.babyfs.tk.commons.model.Operator;
+import org.elasticsearch.common.Strings;
+
 import javax.persistence.Column;
 
 /*
@@ -33,5 +36,27 @@ public class BaseOperatorEntity extends BaseAutoIdEntity {
 
     public void setUtOperator(String utOperator) {
         this.utOperator = utOperator;
+    }
+
+    public void appendCtOperator(Operator operator) {
+        if(operator == null || Strings.isNullOrEmpty(operator.getName())) {
+            return;
+        }
+
+        this.ctOperator = operator.getName();
+        if(!Strings.isNullOrEmpty(operator.getIp())) {
+            this.ctOperator +=  "|" + operator.getIp();
+        }
+    }
+
+    public void appendUtOperator(Operator operator) {
+        if(operator == null || Strings.isNullOrEmpty(operator.getName())) {
+            return;
+        }
+
+        this.utOperator = operator.getName();
+        if(!Strings.isNullOrEmpty(operator.getIp())) {
+            this.utOperator +=  "|" + operator.getIp();
+        }
     }
 }
