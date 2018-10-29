@@ -33,7 +33,7 @@ public class RequestPage extends RequestBase {
         if (page <= 0) {
             page = 1;
         }
-        if (limit < 5 || limit > 100) {
+        if (limit <= 0) {
             limit = 20;
         }
         return new PageParams(page, limit);
