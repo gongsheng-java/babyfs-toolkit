@@ -1,6 +1,7 @@
 package com.babyfs.tk.service.biz.counter.impl;
 
 import com.babyfs.tk.service.biz.constants.CacheConst;
+import com.babyfs.tk.service.biz.counter.CounterInitializer;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -37,6 +38,32 @@ public class IDSequenceServiceImpl implements IDSequenceService {
         try {
             IRedis redis = redisService.get(CacheConst.DEFAULT_COUNTER_GROUP);
             return redis.incr(key);
+        } catch (Exception e) {
+            LOGGER.error("Exception occured in Redis", e);
+            throw new RuntimeException("Exception occured in Redis", e);
+        }
+    }
+
+    @Override
+    public long getNext(String key, CounterInitializer counterInitializer) throws Exception{
+        if (Strings.isNullOrEmpty(key)) {
+            LOGGER.error("getNext : parameter key to get next id is null or empty");
+            return INVALID_ID;
+        }
+        try {
+            IRedis redis = redisService.get(CacheConst.DEFAULT_COUNTER_GROUP);
+            long nextId = redis.incr(key);
+            if(nextId == 1 && counterInitializer != null){
+                try{
+                    nextId = counterInitializer.getStart();
+                    redis.set(key, String.valueOf(nextId), 0);
+                }catch (Exception ex){
+                    LOGGER.error("init counter error key " + key, ex);
+                    //初始化失败的时候，设置为0，可触发多次初始化
+                    redis.set(key, "0", 0);
+                }
+            }
+            return nextId;
         } catch (Exception e) {
             LOGGER.error("Exception occured in Redis", e);
             throw new RuntimeException("Exception occured in Redis", e);
