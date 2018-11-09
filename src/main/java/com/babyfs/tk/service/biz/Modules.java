@@ -78,7 +78,6 @@ public final class Modules {
         }
     };
 
-
     /**
      * 数据校验服务
      * <p/>
