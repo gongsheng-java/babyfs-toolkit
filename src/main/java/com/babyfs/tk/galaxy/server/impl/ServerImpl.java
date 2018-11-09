@@ -166,6 +166,7 @@ public class ServerImpl extends LifeServiceSupport implements IServer {
         Map<String, Method> methods = Maps.newHashMap();
 
         Utils.parseMethods(interfaceType, meta -> {
+            LOGGER.info("add rpc interface method, interface= {}, method = {}, sign = {}", interfaceType, meta.getMethod(), meta.getSig());
             methods.put(meta.getSig(), meta.getMethod());
             return null;
         });
