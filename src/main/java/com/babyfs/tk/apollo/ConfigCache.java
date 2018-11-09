@@ -121,6 +121,10 @@ public class ConfigCache {
     private void update(String key, ConfigChange configChange){
         String value = configChange.getNewValue();
         WatchCacheNode[] toBeUpdates = watchCacheNodeMap.get(key);
+        /**
+         * 解决并未watch会报空指针的问题
+         */
+        if(toBeUpdates == null) return;
         for (WatchCacheNode wc :
                 toBeUpdates) {
             update(wc, value);
