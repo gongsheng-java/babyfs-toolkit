@@ -89,6 +89,7 @@ public class RequestLogUtil {
                 and(append("path", logNode.path)).
                 and(append("msg", logNode.msg)).
                 and(append("client_ip", logNode.clientIp)), "");
+        context.remove();
     }
 
     private static class LogNode{
