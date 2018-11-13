@@ -62,7 +62,10 @@ public class RequestLogUtil {
     }
     
     public static void startCount(){
-        getLogNode().startMilliSecond = System.currentTimeMillis();
+        LogNode logNode = getLogNode();
+
+        logNode.startMilliSecond = System.currentTimeMillis();
+        logNode.endMilliSecond = 0;//reset it
     }
 
     
@@ -76,6 +79,10 @@ public class RequestLogUtil {
         logNode.msg = e.getMessage();
         logNode.isSuccess = false;
         logNode.statusCode = -1;
+    }
+
+    public static void remove(){
+        context.remove();
     }
 
     public static void log(){
