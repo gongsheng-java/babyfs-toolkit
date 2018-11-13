@@ -39,7 +39,10 @@ public class ApolloModule  extends AbstractModule {
      */
     private void registerBean(Class tClass, String namespace){
         Object config = ConfigLoader.getConfig(namespace, tClass);
-
+        if(config == null){
+            logger.warn("unable to get config: #name space {}, #className {}", namespace, tClass.getName());
+            return;
+        }
         bind(tClass).toInstance(config);
     }
 
