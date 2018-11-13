@@ -1,5 +1,6 @@
 package com.babyfs.tk.commons.application;
 
+import com.alibaba.dubbo.remoting.transport.netty.NettyClient;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -14,10 +15,12 @@ import com.babyfs.tk.commons.service.LifecycleModule;
 import com.babyfs.tk.commons.service.annotation.AfterStartStage;
 import com.babyfs.tk.commons.service.annotation.InitStage;
 import com.babyfs.tk.commons.service.annotation.ShutdownStage;
+import org.jboss.netty.channel.ChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.lang.reflect.Field;
 
 /**
  * 应用程序的启动器,一个应用程序的启动顺序如下:
@@ -123,6 +126,21 @@ public final class AppLauncher {
         } catch (Exception e) {
             LOGGER.error("Failed to start application,exit 1", e);
             System.exit(1);
+        }
+
+        releaseNettyClientExternalResources();//释放netty 资源
+    }
+
+    private static void releaseNettyClientExternalResources() {
+        try {
+            Field field = NettyClient.class.getDeclaredField("channelFactory");
+            field.setAccessible(true);
+            ChannelFactory channelFactory = (ChannelFactory) field.get(NettyClient.class);
+            channelFactory.releaseExternalResources();
+            field.setAccessible(false);
+            LOGGER.info("Release NettyClient's external resources");
+        } catch (Exception e){
+            LOGGER.error("Release NettyClient's external resources error", e);
         }
     }
 }
