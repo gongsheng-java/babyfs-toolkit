@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 /**
  * 应用程序的启动器,一个应用程序的启动顺序如下:
@@ -135,27 +136,43 @@ public final class AppLauncher {
     }
 
     private static void tryToStop(){
-        Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
-        boolean canStop = true;
-        for (Map.Entry<Thread, StackTraceElement[]> entry:
-             allStackTraces.entrySet()) {
-            Thread th = entry.getKey();
-            if(entry.getKey().equals(Thread.currentThread())){
-                continue;
-            }
+        LOGGER.info("start watch daemon thread !");
+        Executors.newFixedThreadPool(1, r -> {
+            Thread th = new Thread(r);
+            th.setDaemon(true);
+            th.setName("netty resource watcher");
+            return th;
+        }).execute(() -> {
+            for(;1==1;){
+                Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
+                boolean canStop = true;
+                for (Map.Entry<Thread, StackTraceElement[]> entry:
+                        allStackTraces.entrySet()) {
+                    Thread th = entry.getKey();
+                    if(entry.getKey().equals(Thread.currentThread())){
+                        continue;
+                    }
 
-            String threadName = th.getName();
-            if(th.isDaemon() || (threadName != null && threadName.contains(DEFAULT_NOT_DAEMON))){
-                continue;
-            }
-            LOGGER.info("there is non-daemon thread left! cannot release Netty");
-            canStop = false;
-            break;
-        }
+                    String threadName = th.getName();
+                    if(th.isDaemon() || (threadName != null && threadName.contains(DEFAULT_NOT_DAEMON))){
+                        continue;
+                    }
+                    LOGGER.info("there is non-daemon thread left! cannot release Netty, thread name is {}", threadName);
+                    canStop = false;
+                    break;
+                }
 
-        if(canStop){
-            releaseNettyClientExternalResources();
-        }
+                if(canStop){
+                    releaseNettyClientExternalResources();
+                    break;
+                }
+
+                try {
+                    Thread.sleep(10000);//每10秒扫描是否有必要结束dubbo netty
+                } catch (InterruptedException e) {
+                }
+            }
+        });
     }
 
     private static void releaseNettyClientExternalResources() {
