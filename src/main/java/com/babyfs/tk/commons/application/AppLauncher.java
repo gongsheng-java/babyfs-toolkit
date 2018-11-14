@@ -51,6 +51,7 @@ public final class AppLauncher {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppLauncher.class);
 
     private static final String DEFAULT_NOT_DAEMON = "Hashed wheel timer";
+    private static final String DETROY_JVM_TH_NAME = "DestroyJavaVM";
 
     private String[] args;
 
@@ -154,7 +155,10 @@ public final class AppLauncher {
                     }
 
                     String threadName = th.getName();
-                    if(th.isDaemon() || (threadName != null && threadName.contains(DEFAULT_NOT_DAEMON))){
+                    if(th.isDaemon()
+                            || (threadName != null && threadName.contains(DEFAULT_NOT_DAEMON)
+                            || DETROY_JVM_TH_NAME.equals(threadName)
+                    )){
                         continue;
                     }
                     LOGGER.info("there is non-daemon thread left! cannot release Netty, thread name is {}", threadName);
