@@ -141,7 +141,7 @@ public final class AppLauncher {
         Executors.newFixedThreadPool(1, r -> {
             Thread th = new Thread(r);
             th.setDaemon(true);
-            th.setName("netty resource watcher");
+            th.setName("netty-resource-watcher");
             return th;
         }).execute(() -> {
             for(;1==1;){
