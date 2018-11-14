@@ -136,6 +136,7 @@ public final class AppLauncher {
     }
 
     private static void tryToStop(){
+        LOGGER.info("start watch daemon thread !");
         Executors.newFixedThreadPool(1, r -> {
             Thread th = new Thread(r);
             th.setDaemon(true);
