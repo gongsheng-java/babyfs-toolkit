@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.lang.reflect.Field;
+import java.util.Map;
 
 /**
  * 应用程序的启动器,一个应用程序的启动顺序如下:
@@ -47,6 +48,8 @@ import java.lang.reflect.Field;
  */
 public final class AppLauncher {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppLauncher.class);
+
+    private static final String DEFAULT_NOT_DAEMON = "Hashed wheel timer";
 
     private String[] args;
 
@@ -128,7 +131,31 @@ public final class AppLauncher {
             System.exit(1);
         }
 
-        releaseNettyClientExternalResources();//释放netty 资源
+        tryToStop();//释放netty 资源
+    }
+
+    private static void tryToStop(){
+        Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
+        boolean canStop = true;
+        for (Map.Entry<Thread, StackTraceElement[]> entry:
+             allStackTraces.entrySet()) {
+            Thread th = entry.getKey();
+            if(entry.getKey().equals(Thread.currentThread())){
+                continue;
+            }
+
+            String threadName = th.getName();
+            if(th.isDaemon() || (threadName != null && threadName.contains(DEFAULT_NOT_DAEMON))){
+                continue;
+            }
+            LOGGER.info("there is non-daemon thread left! cannot release Netty");
+            canStop = false;
+            break;
+        }
+
+        if(canStop){
+            releaseNettyClientExternalResources();
+        }
     }
 
     private static void releaseNettyClientExternalResources() {
