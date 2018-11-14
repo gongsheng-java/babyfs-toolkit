@@ -144,7 +144,7 @@ public final class AppLauncher {
             th.setName("netty-resource-watcher");
             return th;
         }).execute(() -> {
-            for(;1==1;){
+            for(int i = 0;1==1; i = (i + 10) % 300){
                 Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
                 boolean canStop = true;
                 for (Map.Entry<Thread, StackTraceElement[]> entry:
@@ -161,7 +161,8 @@ public final class AppLauncher {
                     )){
                         continue;
                     }
-                    LOGGER.info("there is non-daemon thread left! cannot release Netty, thread name is {}", threadName);
+                    if(i == 0)//每5分钟输出一次
+                        LOGGER.info("there is non-daemon thread left! cannot release Netty, thread name is {}", threadName);
                     canStop = false;
                     break;
                 }
