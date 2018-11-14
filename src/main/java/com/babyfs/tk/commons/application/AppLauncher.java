@@ -167,6 +167,7 @@ public final class AppLauncher {
                 }
 
                 if(canStop){
+                    LOGGER.info("all thread is daemon, start to release netty resource");
                     releaseNettyClientExternalResources();
                     break;
                 }
