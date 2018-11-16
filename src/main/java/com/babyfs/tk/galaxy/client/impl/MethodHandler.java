@@ -64,6 +64,7 @@ public final class MethodHandler {
             return codec.decode(content);
         } catch (Exception e) {
             success = false;
+            LOGGER.error("rpc connect remote url :{}", url);
             LOGGER.error("rpc invoke remote method fail", e);
             throw new RpcException("rpc invoke remote method fail", e);
         }finally {
