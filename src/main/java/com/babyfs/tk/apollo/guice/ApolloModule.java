@@ -15,7 +15,7 @@ import java.util.Set;
  */
 public class ApolloModule  extends AbstractModule {
 
-    private static Logger logger = LoggerFactory.getLogger(ApolloModule.class);
+    private final static Logger logger = LoggerFactory.getLogger(ApolloModule.class);
 
     /**
      * scan all the class with annotation Apollo, and register them into ioc container

@@ -59,7 +59,6 @@ public class DubboClientModule extends ServiceModule {
             tClass = Class.forName(client.getType());
         } catch (Exception e) {
             logger.warn("find class {} fail, cannot create dubbo client", client.getType());
-            logger.warn("the exception is :", e);
             return;
         }
 

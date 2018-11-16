@@ -12,6 +12,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
@@ -178,13 +179,22 @@ public class ConfigCache {
         ConfigKey annotation = tClass.getAnnotation(ConfigKey.class);
         if(annotation == null){// not class level, recursively scan sub-field
             T t = buildFieldAnnotatedBean(tClass);
-            consumer.accept(t);
+            safeAcceptConsumer(consumer, t);
             loadOnFieldAnnotatedClass(tClass, t, consumer);
         }else{
             T t = buildTypeAnnotatedBean(annotation, tClass);
-            consumer.accept(t);
+            safeAcceptConsumer(consumer, t);
             String key = annotation.value();
             buildWatchCache(key, new WatchCacheNode(tClass, consumer));
+        }
+    }
+
+    private <T> void safeAcceptConsumer(Consumer<T> consumer, T acceptance){
+        try{
+            consumer.accept(acceptance);
+        }catch (Exception e){
+            logger.warn("invoke consumer error, class: {}", acceptance.getClass());
+            logger.warn("exception is :", e);
         }
     }
 
