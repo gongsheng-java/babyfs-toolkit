@@ -377,4 +377,60 @@ public abstract class BaseController {
         return ServletRequestUtils.getBooleanParameter(request, name, defaultVal);
     }
 
+    /**
+     * 获取可空的整数值
+     *
+     * @param httpRequest   HTTP 请求对象
+     * @param parameterName 参数名称
+     * @return 整数值
+     */
+    protected Integer getNullableIntParameter(HttpServletRequest httpRequest, String parameterName) {
+        String s = this.getStringParameter(httpRequest, parameterName);
+        if (StringUtils.isBlank(s)) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * 获取可空的长整数值
+     *
+     * @param httpRequest   HTTP 请求对象
+     * @param parameterName 参数名称
+     * @return 长整数值
+     */
+    protected Long getNullableLongParameter(HttpServletRequest httpRequest, String parameterName) {
+        String s = this.getStringParameter(httpRequest, parameterName);
+        if (StringUtils.isBlank(s)) {
+            return null;
+        }
+        try {
+            return Long.parseLong(s);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * 获取可空的布尔值
+     *
+     * @param httpRequest   HTTP 请求对象
+     * @param parameterName 参数名称
+     * @return 布尔值
+     */
+    protected Boolean getNullableBooleanParameter(HttpServletRequest httpRequest, String parameterName) {
+        String s = this.getStringParameter(httpRequest, parameterName);
+        if (StringUtils.isBlank(s)) {
+            return null;
+        }
+        try {
+            return Boolean.parseBoolean(s);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
 }
