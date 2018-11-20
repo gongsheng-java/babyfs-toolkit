@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory;
 
 public class GrpcInitModule  extends ServiceModule {
 
-    private static final String GRPC_INTERFACES_KEY = "babyfs.grpc";
+    private static final String GRPC_INTERFACES_NAMESPACE = "babyfs.grpc";
+    private static final String GRPC_INTERFACES_KEY = "guice.interfaces";
 
     private final static Logger logger = LoggerFactory.getLogger(ApolloModule.class);
 
@@ -21,7 +22,7 @@ public class GrpcInitModule  extends ServiceModule {
 
     @Override
     protected void configure() {
-        String config = ConfigLoader.getConfig(GRPC_INTERFACES_KEY);
+        String config = ConfigLoader.getConfig(GRPC_INTERFACES_NAMESPACE, GRPC_INTERFACES_KEY);
         if(Strings.isNullOrEmpty(config)){
             return;
         }
@@ -42,7 +43,7 @@ public class GrpcInitModule  extends ServiceModule {
             return;
         }
 
-        logger.info("bind grpc service {} succeed");
+        logger.info("bind grpc service {} succeed", inter);
         bindService(tClass, ProxyBuilder.buildProxy(tClass));
     }
 }
