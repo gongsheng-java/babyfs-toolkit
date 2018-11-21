@@ -50,7 +50,7 @@ public class ConfigServiceModule extends AbstractModule {
     public ConfigServiceModule(String initConfigPath) {
         this.initConfigPath = Preconditions.checkNotNull(StringUtils.trimToNull(initConfigPath), "The initConfigPath must not be null");
         LOGGER.info("Load global config from {}", initConfigPath);
-        Map<String, String> initConfig = Preconditions.checkNotNull(XmlProperties.loadFromXml(initConfigPath), String.format("Can't load init config from %s", initConfigPath));
+        Map<String, String> initConfig = Preconditions.checkNotNull(XmlProperties.loadFromXml(initConfigPath), "Can't load init config from %s", initConfigPath);
         globalMap = ImmutableMap.copyOf(initConfig);
         Map<String, String> configMap = Maps.filterKeys(initConfig, new Predicate<String>() {
             @Override
@@ -58,7 +58,7 @@ public class ConfigServiceModule extends AbstractModule {
                 return input != null && input.startsWith("config.");
             }
         });
-        Preconditions.checkState(!configMap.isEmpty(), String.format("No config found from %s", initConfigPath));
+        Preconditions.checkState(!configMap.isEmpty(), "No config found from %s", initConfigPath);
 
         String zkServers = globalMap.get(NameConfig.CONF_NAME_ZK_SERVERS);
         String zkUser = globalMap.get(NameConfig.ZK_AUTH_USER);
