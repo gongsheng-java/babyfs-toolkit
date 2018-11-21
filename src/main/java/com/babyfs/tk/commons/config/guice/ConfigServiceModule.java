@@ -58,7 +58,7 @@ public class ConfigServiceModule extends AbstractModule {
                 return input != null && input.startsWith("config.");
             }
         });
-        Preconditions.checkState(!configMap.isEmpty(), "No config found from %s", initConfigPath);
+        Preconditions.checkState(!configMap.isEmpty(), String.format("No config found from %s", initConfigPath));
 
         String zkServers = globalMap.get(NameConfig.CONF_NAME_ZK_SERVERS);
         String zkUser = globalMap.get(NameConfig.ZK_AUTH_USER);
