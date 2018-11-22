@@ -63,6 +63,7 @@ public class RequestLogUtil {
             return;
         }
         LogNode logNode = getLogNode();
+        logNode.isActive = true;
         Object isSucessObj = result.get(REP_KEY_SUCCESS);
         if(isSucessObj != null){
             logNode.isSuccess = ((Boolean)isSucessObj).booleanValue();
@@ -105,19 +106,23 @@ public class RequestLogUtil {
 
     public static void log(){
         LogNode logNode = getLogNode();
+
         endCount();
-        logger.info(append("logger_type", logNode.logType).
-                and(append("logger_status", logNode.isSuccess ? "1" : '0')).
-                and(append("status_code", logNode.statusCode)).
-                and(append("cost", logNode.endMilliSecond - logNode.startMilliSecond)).
-                and(append("method", logNode.httpMethod)).
-                and(append("path", logNode.path)).
-                and(append("msg", logNode.msg)).
-                and(append("client_ip", logNode.clientIp)).
-                and(append("app_name", appName)).
-                and(append("has_exception", logNode.hasException ? "1" : "0")).
-                and(append("exception_msg", logNode.exceptionMsg)).
-                and(append("stacktrace", logNode.stacktrace)), "");
+        if(logNode.isActive){
+            logger.info(append("logger_type", logNode.logType).
+                    and(append("logger_status", logNode.isSuccess ? "1" : '0')).
+                    and(append("status_code", logNode.statusCode)).
+                    and(append("cost", logNode.endMilliSecond - logNode.startMilliSecond)).
+                    and(append("method", logNode.httpMethod)).
+                    and(append("path", logNode.path)).
+                    and(append("msg", logNode.msg)).
+                    and(append("client_ip", logNode.clientIp)).
+                    and(append("app_name", appName)).
+                    and(append("has_exception", logNode.hasException ? "1" : "0")).
+                    and(append("exception_msg", logNode.exceptionMsg)).
+                    and(append("stacktrace", logNode.stacktrace)), "");
+        }
+
         context.remove();
     }
 
@@ -145,6 +150,8 @@ public class RequestLogUtil {
         private String exceptionMsg = "";
 
         private String stacktrace = "";
+
+        private boolean isActive = false;
 
     }
 }
