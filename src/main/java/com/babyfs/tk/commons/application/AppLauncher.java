@@ -1,5 +1,6 @@
 package com.babyfs.tk.commons.application;
 
+import com.alibaba.dubbo.remoting.transport.netty.NettyClient;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -14,10 +15,14 @@ import com.babyfs.tk.commons.service.LifecycleModule;
 import com.babyfs.tk.commons.service.annotation.AfterStartStage;
 import com.babyfs.tk.commons.service.annotation.InitStage;
 import com.babyfs.tk.commons.service.annotation.ShutdownStage;
+import org.jboss.netty.channel.ChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.concurrent.Executors;
 
 /**
  * 应用程序的启动器,一个应用程序的启动顺序如下:
@@ -44,6 +49,9 @@ import javax.inject.Inject;
  */
 public final class AppLauncher {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppLauncher.class);
+
+    private static final String DEFAULT_NOT_DAEMON = "Hashed wheel timer";
+    private static final String DETROY_JVM_TH_NAME = "DestroyJavaVM";
 
     private String[] args;
 
@@ -123,6 +131,66 @@ public final class AppLauncher {
         } catch (Exception e) {
             LOGGER.error("Failed to start application,exit 1", e);
             System.exit(1);
+        }
+
+        tryToStop();//释放netty 资源
+    }
+
+    private static void tryToStop(){
+        LOGGER.info("start watch daemon thread !");
+        Executors.newFixedThreadPool(1, r -> {
+            Thread th = new Thread(r);
+            th.setDaemon(true);
+            th.setName("netty-resource-watcher");
+            return th;
+        }).execute(() -> {
+            for(int i = 0;1==1; i = (i + 10) % 300){
+                Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
+                boolean canStop = true;
+                for (Map.Entry<Thread, StackTraceElement[]> entry:
+                        allStackTraces.entrySet()) {
+                    Thread th = entry.getKey();
+                    if(entry.getKey().equals(Thread.currentThread())){
+                        continue;
+                    }
+
+                    String threadName = th.getName();
+                    if(th.isDaemon()
+                            || (threadName != null && threadName.contains(DEFAULT_NOT_DAEMON)
+                            || DETROY_JVM_TH_NAME.equals(threadName)
+                    )){
+                        continue;
+                    }
+                    if(i == 0)//每5分钟输出一次
+                        LOGGER.info("there is non-daemon thread left! cannot release Netty, thread name is {}", threadName);
+                    canStop = false;
+                    break;
+                }
+
+                if(canStop){
+                    LOGGER.info("all thread is daemon, start to release netty resource");
+                    releaseNettyClientExternalResources();
+                    break;
+                }
+
+                try {
+                    Thread.sleep(10000);//每10秒扫描是否有必要结束dubbo netty
+                } catch (InterruptedException e) {
+                }
+            }
+        });
+    }
+
+    private static void releaseNettyClientExternalResources() {
+        try {
+            Field field = NettyClient.class.getDeclaredField("channelFactory");
+            field.setAccessible(true);
+            ChannelFactory channelFactory = (ChannelFactory) field.get(NettyClient.class);
+            channelFactory.releaseExternalResources();
+            field.setAccessible(false);
+            LOGGER.info("Release NettyClient's external resources");
+        } catch (Exception e){
+            LOGGER.error("Release NettyClient's external resources error", e);
         }
     }
 }

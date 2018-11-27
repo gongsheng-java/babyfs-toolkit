@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
  * DAL查询结果处理的一些工具方法
  */
 public final class DalUtil {
+    private final static int MAX_ROW_COUNT = 10000;
     private DalUtil() {
 
     }
@@ -163,14 +164,18 @@ public final class DalUtil {
         Preconditions.checkNotNull(conditionPair.second, "Invalid conditionPair second params map.");
 
         int count = -1;
+        int limit = pageParams.getLimit();
         //如果需要分页,先查询总数
-        if (pageParams.getLimit() > 0) {
+        if (limit > 0) {
             final String countCondition = conditionPair.first;
             final MapSqlParameterSource countQueryParams = new MapSqlParameterSource(conditionPair.second);
             List<Object[]> countColumns = daoFactory.getDaoSupport().queryEntityColumns(
                     dalContext.getEntityClass(), "count(*)",
                     countCondition, countQueryParams, Collections.<String, Object>emptyMap());
             count = extractInt(countColumns, 0);
+        }else {
+            //对于不分页的查询，如导出等，加上最多返回条数限制，防止对数据库造成压力
+            limit = MAX_ROW_COUNT;
         }
 
         List<E> entities;
@@ -180,11 +185,11 @@ public final class DalUtil {
                 pageCondition += " ORDER BY " + orderCondition;
             }
             MapSqlParameterSource pageQueryParams = new MapSqlParameterSource(conditionPair.second);
-            if (pageParams.getLimit() > 0) {
+            if (limit > 0) {
                 //分页查询数据
                 pageCondition += " LIMIT :from, :size";
                 pageQueryParams.addValue("from", pageParams.getBeginIndex());
-                pageQueryParams.addValue("size", pageParams.getLimit());
+                pageQueryParams.addValue("size", limit);
             }
             List<Object[]> idColumns = daoFactory.getDaoSupport().queryEntityColumns(
                     dalContext.getEntityClass(), idName,

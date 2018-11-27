@@ -8,6 +8,7 @@ import com.babyfs.tk.commons.xml.JAXBUtil;
 import com.babyfs.tk.dal.guice.DalXmlConfModule;
 import com.babyfs.tk.dubbo.xml.DubboClients;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.netty.util.HashedWheelTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -19,7 +20,7 @@ public class DubboClientModule extends ServiceModule {
     private static final Logger logger = LoggerFactory.getLogger(DalXmlConfModule.class);
 
     static {
-        System.setProperty("dubbo.application.logger", "slf4j");
+        initEnv();
     }
 
     private boolean hasLoadConfig = false;
@@ -32,6 +33,11 @@ public class DubboClientModule extends ServiceModule {
         this.application = applicationName;
         this.xmlName = xmlName;
         this.loadConfig();
+    }
+
+    private static void initEnv(){
+        System.setProperty("dubbo.application.logger", "slf4j");
+
     }
 
     @Override
@@ -52,8 +58,7 @@ public class DubboClientModule extends ServiceModule {
         try {
             tClass = Class.forName(client.getType());
         } catch (Exception e) {
-            logger.error("find class {} fail, cannot create dubbo client", client.getType());
-            logger.error("the exception is :", e);
+            logger.warn("find class {} fail, cannot create dubbo client", client.getType());
             return;
         }
 

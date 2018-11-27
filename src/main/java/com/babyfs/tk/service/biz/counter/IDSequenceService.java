@@ -23,6 +23,8 @@ public interface IDSequenceService {
      */
     long getNext(String key) throws Exception;
 
+    long getNext(String key, CounterInitializer counterInitializer) throws Exception;
+
     /**
      * 根据表名key,获得下一个增量id
      *
