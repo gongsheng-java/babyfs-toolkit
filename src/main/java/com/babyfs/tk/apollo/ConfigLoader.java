@@ -88,7 +88,7 @@ public class ConfigLoader {
             }
 
         }catch (Exception e){
-            logger.warn("load dev config failed", e);
+//            logger.warn("load dev config failed", e);
             isDevEnv = false;
         }
 
