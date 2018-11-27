@@ -72,7 +72,7 @@ public class DubboClientModule extends ServiceModule {
             reference.setInterface(tClass);
             reference.setVersion(client.getVersion());
             reference.setCheck(false);//设置懒加载
-            reference.setTimeout(3000);
+            reference.setTimeout(30000);
             Object ref = reference.get();
             bindService(tClass, ref);
             logger.info("create dubbo client {} by registry {} succeed!", client.getType(), client.getRegistry());
@@ -80,7 +80,7 @@ public class DubboClientModule extends ServiceModule {
             ReferenceConfig<?> reference = new ReferenceConfig<>();
             String url = String.format("dubbo://%s/%s", client.getUrl(), client.getType());
             reference.setUrl(url);
-            reference.setTimeout(3000);
+            reference.setTimeout(30000);
             reference.setInterface(tClass);
             reference.setApplication(applicationConfig);
             reference.setVersion(client.getVersion());
