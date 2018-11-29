@@ -9,7 +9,8 @@ public enum SerialNumType implements IndexedEnum {
     FISSION_TRANSACTION(1, "分销交易"),
     RETAILERS_ORDER(2, "商城订单"),
     RETAILERS_REFUND(3, "商城退款订单"),
-    RETAILERS_ORDER_ITEM(4, "商城订单项编号"),;
+    RETAILERS_ORDER_ITEM(4, "商城订单项编号"),
+    ACTIVE_POSTER_IMAGE(5, "打卡小程序生成海报编号");
 
     private static final List<SerialNumType> INDEXS = Util.toIndexes(SerialNumType.values());
 
