@@ -4,7 +4,7 @@
     <groupId>com.babyfs</groupId>
     <artifactId>toolkit</artifactId>
     <packaging>jar</packaging>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.3.0</version>
 
     <parent>
         <groupId>com.babyfs</groupId>
@@ -16,7 +16,7 @@
         <connection>scm:git:git@gitlib.babyfs.cn:server/toolkit.git</connection>
         <developerConnection>scm:git:git@gitlib.babyfs.cn:server/toolkit.git</developerConnection>
         <url>http://gitlib.babyfs.cn/server/toolkit</url>
-        <tag>HEAD</tag>
+        <tag>v1.3.0-SNAPSHOT</tag>
     </scm>
 
     <dependencies>
