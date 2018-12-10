@@ -103,4 +103,17 @@ public class FreqServiceImpl implements IFreqService {
         }
         return false;
     }
+
+    @Override
+    public long getTTL(String key, FreqParameter freqParameter) {
+        String cacheKey = buildCacheKey(freqParameter.getType(), key);
+        IRedis redis = CacheUtils.getRedisCacheClient(redisService, cacheParameter.getRedisServiceGroup());
+        Long result = redis.ttl(cacheKey);
+
+        if(result == null) {
+            return 0L;
+        }
+
+        return result;
+    }
 }

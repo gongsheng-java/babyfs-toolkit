@@ -31,4 +31,13 @@ public interface IFreqService {
      * @param freqParameter
      */
     void clean(String key, FreqParameter freqParameter);
+
+    /**
+     * 查看剩余时间
+     *
+     * @param key
+     * @param freqParameter
+     * @return
+     */
+    long getTTL(String key, FreqParameter freqParameter);
 }
