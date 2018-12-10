@@ -8,6 +8,7 @@ import com.babyfs.tk.commons.xml.JAXBUtil;
 import com.babyfs.tk.dal.guice.DalXmlConfModule;
 import com.babyfs.tk.dubbo.xml.DubboClients;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.netty.util.HashedWheelTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -18,8 +19,8 @@ public class DubboClientModule extends ServiceModule {
 
     private static final Logger logger = LoggerFactory.getLogger(DalXmlConfModule.class);
 
-    static{
-        System.setProperty("dubbo.application.logger", "slf4j");
+    static {
+        initEnv();
     }
 
     private boolean hasLoadConfig = false;
@@ -28,36 +29,40 @@ public class DubboClientModule extends ServiceModule {
 
     private List<DubboClients.DubboClient> dubboClients;
 
-    public DubboClientModule(String applicationName, String xmlName){
+    public DubboClientModule(String applicationName, String xmlName) {
         this.application = applicationName;
         this.xmlName = xmlName;
         this.loadConfig();
+    }
+
+    private static void initEnv(){
+        System.setProperty("dubbo.application.logger", "slf4j");
+
     }
 
     @Override
     protected void configure() {
         ApplicationConfig applicationConfig = new ApplicationConfig(application);
 
-        if(hasLoadConfig){
-            for (DubboClients.DubboClient client:
-                 dubboClients) {
+        if (hasLoadConfig) {
+            for (DubboClients.DubboClient client :
+                    dubboClients) {
                 bindClient(client, applicationConfig);
             }
         }
     }
 
-    private void bindClient(DubboClients.DubboClient client, ApplicationConfig applicationConfig){
+    private void bindClient(DubboClients.DubboClient client, ApplicationConfig applicationConfig) {
 
         Class tClass = null;
-        try{
+        try {
             tClass = Class.forName(client.getType());
-        }catch (Exception e){
-            logger.error("find class {} fail, cannot create dubbo client", client.getType());
-            logger.error("the exception is :", e);
+        } catch (Exception e) {
+            logger.warn("find class {} fail, cannot create dubbo client", client.getType());
             return;
         }
 
-        if(hasRegistry(client.getRegistry())){
+        if (hasRegistry(client.getRegistry())) {
             RegistryConfig registryConfig = new RegistryConfig();
             registryConfig.setAddress(client.getRegistry());
             registryConfig.setCheck(false);
@@ -67,13 +72,15 @@ public class DubboClientModule extends ServiceModule {
             reference.setInterface(tClass);
             reference.setVersion(client.getVersion());
             reference.setCheck(false);//设置懒加载
+            reference.setTimeout(30000);
             Object ref = reference.get();
             bindService(tClass, ref);
             logger.info("create dubbo client {} by registry {} succeed!", client.getType(), client.getRegistry());
-        }else{
+        } else {
             ReferenceConfig<?> reference = new ReferenceConfig<>();
             String url = String.format("dubbo://%s/%s", client.getUrl(), client.getType());
             reference.setUrl(url);
+            reference.setTimeout(30000);
             reference.setInterface(tClass);
             reference.setApplication(applicationConfig);
             reference.setVersion(client.getVersion());
@@ -84,20 +91,20 @@ public class DubboClientModule extends ServiceModule {
         }
     }
 
-    private boolean hasRegistry(String registry){
+    private boolean hasRegistry(String registry) {
         return StringUtils.isNotEmpty(registry) && !"N/A".equals(registry);
     }
 
-    private void loadConfig(){
-        try{
+    private void loadConfig() {
+        try {
             DubboClients loadClients = loadDubboConfig(DubboClients.class, xmlName);
-            if(loadClients == null || CollectionUtils.isEmpty(loadClients.getDubboClients())){
+            if (loadClients == null || CollectionUtils.isEmpty(loadClients.getDubboClients())) {
                 logger.error("error in load dubbo config, load config fail");
             }
             this.dubboClients = loadClients.getDubboClients();
             hasLoadConfig = true;
 
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("error in load dubbo config", e);
         }
     }

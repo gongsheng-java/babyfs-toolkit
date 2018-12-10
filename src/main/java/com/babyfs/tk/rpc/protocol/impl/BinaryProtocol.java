@@ -100,7 +100,7 @@ public final class BinaryProtocol implements IProtocol<RPC, ChannelBuffer> {
         //check protocl version
         Preconditions.checkState(protocolType == RPC_TYPE, "The protocl type is %d,but %d is excepted.", protocolType, RPC_TYPE);
         Preconditions.checkState(protocolVersion <= RPC_VERSION, "The version %d > supported version %d", protocolVersion, RPC_VERSION);
-        Preconditions.checkNotNull(msgVersion>=0,"Bad msgVersion:%s",msgVersion);
+        Preconditions.checkState(msgVersion>=0,"Bad msgVersion:%s",msgVersion);
         switch (msgType) {
             case MSG_TYPE_REQUEST:
                 return requestProtocol.decode(channelBuffer);

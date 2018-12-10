@@ -90,6 +90,7 @@ public class ResponseUtil {
         map.put(REP_KEY_CODE, serviceResponse.getCode());
         map.put(REP_KEY_MSG, serviceResponse.getMsg());
         map.put(REP_KEY_DATA, serviceResponse.getData());
+        RequestLogUtil.setResult(map);//记录日志用
         return map;
     }
 
@@ -106,6 +107,7 @@ public class ResponseUtil {
         map.put(REP_KEY_CODE, code);
         map.put(REP_KEY_MSG, msg);
         map.put(REP_KEY_DATA, data);
+        RequestLogUtil.setResult(map);//记录日志用
         return map;
     }
 
