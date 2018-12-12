@@ -67,7 +67,7 @@ public final class MethodHandler {
             LOGGER.error("rpc connect remote url :{}", url);
             LOGGER.error("rpc invoke remote method fail", e);
             throw new RpcException("rpc invoke remote method fail", e);
-        }finally {
+        } finally {
             metric(getMetricItemName(request, serviceServer), st, success);
         }
     }
@@ -88,6 +88,7 @@ public final class MethodHandler {
 
     /**
      * 使用metric探针记录timer
+     *
      * @param itemName
      * @param start
      * @param success
@@ -98,6 +99,7 @@ public final class MethodHandler {
 
     /**
      * 构建itemName
+     *
      * @param request
      * @param server
      * @return
@@ -108,10 +110,11 @@ public final class MethodHandler {
         String simpleName = (dotIndex == -1) ? className : className.substring(dotIndex + 1);
         String simpleMethod = Splitter.on("#").splitToList(request.getMethodSign()).get(0);
         StringBuilder builder = new StringBuilder();
-        builder.append(server.getHost()).append(".")
-                .append(server.getPort())
-                .append(".").append(simpleName)
-                .append(".").append(simpleMethod);
+        builder.append("RPC").append(".")
+                .append(server.getHost()).append(".")
+                .append(server.getPort()).append(".")
+                .append(simpleName).append(".")
+                .append(simpleMethod);
         return builder.toString();
     }
 }
