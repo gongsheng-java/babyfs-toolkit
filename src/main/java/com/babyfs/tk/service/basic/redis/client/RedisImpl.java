@@ -927,6 +927,22 @@ public class RedisImpl implements IRedis {
     }
 
     @Override
+    public Long ttl(String key) {
+        ShardedJedis shardedJedis = pool.getResource();
+        final long st = System.nanoTime();
+        boolean success = true;
+        try {
+            return shardedJedis.ttl(key);
+        } catch (Exception e) {
+            success = false;
+            throw new JedisException(getShardInfo(shardedJedis,key),e);
+        } finally {
+            close(shardedJedis);
+            metric("ttl", st, success);
+        }
+    }
+
+    @Override
     public String set(String key, String value, int expireSecond) {
         ShardedJedis shardedJedis = pool.getResource();
         // 性能监控数据初始化

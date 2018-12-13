@@ -483,6 +483,13 @@ public interface IRedis {
      */
     Long decr(String key, int seconds);
 
+    /**
+     * 查看指定key的过期时间
+     *
+     * @param key
+     * @return
+     */
+    Long ttl(String key);
 
     /**
      * 执行lua脚本
