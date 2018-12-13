@@ -10,10 +10,9 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.node.Node;
-import org.elasticsearch.node.NodeBuilder;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +21,8 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static org.reflections.util.ConfigurationBuilder.build;
 
 /**
  * ElasticSearch 客户端工厂
@@ -48,6 +49,11 @@ public final class ESClientFactory {
      * 禁用client检查,true:禁用
      */
     public static final String DISABLE_CHECK_CLIENT = "es.client.disable.check";
+
+    static {
+        System.setProperty("es.set.netty.runtime.available.processors", "false");
+    }
+
 
     private ESClientFactory() {
     }
@@ -82,8 +88,15 @@ public final class ESClientFactory {
         Preconditions.checkArgument(config.get(CLUSTER_NAME) != null, "config must contains the key " + CLUSTER_NAME);
 
         setDefaultConfig(config);
-        Settings settings = Settings.builder().put(CLIENT_TRANSPORT_SNIFF, true).put(config).build();
-        TransportClient client = TransportClient.builder().settings(settings).build();
+        Settings.Builder settingBuilder = Settings.builder();
+        settingBuilder.put(CLIENT_TRANSPORT_SNIFF, true);
+        for (Map.Entry<String, Object> configEnt :
+                config.entrySet()) {
+            settingBuilder.put(configEnt.getKey(), configEnt.getValue().toString());
+        }
+        
+        Settings settings = settingBuilder.build();
+        TransportClient client = new PreBuiltTransportClient(settings);
         List<TransportAddress> addresses = Lists.transform(Lists.newArrayList(esHosts), new Function<String, TransportAddress>() {
             @Override
             public TransportAddress apply(@Nonnull String host) {
@@ -91,7 +104,7 @@ public final class ESClientFactory {
                 String[] split = host.split(":");
                 Preconditions.checkArgument(split.length == 2, "Bad host format %s,the format is host:port", host);
                 InetSocketAddress address = new InetSocketAddress(split[0], Integer.parseInt(split[1]));
-                return new InetSocketTransportAddress(address);
+                return new TransportAddress(address);
             }
         });
         for (TransportAddress address : addresses) {
@@ -100,24 +113,27 @@ public final class ESClientFactory {
         return checkClient(client);
     }
 
-    /**
-     * 构建{@link org.elasticsearch.client.node.NodeClient}
-     * NodeClient会加入ElastichSearch Cluster,发起的请求时可以路由到目标节点,避免"double hop"
-     * 理论上NodeClient比TransportClient效率更高
-     *
-     * @param config 非空
-     * @return {@link org.elasticsearch.client.node.NodeClient}
-     */
-    public static Node createNodeClient(Map<String, Object> config) {
-        Preconditions.checkArgument(config != null, "The config must not be null");
-        Preconditions.checkArgument(config.get(CLUSTER_NAME) != null, "config must contains the key " + CLUSTER_NAME);
-        setDefaultConfig(config);
-        Settings.Builder builder = Settings.settingsBuilder();
-        builder.put(config);
-        Node node = NodeBuilder.nodeBuilder().local(false).settings(builder).client(true).node();
-        checkClient(node.client());
-        return node;
-    }
+//    /**
+//     * 构建{@link org.elasticsearch.client.node.NodeClient}
+//     * NodeClient会加入ElastichSearch Cluster,发起的请求时可以路由到目标节点,避免"double hop"
+//     * 理论上NodeClient比TransportClient效率更高
+//     *
+//     * @param config 非空
+//     * @return {@link org.elasticsearch.client.node.NodeClient}
+//     */
+//    public static Node createNodeClient(Map<String, Object> config) {
+//        Preconditions.checkArgument(config != null, "The config must not be null");
+//        Preconditions.checkArgument(config.get(CLUSTER_NAME) != null, "config must contains the key " + CLUSTER_NAME);
+//        setDefaultConfig(config);
+//        Settings.Builder builder = Settings.builder();
+//        for (Map.Entry<String, Object> configEnt :
+//                config.entrySet()) {
+//            builder.put(configEnt.getKey(), configEnt.getValue().toString());
+//        }
+//        Node node = NodeBuilder.nodeBuilder().local(false).settings(builder).client(true).node();
+//        checkClient(node.client());
+//        return node;
+//    }
 
     /**
      * 检查client的状态
@@ -149,6 +165,7 @@ public final class ESClientFactory {
      */
     private static void setDefaultConfig(Map<String, Object> config) {
         setIfAbsent(config, TRANSPORT_TCP_PORT, TCP_PORT_RANGE);
+
     }
 
     /**

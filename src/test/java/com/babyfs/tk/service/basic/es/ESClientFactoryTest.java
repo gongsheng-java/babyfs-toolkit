@@ -25,14 +25,14 @@ public class ESClientFactoryTest {
         client.close();
     }
 
-    @Test
-    @Ignore
-    public void test_create_node_client() {
-        Map<String, Object> maps = Maps.newHashMap();
-        maps.put(ESClientFactory.CLUSTER_NAME, "es-d0ngw");
-        Node client = ESClientFactory.createNodeClient(maps);
-        Assert.assertNotNull(client);
-        System.out.println(client);
-    }
+//    @Test
+//    @Ignore
+//    public void test_create_node_client() {
+//        Map<String, Object> maps = Maps.newHashMap();
+//        maps.put(ESClientFactory.CLUSTER_NAME, "es-d0ngw");
+//        Node client = ESClientFactory.createNodeClient(maps);
+//        Assert.assertNotNull(client);
+//        System.out.println(client);
+//    }
 
 }

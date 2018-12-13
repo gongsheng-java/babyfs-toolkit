@@ -41,18 +41,13 @@ public class ApolloTest {
 
     @Test
     public void testWatch(){
-        ConfigLoader.watch(ApolloJsonTest.class, apolloJsonTest -> {
-            test = apolloJsonTest;
-            logger.info("after changed: {}-{}",test.getName(), test.getPath());
-        });
-
         ConfigLoader.watch(TestConfig.class, apolloTest -> {
             test1 = apolloTest;
             logger.info("after changed: {}", test1.getName());
         });
 
         try {
-            Thread.sleep(10);
+            Thread.sleep(100000);
         } catch (InterruptedException e) {
         }
     }
