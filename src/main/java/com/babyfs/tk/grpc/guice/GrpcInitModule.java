@@ -42,8 +42,13 @@ public class GrpcInitModule  extends ServiceModule {
             logger.warn("find class {} fail, cannot create grpc client", inter);
             return;
         }
+        try {
+            bindService(tClass, ProxyBuilder.buildProxy(tClass));
+            logger.info("bind grpc service {} succeed", inter);
+        }catch (Exception e){
+            logger.error("bind grpc failed, {} has already been registered", tClass.getName());
+        }
 
-        logger.info("bind grpc service {} succeed", inter);
-        bindService(tClass, ProxyBuilder.buildProxy(tClass));
+
     }
 }
