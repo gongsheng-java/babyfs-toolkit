@@ -73,8 +73,13 @@ public class DubboClientModule extends ServiceModule {
             reference.setCheck(false);//设置懒加载
             reference.setTimeout(30000);
             Object ref = reference.get();
-            bindService(tClass, ref);
-            logger.info("create dubbo client {} by registry {} succeed!", client.getType(), client.getRegistry());
+            try{
+                bindService(tClass, ref);
+                logger.info("create dubbo client {} by registry {} succeed!", client.getType(), client.getRegistry());
+            }catch (Exception e){
+                logger.info("create dubbo client {} by url {} failed! it's already been registered",  client.getType(), client.getRegistry());
+            }
+
         } else {
             ReferenceConfig<?> reference = new ReferenceConfig<>();
             String url = String.format("dubbo://%s/%s", client.getUrl(), client.getType());
@@ -85,8 +90,13 @@ public class DubboClientModule extends ServiceModule {
             reference.setVersion(client.getVersion());
             reference.setCheck(false);//设置懒加载
             Object ref = reference.get();
-            bindService(tClass, ref);
-            logger.info("create dubbo client {} by url {} succeed!", client.getType(), url);
+            try{
+                bindService(tClass, ref);
+                logger.info("create dubbo client {} by url {} succeed!", client.getType(), url);
+            }catch (Exception e){
+                logger.info("create dubbo client {} by url {} failed! it's already been registered", client.getType(), url);
+            }
+
         }
     }
 
