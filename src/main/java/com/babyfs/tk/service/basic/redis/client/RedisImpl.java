@@ -9,6 +9,7 @@ import com.babyfs.tk.commons.codec.ICodec;
 import com.babyfs.tk.commons.codec.impl.HessianCodec;
 import com.babyfs.tk.probe.metrics.MetricsProbe;
 import com.babyfs.tk.service.basic.redis.IRedis;
+import io.prometheus.client.Summary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -29,6 +30,14 @@ import java.util.concurrent.Future;
 public class RedisImpl implements IRedis {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisImpl.class);
     private static final ICodec DEFAULT_CODEC = new HessianCodec();
+
+    static final Summary redisCallLatency = Summary.build()
+            .name("redis_call_latency_seconds")
+            .labelNames("method", "success")
+            .quantile(0.98, 0.005)
+            .quantile(0.85, 0.005)
+            .quantile(0.50, 0.005)
+            .help("Request latency in seconds.").register();
 
     /**
      * 编码和解码器
@@ -82,7 +91,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.scard(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("scard", st, success);
@@ -109,7 +118,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.sadd(keyBytes, valueBytes);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("saddObject", st, success);
@@ -133,7 +142,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.sismember(key, member);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("sismember", st, success);
@@ -160,7 +169,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.sismember(keyBytes, valueBytes);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("sismemberObject", st, success);
@@ -183,7 +192,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.smembers(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("smembers", st, success);
@@ -214,7 +223,7 @@ public class RedisImpl implements IRedis {
             return result;
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("smembersObject", st, success);
@@ -232,7 +241,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hincrBy(key, field, value);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hincr", st, success);
@@ -257,7 +266,7 @@ public class RedisImpl implements IRedis {
             }
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hincrexpire", st, success);
@@ -274,7 +283,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hget(key, field);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hget", st, success);
@@ -291,7 +300,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hget(key, field);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hgetByte", st, success);
@@ -307,7 +316,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hexists(key, field);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hexists", st, success);
@@ -323,7 +332,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hgetAll(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hgetAll", st, success);
@@ -339,7 +348,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hmget(key, fields);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hmget", st, success);
@@ -356,7 +365,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hkeys(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hkeys", st, success);
@@ -372,7 +381,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hvals(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hvals", st, success);
@@ -389,7 +398,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hset(key, field, value);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hset", st, success);
@@ -406,7 +415,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hset(key, field, value);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hsetByte", st, success);
@@ -423,7 +432,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hlen(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hlen", st, success);
@@ -440,7 +449,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hdel(key, field);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hdel", st, success);
@@ -457,7 +466,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.hdel(key, field);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("hdelByte", st, success);
@@ -474,7 +483,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.del(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("del", st, success);
@@ -491,7 +500,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.rpush(key, string);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("rpush", st, success);
@@ -508,7 +517,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.lpush(key, string);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("lpush", st, success);
@@ -526,7 +535,7 @@ public class RedisImpl implements IRedis {
 
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("llen", st, success);
@@ -544,7 +553,7 @@ public class RedisImpl implements IRedis {
 
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("lrange", st, success);
@@ -561,7 +570,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.ltrim(key, start, end);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("ltrim", st, success);
@@ -578,7 +587,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.lindex(key, index);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("lindex", st, success);
@@ -595,7 +604,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.lset(key, index, value);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("lset", st, success);
@@ -612,7 +621,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.lrem(key, count, value);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("lrem", st, success);
@@ -629,7 +638,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.lpop(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("lpop", st, success);
@@ -646,7 +655,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.rpop(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("rpop", st, success);
@@ -664,7 +673,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.incr(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("incr", st, success);
@@ -681,7 +690,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.exists(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("exists", st, success);
@@ -709,7 +718,7 @@ public class RedisImpl implements IRedis {
             return value;
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("incrExpire", st, success);
@@ -726,7 +735,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.expire(key, seconds);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("expire", st, success);
@@ -750,7 +759,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.zrevrank(key, member);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("zrevrank", st, success);
@@ -773,7 +782,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.zcard(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("zcard", st, success);
@@ -796,7 +805,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.get(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("getByte", st, success);
@@ -820,7 +829,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.set(key, value);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("setByte", st, success);
@@ -844,7 +853,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.expire(key, seconds);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("expireByte", st, success);
@@ -868,7 +877,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.zrem(key, member);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("zrem", st, success);
@@ -891,7 +900,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.decr(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("decr", st, success);
@@ -919,7 +928,7 @@ public class RedisImpl implements IRedis {
             return value;
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("decrExpire", st, success);
@@ -935,7 +944,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.ttl(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("ttl", st, success);
@@ -957,7 +966,7 @@ public class RedisImpl implements IRedis {
             }
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("setExpire", st, success);
@@ -974,7 +983,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.get(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("get", st, success);
@@ -1000,7 +1009,7 @@ public class RedisImpl implements IRedis {
             }
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("getExpire", st, success);
@@ -1017,7 +1026,7 @@ public class RedisImpl implements IRedis {
             return shardedJedis.srem(key, member);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis,key),e);
+            throw new JedisException(getShardInfo(shardedJedis, key), e);
         } finally {
             close(shardedJedis);
             metric("srem", st, success);
@@ -1293,7 +1302,9 @@ public class RedisImpl implements IRedis {
      */
     private void metric(String itemName, long start, boolean success) {
         if (enableProbe) {
-            MetricsProbe.timerUpdateNSFromStart("redis", itemName, start, success);
+            redisCallLatency.labels(itemName, success ? "1" : "0").observe((System.nanoTime() - start) / 1.0E9D);
+            //oldMetric
+            //MetricsProbe.timerUpdateNSFromStart("redis", itemName, start, success);
         }
     }
 
@@ -1304,7 +1315,7 @@ public class RedisImpl implements IRedis {
         return shardedJedis.getShardInfo(key).toString();
     }
 
-    private String getShardInfo(ShardedJedis shardedJedis, byte[]key) {
+    private String getShardInfo(ShardedJedis shardedJedis, byte[] key) {
         if (shardedJedis == null || key == null) {
             return "no shard";
         }
