@@ -10,6 +10,7 @@ import com.babyfs.tk.galaxy.register.ILoadBalance;
 import com.babyfs.tk.galaxy.register.ServiceServer;
 import com.babyfs.tk.probe.metrics.MetricsProbe;
 import com.google.common.base.Splitter;
+import io.prometheus.client.Summary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,14 @@ public final class MethodHandler {
     private final IClient client;
     private final ILoadBalance loadBalance;
     private final String urlPrefix;
+
+    static final Summary rpcCallLatency = Summary.build()
+            .name("rpc_call_latency_seconds")
+            .labelNames("method", "target_server", "success")
+            .quantile(0.98, 0.005)
+            .quantile(0.85, 0.005)
+            .quantile(0.50, 0.005)
+            .help("Request latency in seconds.").register();
 
     public MethodHandler(ServicePoint<?> target, ICodec codec, IClient client, MethodMeta metadata, ILoadBalance loadBalance, String urlPrefix) {
         this.target = checkNotNull(target, "target");
@@ -67,8 +76,10 @@ public final class MethodHandler {
             LOGGER.error("rpc connect remote url :{}", url);
             LOGGER.error("rpc invoke remote method fail", e);
             throw new RpcException("rpc invoke remote method fail", e);
-        }finally {
-            metric(getMetricItemName(request, serviceServer), st, success);
+        } finally {
+            //oldMetric
+//            oldMetric(request,serviceServer, st, success);
+            metric(request, serviceServer, st, success);
         }
     }
 
@@ -86,18 +97,31 @@ public final class MethodHandler {
         return rpcRequest;
     }
 
+    private void oldMetric(RpcRequest request, ServiceServer server, long start, boolean success) {
+        MetricsProbe.timerUpdateNSFromStart("rpc", getMetricItemName(request, server), start, success);
+    }
+
     /**
-     * 使用metric探针记录timer
-     * @param itemName
+     * @param request
+     * @param server
      * @param start
      * @param success
      */
-    private void metric(String itemName, long start, boolean success) {
-        MetricsProbe.timerUpdateNSFromStart("rpc", itemName, start, success);
+    private void metric(RpcRequest request, ServiceServer server, long start, boolean success) {
+        String className = request.getInterfaceName();
+        int dotIndex = className.lastIndexOf('.');
+        String simpleName = (dotIndex == -1) ? className : className.substring(dotIndex + 1);
+        String simpleMethod = Splitter.on("#").splitToList(request.getMethodSign()).get(0);
+
+        String method = simpleName + "." + simpleMethod;
+        String targetServer = server.getHost() + ":" + server.getPort();
+
+        rpcCallLatency.labels(method, targetServer, success ? "1" : "0").observe((System.nanoTime() - start) / 1.0E9D);
     }
 
     /**
      * 构建itemName
+     *
      * @param request
      * @param server
      * @return
@@ -107,11 +131,13 @@ public final class MethodHandler {
         int dotIndex = className.lastIndexOf('.');
         String simpleName = (dotIndex == -1) ? className : className.substring(dotIndex + 1);
         String simpleMethod = Splitter.on("#").splitToList(request.getMethodSign()).get(0);
+
         StringBuilder builder = new StringBuilder();
-        builder.append(server.getHost()).append(".")
-                .append(server.getPort())
-                .append(".").append(simpleName)
-                .append(".").append(simpleMethod);
+        builder.append("RPC").append(".")
+                .append(server.getHost()).append(".")
+                .append(server.getPort()).append(".")
+                .append(simpleName).append(".")
+                .append(simpleMethod);
         return builder.toString();
     }
 }

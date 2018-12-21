@@ -16,6 +16,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.prometheus.client.Summary;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import javax.annotation.Nonnull;
@@ -67,6 +68,14 @@ public final class DaoInvocationHandler implements InvocationHandler {
         }
     };
 
+    static final Summary dbCallLatency = Summary.build()
+            .name("db_call_latency_seconds")
+            .labelNames("method", "success")
+            .quantile(0.98, 0.005)
+            .quantile(0.85, 0.005)
+            .quantile(0.50, 0.005)
+            .help("Request latency in seconds.").register();
+
     /**
      * 解整数的参数
      */
@@ -89,6 +98,7 @@ public final class DaoInvocationHandler implements InvocationHandler {
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
+
         String itemName = daoSimpleName + "." + method.getName();
         try {
             Function<Object[], Object> objectFunction = methodFunctionMap.get(method);
@@ -101,7 +111,10 @@ public final class DaoInvocationHandler implements InvocationHandler {
             success = false;
             throw e;
         } finally {
-            MetricsProbe.timerUpdateNSFromStart("db", itemName, st, success);
+            //oldMetric
+            //MetricsProbe.timerUpdateNSFromStart("db", itemName, st, success);
+
+            dbCallLatency.labels(itemName, success ? "1" : "0").observe((System.nanoTime() - st) / 1.0E9D);
         }
     }
 

@@ -8,7 +8,6 @@ import com.babyfs.tk.commons.xml.JAXBUtil;
 import com.babyfs.tk.dal.guice.DalXmlConfModule;
 import com.babyfs.tk.dubbo.xml.DubboClients;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.netty.util.HashedWheelTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -35,7 +34,7 @@ public class DubboClientModule extends ServiceModule {
         this.loadConfig();
     }
 
-    private static void initEnv(){
+    private static void initEnv() {
         System.setProperty("dubbo.application.logger", "slf4j");
 
     }
@@ -44,7 +43,7 @@ public class DubboClientModule extends ServiceModule {
     protected void configure() {
         ApplicationConfig applicationConfig = new ApplicationConfig(application);
 
-        if (hasLoadConfig) {
+        if (hasLoadConfig && dubboClients != null) {
             for (DubboClients.DubboClient client :
                     dubboClients) {
                 bindClient(client, applicationConfig);
@@ -74,8 +73,13 @@ public class DubboClientModule extends ServiceModule {
             reference.setCheck(false);//设置懒加载
             reference.setTimeout(30000);
             Object ref = reference.get();
-            bindService(tClass, ref);
-            logger.info("create dubbo client {} by registry {} succeed!", client.getType(), client.getRegistry());
+            try{
+                bindService(tClass, ref);
+                logger.info("create dubbo client {} by registry {} succeed!", client.getType(), client.getRegistry());
+            }catch (Exception e){
+                logger.info("create dubbo client {} by url {} failed! it's already been registered",  client.getType(), client.getRegistry());
+            }
+
         } else {
             ReferenceConfig<?> reference = new ReferenceConfig<>();
             String url = String.format("dubbo://%s/%s", client.getUrl(), client.getType());
@@ -86,8 +90,13 @@ public class DubboClientModule extends ServiceModule {
             reference.setVersion(client.getVersion());
             reference.setCheck(false);//设置懒加载
             Object ref = reference.get();
-            bindService(tClass, ref);
-            logger.info("create dubbo client {} by url {} succeed!", client.getType(), url);
+            try{
+                bindService(tClass, ref);
+                logger.info("create dubbo client {} by url {} succeed!", client.getType(), url);
+            }catch (Exception e){
+                logger.info("create dubbo client {} by url {} failed! it's already been registered", client.getType(), url);
+            }
+
         }
     }
 
