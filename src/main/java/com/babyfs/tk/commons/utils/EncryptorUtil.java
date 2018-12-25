@@ -6,6 +6,7 @@ import org.apache.commons.codec.binary.Base64;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 
 /**
@@ -60,5 +61,44 @@ public class EncryptorUtil {
         byte[] utf8 = str.getBytes(Constants.UTF8_CHARSET);
         byte[] enc = cipher.doFinal(utf8);
         return Base64.encodeBase64URLSafeString(enc);
+    }
+
+    /**
+     * 功能:AES加密
+     *
+     * @param content  需要加密的内容
+     * @param password 加密密码
+     * @return
+     */
+
+    public static String aesEncrypt(String content, String password) {
+        try {
+            SecretKeySpec key = new SecretKeySpec(password.getBytes(), "AES");
+            Cipher cipher = Cipher.getInstance("AES");// 创建密码器
+            cipher.init(Cipher.ENCRYPT_MODE, key);// 初始化
+            return EncryptorUtil.encodeBase64ByCipher(content, cipher);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
+    /**
+     * 功能: AES解密
+     *
+     * @param content  待解密内容
+     * @param password 解密密钥
+     * @return
+     */
+
+    public static String aesDecrypt(String content, String password) {
+        try {
+            SecretKeySpec key = new SecretKeySpec(password.getBytes(), "AES");
+            Cipher cipher = Cipher.getInstance("AES");// 创建密码器
+            cipher.init(Cipher.DECRYPT_MODE, key);// 初始化
+            return EncryptorUtil.decodeBase64ByCipher(content, cipher);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
