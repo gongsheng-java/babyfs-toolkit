@@ -79,7 +79,7 @@ public final class MethodHandler {
         } finally {
             //oldMetric
 //            oldMetric(request,serviceServer, st, success);
-            metric(request, serviceServer, st, success);
+//            metric(request, serviceServer, st, success);
         }
     }
 

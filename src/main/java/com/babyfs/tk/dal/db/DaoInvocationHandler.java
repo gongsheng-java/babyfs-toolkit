@@ -114,7 +114,7 @@ public final class DaoInvocationHandler implements InvocationHandler {
             //oldMetric
             //MetricsProbe.timerUpdateNSFromStart("db", itemName, st, success);
 
-            dbCallLatency.labels(itemName, success ? "1" : "0").observe((System.nanoTime() - st) / 1.0E9D);
+//            dbCallLatency.labels(itemName, success ? "1" : "0").observe((System.nanoTime() - st) / 1.0E9D);
         }
     }
 
