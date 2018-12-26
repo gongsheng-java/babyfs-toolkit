@@ -31,9 +31,9 @@ public final class MethodHandler {
     static final Summary rpcCallLatency = Summary.build()
             .name("rpc_call_latency_seconds")
             .labelNames("method", "target_server", "success")
-            .quantile(0.98, 0.005)
-            .quantile(0.85, 0.005)
-            .quantile(0.50, 0.005)
+            .quantile(0.98, 0.05)
+            .quantile(0.85, 0.05)
+            .quantile(0.50, 0.05)
             .help("Request latency in seconds.").register();
 
     public MethodHandler(ServicePoint<?> target, ICodec codec, IClient client, MethodMeta metadata, ILoadBalance loadBalance, String urlPrefix) {
