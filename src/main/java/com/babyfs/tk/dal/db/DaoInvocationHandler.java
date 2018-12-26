@@ -71,9 +71,9 @@ public final class DaoInvocationHandler implements InvocationHandler {
     static final Summary dbCallLatency = Summary.build()
             .name("db_call_latency_seconds")
             .labelNames("method", "success")
-            .quantile(0.98, 0.005)
-            .quantile(0.85, 0.005)
-            .quantile(0.50, 0.005)
+            .quantile(0.98, 0.05)
+            .quantile(0.85, 0.05)
+            .quantile(0.5, 0.05)
             .help("Request latency in seconds.").register();
 
     /**
@@ -114,7 +114,7 @@ public final class DaoInvocationHandler implements InvocationHandler {
             //oldMetric
             //MetricsProbe.timerUpdateNSFromStart("db", itemName, st, success);
 
-            dbCallLatency.labels(itemName, success ? "1" : "0").observe((System.nanoTime() - st) / 1.0E9D);
+//            dbCallLatency.labels(itemName, success ? "1" : "0").observe((System.nanoTime() - st) / 1.0E9D);
         }
     }
 
