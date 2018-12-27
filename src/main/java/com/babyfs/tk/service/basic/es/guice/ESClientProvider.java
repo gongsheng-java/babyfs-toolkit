@@ -13,6 +13,7 @@ import org.elasticsearch.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -22,8 +23,15 @@ public class ESClientProvider implements Provider<Client> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ESClientProvider.class);
     public static final String ES_CONF_CLIENT_TYPE = "es.client.type";
     public static final String ES_CONF_CLIENT_HOSTS = "es.client.hosts";
-    public static final String NODE_CLIENT = "NodeClient";
     public static final String TRANSPORT_CLIENT = "TransportClient";
+
+    private static final Map<String, String> ES_UPGRADE_CONVERTER =  new HashMap<String, String>(){
+        {
+            put("threadpool.index.queue", "thread_pool.index.queue_size");
+            put("threadpool.listener.queue", "thread_pool.listener.queue_size");
+
+        }
+    };
 
     private final Map<String, String> conf;
 
@@ -43,22 +51,15 @@ public class ESClientProvider implements Provider<Client> {
     public Client get() {
         String clientType = conf.get(ES_CONF_CLIENT_TYPE);
         if (clientType == null) {
-            clientType = NODE_CLIENT;
             LOGGER.info("Use default es client type:{}", clientType);
         }
         LOGGER.info("ES client type:{}", clientType);
-        Map<String, Object> map = Maps.newHashMap();
-        map.putAll(conf);
-
-
+        Map<String, Object> map = buildConfigMap(conf);
         Releasable toClose;
         Client client;
-        if (clientType.equalsIgnoreCase(NODE_CLIENT)) {
-            Node node = ESClientFactory.createNodeClient(map);
-            client = node.client();
-            toClose = node;
-        } else if (clientType.equalsIgnoreCase(TRANSPORT_CLIENT)) {
+        if (clientType.equalsIgnoreCase(TRANSPORT_CLIENT)) {
             String esHosts = conf.get(ES_CONF_CLIENT_HOSTS);
+
             Preconditions.checkNotNull(esHosts, "The %s must be set for tarnsport client.", ES_CONF_CLIENT_HOSTS);
             client = ESClientFactory.createTransportClient(map, esHosts.split(","));
             toClose = client;
@@ -74,5 +75,23 @@ public class ESClientProvider implements Provider<Client> {
             LOGGER.warn("Not found ShutdownActionRegistry,the ES client will not be closed when the jvm shutdown.");
         }
         return client;
+    }
+
+    private Map<String, Object> buildConfigMap(Map<String, String> conf){
+        Map<String, Object> map = Maps.newHashMap();
+        map.putAll(conf);
+        /**
+         * 兼容性移除
+         */
+        map.remove(ES_CONF_CLIENT_HOSTS);
+        map.remove(ES_CONF_CLIENT_TYPE);
+
+        for (Map.Entry<String, String> ent:
+        ES_UPGRADE_CONVERTER.entrySet()) {
+            Object o = map.get(ent.getKey());
+            map.remove(ent.getKey());
+            map.put(ent.getValue(), o);
+        };
+        return map;
     }
 }

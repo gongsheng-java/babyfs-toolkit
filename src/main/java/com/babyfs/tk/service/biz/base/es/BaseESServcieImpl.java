@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.google.common.base.Preconditions;
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.babyfs.tk.commons.model.ServiceResponse;
 import org.apache.commons.lang.StringUtils;
@@ -12,15 +13,18 @@ import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static com.alibaba.fastjson.serializer.SerializerFeature.DisableCircularReferenceDetect;
-
+import static org.elasticsearch.common.xcontent.XContentFactory.*;
 /**
  *
  */
@@ -61,7 +65,12 @@ public class BaseESServcieImpl {
         Preconditions.checkNotNull(doc);
 
         IndexRequestBuilder builder = client.prepareIndex(this.indexName, this.docName, docId);
-        builder.setSource(doc);
+        try {
+            builder.setSource(buildEsObject(doc));
+        } catch (IOException e) {
+            LOGGER.error("Index " + this.indexName + "." + this.docName + "/" + docId, e);
+            return ServiceResponse.createFailResponse(ServiceResponse.FAIL_KEY, e.getMessage());
+        }
 
         try {
             builder.execute().actionGet(TIMEOUT, TimeUnit.SECONDS);
@@ -85,7 +94,12 @@ public class BaseESServcieImpl {
         Preconditions.checkNotNull(doc);
 
         UpdateRequestBuilder requestBuilder = client.prepareUpdate(this.indexName, this.docName, docId);
-        requestBuilder.setDoc(doc);
+        try{
+            requestBuilder.setDoc(buildEsObject(doc));
+        }catch (IOException e){
+            LOGGER.error("Document update " + this.indexName + "." + this.docName + "/" + docId, e);
+            return ServiceResponse.createFailResponse(ServiceResponse.FAIL_KEY, e.getMessage());
+        }
         requestBuilder.setDocAsUpsert(docAsUpsert);
 
         try {
@@ -159,6 +173,7 @@ public class BaseESServcieImpl {
      */
     protected String createDoc(Object o, SerializeFilter[] filters) {
         return JSONObject.toJSONString(o, SerializeConfig.getGlobalInstance(), filters, DisableCircularReferenceDetect);
+
     }
 
     /**
@@ -176,11 +191,16 @@ public class BaseESServcieImpl {
 
         for(String docId : map.keySet()){
             IndexRequestBuilder builder = client.prepareIndex(this.indexName, this.docName, docId);
-            builder.setSource(map.get(docId));
-
+// es is upgraded
+// builder.setSource(map.get(docId));
+            try {
+                builder.setSource(buildEsObject(map.get(docId)));
+            } catch (IOException e) {
+                LOGGER.error("errr build es object", e);
+                continue;
+            }
             bulkRequestBuilder.add(builder);
         }
-
         try {
             bulkRequestBuilder.execute().actionGet(TIMEOUT, TimeUnit.SECONDS);
             return ServiceResponse.succResponse();
@@ -188,6 +208,18 @@ public class BaseESServcieImpl {
             LOGGER.error("Index " + this.indexName + "." + this.docName, e);
             return ServiceResponse.createFailResponse(ServiceResponse.FAIL_KEY, e.getMessage());
         }
+    }
+
+    private XContentBuilder buildEsObject(String jsonString) throws IOException {
+        JSONObject jsonObject = JSONObject.parseObject(jsonString);
+        Set<Map.Entry<String, Object>> entries = jsonObject.entrySet();
+
+        XContentBuilder xContentBuilder = jsonBuilder().startObject();
+        for (Map.Entry<String, Object> ent :
+                entries) {
+            xContentBuilder.field(ent.getKey(), ent.getValue());
+        }
+        return xContentBuilder.endObject();
     }
 
 }
