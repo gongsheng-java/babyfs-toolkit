@@ -11,10 +11,7 @@ import com.google.common.collect.Lists;
 import io.prometheus.client.Summary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.ShardedJedis;
-import redis.clients.jedis.ShardedJedisPipeline;
-import redis.clients.jedis.ShardedJedisPool;
+import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.Serializable;
@@ -23,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.Future;
 
 /**
- * Redis服务的封装
+ * Redis服务的封装 哨兵模式，只支持单个Redis
  * <p/>
  */
 public class RedisSentinelImpl implements IRedis {
@@ -46,7 +43,7 @@ public class RedisSentinelImpl implements IRedis {
     /**
      * 基于shard的jedis客户端池
      */
-    private final ShardedJedisPool pool;
+    private final JedisSentinelPool pool;
 
     /**
      * 是否启用Probe
@@ -58,7 +55,7 @@ public class RedisSentinelImpl implements IRedis {
      *
      * @param pool
      */
-    public RedisSentinelImpl(ShardedJedisPool pool) {
+    public RedisSentinelImpl(JedisSentinelPool pool) {
         this(pool, DEFAULT_CODEC, false);
     }
 
@@ -66,7 +63,7 @@ public class RedisSentinelImpl implements IRedis {
      * @param pool
      * @param codec
      */
-    public RedisSentinelImpl(ShardedJedisPool pool, ICodec codec, boolean enableProbe) {
+    public RedisSentinelImpl(JedisSentinelPool pool, ICodec codec, boolean enableProbe) {
         Preconditions.checkArgument(pool != null);
         Preconditions.checkArgument(codec != null);
         this.pool = pool;
@@ -83,16 +80,16 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public Long scard(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         boolean success = true;
         final long st = System.nanoTime();
         try {
-            return shardedJedis.scard(key);
+            return jedis.scard(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("scard", st, success);
         }
     }
@@ -107,19 +104,19 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public <T extends Serializable> Long saddObject(String key, T value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
             final byte[] keyBytes = getStringBytes(key);
             final byte[] valueBytes = codec.encode(value);
-            return shardedJedis.sadd(keyBytes, valueBytes);
+            return jedis.sadd(keyBytes, valueBytes);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("saddObject", st, success);
         }
     }
@@ -133,17 +130,17 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public boolean sismember(final String key, final String member) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.sismember(key, member);
+            return jedis.sismember(key, member);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("sismember", st, success);
         }
     }
@@ -158,19 +155,19 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public <T extends Serializable> Boolean sismemberObject(String key, T value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
             final byte[] keyBytes = getStringBytes(key);
             final byte[] valueBytes = codec.encode(value);
-            return shardedJedis.sismember(keyBytes, valueBytes);
+            return jedis.sismember(keyBytes, valueBytes);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("sismemberObject", st, success);
         }
     }
@@ -183,17 +180,17 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public Set<String> smembers(final String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.smembers(key);
+            return jedis.smembers(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("smembers", st, success);
         }
     }
@@ -207,13 +204,13 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public <T extends Serializable> Set<T> smembersObject(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
             final byte[] keyBytes = getStringBytes(key);
-            Set<byte[]> set = shardedJedis.smembers(keyBytes);
+            Set<byte[]> set = jedis.smembers(keyBytes);
             Set<T> result = new HashSet<T>();
             for (byte[] b : set) {
                 T t = (T) codec.decode(b);
@@ -222,9 +219,9 @@ public class RedisSentinelImpl implements IRedis {
             return result;
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("smembersObject", st, success);
         }
 
@@ -232,431 +229,431 @@ public class RedisSentinelImpl implements IRedis {
 
     @Override
     public Long hincr(final String key, final String field, final long value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hincrBy(key, field, value);
+            return jedis.hincrBy(key, field, value);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hincr", st, success);
         }
     }
 
     @Override
     public void hincr(final String key, final String field, final long value, final int expireSeconds) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
             if (expireSeconds > 0) {
-                ShardedJedisPipeline pipelined = shardedJedis.pipelined();
+                Pipeline pipelined = jedis.pipelined();
                 pipelined.hincrBy(key, field, (int) value);
                 pipelined.expire(key, expireSeconds);
                 pipelined.sync();
             } else {
                 //不设置过期时间
-                shardedJedis.hincrBy(key, field, value);
+                jedis.hincrBy(key, field, value);
             }
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hincrexpire", st, success);
         }
     }
 
     @Override
     public String hget(String key, String field) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hget(key, field);
+            return jedis.hget(key, field);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hget", st, success);
         }
     }
 
     @Override
     public byte[] hget(byte[] key, byte[] field) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hget(key, field);
+            return jedis.hget(key, field);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hgetByte", st, success);
         }
     }
 
     @Override
     public boolean hexists(String key, String field) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hexists(key, field);
+            return jedis.hexists(key, field);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hexists", st, success);
         }
     }
 
     @Override
     public Map<String, String> hgetAll(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hgetAll(key);
+            return jedis.hgetAll(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hgetAll", st, success);
         }
     }
 
     @Override
     public List<String> hmget(String key, String... fields) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hmget(key, fields);
+            return jedis.hmget(key, fields);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hmget", st, success);
         }
     }
 
     @Override
     public Set<String> hkeys(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hkeys(key);
+            return jedis.hkeys(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hkeys", st, success);
         }
     }
 
     @Override
     public List<String> hvals(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hvals(key);
+            return jedis.hvals(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hvals", st, success);
         }
     }
 
     @Override
     public Long hset(String key, String field, String value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hset(key, field, value);
+            return jedis.hset(key, field, value);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hset", st, success);
         }
     }
 
     @Override
     public Long hset(byte[] key, byte[] field, byte[] value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hset(key, field, value);
+            return jedis.hset(key, field, value);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hsetByte", st, success);
         }
     }
 
     @Override
     public Long hlen(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hlen(key);
+            return jedis.hlen(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hlen", st, success);
         }
     }
 
     @Override
     public Long hdel(String key, String field) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hdel(key, field);
+            return jedis.hdel(key, field);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hdel", st, success);
         }
     }
 
     @Override
     public Long hdel(byte[] key, byte[] field) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.hdel(key, field);
+            return jedis.hdel(key, field);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("hdelByte", st, success);
         }
     }
 
     @Override
     public Long del(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.del(key);
+            return jedis.del(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("del", st, success);
         }
     }
 
     @Override
     public Long rpush(String key, String string) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.rpush(key, string);
+            return jedis.rpush(key, string);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("rpush", st, success);
         }
     }
 
     @Override
     public Long lpush(String key, String string) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.lpush(key, string);
+            return jedis.lpush(key, string);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("lpush", st, success);
         }
     }
 
     @Override
     public Long llen(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.llen(key);
+            return jedis.llen(key);
 
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("llen", st, success);
         }
     }
 
     @Override
     public List<String> lrange(String key, long start, long end) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.lrange(key, start, end);
+            return jedis.lrange(key, start, end);
 
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("lrange", st, success);
         }
     }
 
     @Override
     public String ltrim(String key, long start, long end) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.ltrim(key, start, end);
+            return jedis.ltrim(key, start, end);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("ltrim", st, success);
         }
     }
 
     @Override
     public String lindex(String key, long index) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.lindex(key, index);
+            return jedis.lindex(key, index);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("lindex", st, success);
         }
     }
 
     @Override
     public String lset(String key, long index, String value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.lset(key, index, value);
+            return jedis.lset(key, index, value);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("lset", st, success);
         }
     }
 
     @Override
     public Long lrem(String key, long count, String value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.lrem(key, count, value);
+            return jedis.lrem(key, count, value);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("lrem", st, success);
         }
     }
 
     @Override
     public String lpop(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.lpop(key);
+            return jedis.lpop(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("lpop", st, success);
         }
     }
 
     @Override
     public String rpop(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.rpop(key);
+            return jedis.rpop(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("rpop", st, success);
         }
     }
@@ -664,62 +661,62 @@ public class RedisSentinelImpl implements IRedis {
 
     @Override
     public Long incr(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.incr(key);
+            return jedis.incr(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("incr", st, success);
         }
     }
 
     @Override
     public Boolean exists(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.exists(key);
+            return jedis.exists(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("exists", st, success);
         }
     }
 
     @Override
     public Long incr(final String key, final int expireSec) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
             Long value;
             if (expireSec > 0) {
-                ShardedJedisPipeline pipelined = shardedJedis.pipelined();
+                Pipeline pipelined = jedis.pipelined();
                 pipelined.incr(key);
                 pipelined.expire(key, expireSec);
                 List<Object> results = pipelined.syncAndReturnAll();
                 value = (Long) results.get(0);
             } else {
                 //不设置过期时间
-                value = shardedJedis.incr(key);
+                value = jedis.incr(key);
             }
             return value;
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("incrExpire", st, success);
         }
     }
@@ -727,16 +724,16 @@ public class RedisSentinelImpl implements IRedis {
 
     @Override
     public Long expire(String key, int seconds) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.expire(key, seconds);
+            return jedis.expire(key, seconds);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("expire", st, success);
         }
     }
@@ -750,17 +747,17 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public Long zrevrank(String key, String member) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.zrevrank(key, member);
+            return jedis.zrevrank(key, member);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("zrevrank", st, success);
         }
     }
@@ -773,17 +770,17 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public Long zcard(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.zcard(key);
+            return jedis.zcard(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("zcard", st, success);
         }
     }
@@ -796,17 +793,17 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public byte[] get(byte[] key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.get(key);
+            return jedis.get(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("getByte", st, success);
         }
     }
@@ -820,17 +817,17 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public String set(byte[] key, byte[] value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.set(key, value);
+            return jedis.set(key, value);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("setByte", st, success);
         }
     }
@@ -844,17 +841,17 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public Long expire(byte[] key, int seconds) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.expire(key, seconds);
+            return jedis.expire(key, seconds);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("expireByte", st, success);
         }
     }
@@ -868,17 +865,17 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public Long zrem(String key, String member) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.zrem(key, member);
+            return jedis.zrem(key, member);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("zrem", st, success);
         }
     }
@@ -891,160 +888,160 @@ public class RedisSentinelImpl implements IRedis {
      */
     @Override
     public Long decr(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.decr(key);
+            return jedis.decr(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("decr", st, success);
         }
     }
 
     @Override
     public Long decr(final String key, final int expireSec) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
             Long value;
             if (expireSec > 0) {
-                ShardedJedisPipeline pipelined = shardedJedis.pipelined();
+                Pipeline pipelined = jedis.pipelined();
                 pipelined.decr(key);
                 pipelined.expire(key, expireSec);
                 List<Object> results = pipelined.syncAndReturnAll();
                 value = (Long) results.get(0);
             } else {
                 //不设置过期时间
-                value = shardedJedis.decr(key);
+                value = jedis.decr(key);
             }
             return value;
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("decrExpire", st, success);
         }
     }
 
     @Override
     public Long ttl(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.ttl(key);
+            return jedis.ttl(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("ttl", st, success);
         }
     }
 
     @Override
     public String set(String key, String value, int expireSecond) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
             if (expireSecond > 0) {
-                return shardedJedis.setex(key, expireSecond, value);
+                return jedis.setex(key, expireSecond, value);
             } else {
                 //不设置过期时间
-                return shardedJedis.set(key, value);
+                return jedis.set(key, value);
             }
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("setExpire", st, success);
         }
     }
 
     @Override
     public String get(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.get(key);
+            return jedis.get(key);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("get", st, success);
         }
     }
 
     @Override
     public String get(final String key, final int expireSecond) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
             if (expireSecond > 0) {
                 // 访LRU,如果命中，则续时，需要指定续时时间
-                ShardedJedisPipeline pipelined = shardedJedis.pipelined();
+                Pipeline pipelined = jedis.pipelined();
                 pipelined.get(key);
                 pipelined.expire(key, expireSecond);
                 List<Object> results = pipelined.syncAndReturnAll();
                 return (String) results.get(0);
             } else {
-                return shardedJedis.get(key);
+                return jedis.get(key);
             }
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("getExpire", st, success);
         }
     }
 
     @Override
     public Long srem(String key, String member) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.srem(key, member);
+            return jedis.srem(key, member);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("srem", st, success);
         }
     }
 
     @Override
     public Long sadd(String key, String member) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.sadd(key, member);
+            return jedis.sadd(key, member);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("sadd", st, success);
         }
     }
@@ -1057,7 +1054,7 @@ public class RedisSentinelImpl implements IRedis {
 
     @Override
     public <T> T getObject(String key, final int expireSecond) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
@@ -1066,22 +1063,22 @@ public class RedisSentinelImpl implements IRedis {
             byte[] bytes;
             if (expireSecond > 0) {
                 // 访LRU,如果命中，则续时，需要指定续时时间
-                ShardedJedisPipeline pipelined = shardedJedis.pipelined();
+                Pipeline pipelined = jedis.pipelined();
                 pipelined.get(keyBytes);
                 pipelined.expire(keyBytes, expireSecond);
                 List<Object> results = pipelined.syncAndReturnAll();
                 bytes = (byte[]) results.get(0);
             } else {
-                bytes = shardedJedis.get(keyBytes);
+                bytes = jedis.get(keyBytes);
             }
             if (bytes != null) {
                 return (T) codec.decode(bytes);
             }
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("getObject", st, success);
         }
         return null;
@@ -1090,13 +1087,12 @@ public class RedisSentinelImpl implements IRedis {
 
     @Override
     public <T> List<T> getObjectList(String... keyArray) {
-        if (null == keyArray ||
-                keyArray.length <= 0) {
+        if ( keyArray == null || keyArray.length <= 0) {
             return Collections.emptyList();
         }
 
         // 获取 Redis 分片
-        ShardedJedis shardedJedis = this.pool.getResource();
+        Jedis jedis = this.pool.getResource();
 
         // 性能监控数据初始化
         long st = System.nanoTime();
@@ -1104,7 +1100,7 @@ public class RedisSentinelImpl implements IRedis {
 
         try {
             // 获取 Redis 管道
-            ShardedJedisPipeline pipelined = shardedJedis.pipelined();
+            Pipeline pipelined = jedis.pipelined();
 
             for (String key : keyArray) {
                 if (null == key || key.isEmpty()) {
@@ -1147,7 +1143,7 @@ public class RedisSentinelImpl implements IRedis {
             success = false;
             throw new JedisException(ex);
         } finally {
-            this.close(shardedJedis);
+            this.close(jedis);
             metric("getObjectList", st, success);
         }
     }
@@ -1160,42 +1156,41 @@ public class RedisSentinelImpl implements IRedis {
      * @return
      */
     @Override
-    public List<Object> pipelined(PipelineFunc pipelineFunc) {
-        ShardedJedis shardedJedis = pool.getResource();
+    public List<Object> pipelined(String name,Function<Pipeline, Void> pipelineFunc) {
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
-        String itemName = pipelineFunc.getName();
+        String itemName = name;
         try {
-            ShardedJedisPipeline pipelined = shardedJedis.pipelined();
+            Pipeline pipelined = jedis.pipelined();
             pipelineFunc.apply(pipelined);
             return pipelined.syncAndReturnAll();
         } catch (Exception e) {
             success = false;
             throw new JedisException(e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric(itemName, st, success);
         }
     }
 
     @Override
     public Object eval(final String key, final String script, final String scriptSHA1, final String... args) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(script));
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(scriptSHA1));
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         final long st = System.nanoTime();
         boolean success = true;
         final byte[] keyBytes = getStringBytes(key);
         try {
-            Jedis jedis = shardedJedis.getShard(keyBytes);
             return evalInOneJedis(jedis, key, script, scriptSHA1, args);
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("eval", st, success);
         }
     }
@@ -1208,30 +1203,28 @@ public class RedisSentinelImpl implements IRedis {
      * @return 返回func执行后的结果
      */
     @Override
-    public <T> T template(Function<ShardedJedis, T> func) {
+    public <T> T template(Function<Jedis, T> func) {
         final long st = System.nanoTime();
         boolean success = true;
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         try {
-            return func.apply(shardedJedis);
+            return func.apply(jedis);
         } catch (Exception e) {
             success = false;
             throw new JedisException(func.getClass().getName(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("template", st, success);
         }
     }
 
     @Override
     public void processOnAllJedis(Function<Jedis, Future> function) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         try {
             List<Future> futureList = Lists.newArrayList();
-            Collection<Jedis> allShards = shardedJedis.getAllShards();
-            for (Jedis jedis : allShards) {
-                futureList.add(Preconditions.checkNotNull(function.apply(jedis)));
-            }
+            futureList.add(Preconditions.checkNotNull(function.apply(jedis)));
+
             for (Future future : futureList) {
                 try {
                     future.get();
@@ -1240,12 +1233,12 @@ public class RedisSentinelImpl implements IRedis {
                 }
             }
         } finally {
-            close(shardedJedis);
+            close(jedis);
         }
     }
 
     private <T> void setObject0(final String key, final T value, final int expireSecond) {
-        ShardedJedis shardedJedis = pool.getResource();
+        Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
@@ -1253,16 +1246,16 @@ public class RedisSentinelImpl implements IRedis {
         try {
             final byte[] valueBytes = codec.encode(value);
             if (expireSecond > 0) {
-                shardedJedis.setex(keyBytes, expireSecond, valueBytes);
+                jedis.setex(keyBytes, expireSecond, valueBytes);
             } else {
                 //不设置过期时间
-                shardedJedis.set(keyBytes, valueBytes);
+                jedis.set(keyBytes, valueBytes);
             }
         } catch (Exception e) {
             success = false;
-            throw new JedisException(getShardInfo(shardedJedis, key), e);
+            throw new JedisException(jedis.toString(), e);
         } finally {
-            close(shardedJedis);
+            close(jedis);
             metric("setObject", st, success);
         }
     }
@@ -1288,7 +1281,7 @@ public class RedisSentinelImpl implements IRedis {
      *
      * @param jedis jedis client
      */
-    private void close(ShardedJedis jedis) {
+    private void close(Jedis jedis) {
         if (jedis != null) {
             jedis.close();
         }
@@ -1305,20 +1298,6 @@ public class RedisSentinelImpl implements IRedis {
             //oldMetric
             //MetricsProbe.timerUpdateNSFromStart("redis", itemName, start, success);
         }
-    }
-
-    private String getShardInfo(ShardedJedis shardedJedis, String key) {
-        if (shardedJedis == null || key == null) {
-            return "no shard";
-        }
-        return shardedJedis.getShardInfo(key).toString();
-    }
-
-    private String getShardInfo(ShardedJedis shardedJedis, byte[] key) {
-        if (shardedJedis == null || key == null) {
-            return "no shard";
-        }
-        return shardedJedis.getShardInfo(key).toString();
     }
 }
 

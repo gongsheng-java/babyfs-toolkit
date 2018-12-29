@@ -56,9 +56,9 @@ public class SentinelRedisServiceLoaderImpl extends ServiceLoader<IRedis> {
         List<JedisSentinelPool> groupPool = Lists.newArrayList();
 
         JedisSentinelPool pool = new JedisSentinelPool("dxy",sentinels,config);
-        ShardedJedisPool
+
         groupPool.add(pool);
-        return new (pool);
+        return new RedisSentinelImpl(pool);
 //        Preconditions.checkNotNull(key);
 //        Group group = serviceGroup.getGroups().get(key);
 //        Preconditions.checkNotNull(group, "redis group `" + key + "` not defined");
