@@ -1245,6 +1245,18 @@ public class RedisImpl implements IRedis {
         }
     }
 
+    @Override
+    public int shards() {
+        // 获取shard的数量，如果有异常，默认返回1
+        if (pool != null && pool.getResource() != null) {
+            Collection<Jedis> allShards = pool.getResource().getAllShards();
+            if (allShards != null) {
+                return allShards.size();
+            }
+        }
+        return 1;
+    }
+
     private <T> void setObject0(final String key, final T value, final int expireSecond) {
         ShardedJedis shardedJedis = pool.getResource();
         // 性能监控数据初始化

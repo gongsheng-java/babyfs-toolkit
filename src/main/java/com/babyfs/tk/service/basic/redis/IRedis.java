@@ -519,6 +519,12 @@ public interface IRedis {
     void processOnAllJedis(Function<Jedis, Future> function);
 
     /**
+     * Redis shard的个数
+     * @return
+     */
+    int shards();
+
+    /**
      * 在一个jedis服务上执行lua脚本
      *
      * @param jedis

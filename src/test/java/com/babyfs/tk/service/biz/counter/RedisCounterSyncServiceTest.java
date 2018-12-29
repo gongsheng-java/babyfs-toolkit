@@ -66,7 +66,7 @@ public class RedisCounterSyncServiceTest {
 
         //每个slot这是应该只剩下两个计数器了
         for (int i = 0; i < slots; i++) {
-            String syncSetSlotKey = redisCounterService.getSyncSetSlotKey(i);
+            String syncSetSlotKey = redisCounterService.getSyncSetSlotKey(i,"");
             List<Object> pipelined = syncService.getSyncSetRedis().pipelined(new PipelineFunc("") {
                 @Nullable
                 @Override
@@ -102,7 +102,7 @@ public class RedisCounterSyncServiceTest {
 
         //每个slot这是应该只剩下两个500个计数器
         for (int i = 0; i < slots; i++) {
-            String syncSetSlotKey = redisCounterService.getSyncSetSlotKey(i);
+            String syncSetSlotKey = redisCounterService.getSyncSetSlotKey(i,"");
             List<Object> pipelined = syncService.getSyncSetRedis().pipelined(new PipelineFunc("") {
                 @Nullable
                 @Override
