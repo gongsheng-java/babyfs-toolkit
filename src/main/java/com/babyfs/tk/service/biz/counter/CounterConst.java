@@ -98,7 +98,7 @@ public final class CounterConst {
         prefix = Preconditions.checkNotNull(StringUtils.trimToNull(prefix));
         id = Preconditions.checkNotNull(StringUtils.trimToNull(id));
         Preconditions.checkArgument(!prefix.contains(":"), "prefix can't contain `:`");
-        Preconditions.checkArgument(shards <= 0, "shards must > 0");
+        // Preconditions.checkArgument(shards <= 0, "shards must > 0");
 
         // 将id取模，作为hashKey，使用该hash保证counterkey和synckey分在同一个redis shard
         if (shards > 0) {
