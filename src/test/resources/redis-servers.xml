@@ -3,5 +3,6 @@
     <servers>
         <server name="redis_1" port="6379" host="127.0.0.1"/>
         <server name="redis_2" port="6379" host="127.0.0.1"/>
+        <server name="redis_master_group1" port="0" host="10.10.10.20:16379,10.10.10.20:16380"/>
     </servers>
 </root>

@@ -1225,6 +1225,10 @@ public class RedisImpl implements IRedis {
     }
 
     @Override
+   public <T> T templateby(Function<Jedis, T> func) {
+        throw new JedisException("not impelment templateby");
+    }
+    @Override
     public void processOnAllJedis(Function<Jedis, Future> function) {
         ShardedJedis shardedJedis = pool.getResource();
         try {

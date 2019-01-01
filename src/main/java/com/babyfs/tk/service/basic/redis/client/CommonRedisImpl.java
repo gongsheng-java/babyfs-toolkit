@@ -23,8 +23,8 @@ import java.util.concurrent.Future;
  * Redis服务的封装 哨兵模式，只支持单个Redis
  * <p/>
  */
-public class RedisSentinelImpl implements IRedis {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisSentinelImpl.class);
+public class CommonRedisImpl implements IRedis {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonRedisImpl.class);
     private static final ICodec DEFAULT_CODEC = new HessianCodec();
 
     static final Summary redisCallLatency = Summary.build()
@@ -43,7 +43,7 @@ public class RedisSentinelImpl implements IRedis {
     /**
      * 基于shard的jedis客户端池
      */
-    private final JedisSentinelPool pool;
+    private final JedisPoolAbstract pool;
 
     /**
      * 是否启用Probe
@@ -55,7 +55,7 @@ public class RedisSentinelImpl implements IRedis {
      *
      * @param pool
      */
-    public RedisSentinelImpl(JedisSentinelPool pool) {
+    public CommonRedisImpl(JedisPoolAbstract pool) {
         this(pool, DEFAULT_CODEC, false);
     }
 
@@ -63,7 +63,7 @@ public class RedisSentinelImpl implements IRedis {
      * @param pool
      * @param codec
      */
-    public RedisSentinelImpl(JedisSentinelPool pool, ICodec codec, boolean enableProbe) {
+    public CommonRedisImpl(JedisPoolAbstract pool, ICodec codec, boolean enableProbe) {
         Preconditions.checkArgument(pool != null);
         Preconditions.checkArgument(codec != null);
         this.pool = pool;
@@ -1087,7 +1087,7 @@ public class RedisSentinelImpl implements IRedis {
 
     @Override
     public <T> List<T> getObjectList(String... keyArray) {
-        if ( keyArray == null || keyArray.length <= 0) {
+        if (keyArray == null || keyArray.length <= 0) {
             return Collections.emptyList();
         }
 
@@ -1112,7 +1112,7 @@ public class RedisSentinelImpl implements IRedis {
             }
 
             // 获取 Redis 结果列表
-            List<Object> redisResultList = pipelined.getResults();
+            List<Object> redisResultList = pipelined.syncAndReturnAll();
 
             if (null == redisResultList || redisResultList.isEmpty()) {
                 // 如果 Redis 结果为空, 就直接退出!
@@ -1148,15 +1148,17 @@ public class RedisSentinelImpl implements IRedis {
         }
     }
 
-
+    @Override
+    public List<Object> pipelined(PipelineFunc pipelineFunc) {
+        throw new JedisException("no pipelined 方法");
+    }
     /**
      * 使用管道处理多个命令
      *
      * @param pipelineFunc
      * @return
      */
-    @Override
-    public List<Object> pipelined(String name,Function<Pipeline, Void> pipelineFunc) {
+    public List<Object> pipelined(String name, Function<Pipeline, Void> pipelineFunc) {
         Jedis jedis = pool.getResource();
         // 性能监控数据初始化
         final long st = System.nanoTime();
@@ -1195,6 +1197,10 @@ public class RedisSentinelImpl implements IRedis {
         }
     }
 
+    @Override
+    public <T> T template(Function<ShardedJedis, T> func){
+        throw new JedisException("not implement in sentinel");
+    }
     /**
      * 提供redis操作的模版方法
      *
@@ -1203,7 +1209,7 @@ public class RedisSentinelImpl implements IRedis {
      * @return 返回func执行后的结果
      */
     @Override
-    public <T> T template(Function<Jedis, T> func) {
+    public <T> T templateby(Function<Jedis, T> func) {
         final long st = System.nanoTime();
         boolean success = true;
         Jedis jedis = pool.getResource();
@@ -1235,6 +1241,11 @@ public class RedisSentinelImpl implements IRedis {
         } finally {
             close(jedis);
         }
+    }
+
+    @Override
+    public int shards() {
+        return 1;
     }
 
     private <T> void setObject0(final String key, final T value, final int expireSecond) {

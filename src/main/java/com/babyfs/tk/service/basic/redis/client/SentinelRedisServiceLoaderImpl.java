@@ -1,26 +1,15 @@
 package com.babyfs.tk.service.basic.redis.client;
 
-import com.babyfs.tk.commons.utils.ListUtil;
 import com.babyfs.tk.service.basic.ServiceLoader;
 import com.babyfs.tk.service.basic.redis.IRedis;
-import com.babyfs.tk.service.basic.xml.client.Group;
-import com.babyfs.tk.service.basic.xml.client.ServerElement;
-import com.babyfs.tk.service.basic.xml.client.ServiceGroup;
-import com.babyfs.tk.service.basic.xml.server.Server;
-import com.babyfs.tk.service.basic.xml.server.Servers;
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
-import redis.clients.jedis.JedisShardInfo;
-import redis.clients.jedis.ShardedJedisPool;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -58,7 +47,7 @@ public class SentinelRedisServiceLoaderImpl extends ServiceLoader<IRedis> {
         JedisSentinelPool pool = new JedisSentinelPool("dxy",sentinels,config);
 
         groupPool.add(pool);
-        return new RedisSentinelImpl(pool);
+        return new CommonRedisImpl(pool);
 //        Preconditions.checkNotNull(key);
 //        Group group = serviceGroup.getGroups().get(key);
 //        Preconditions.checkNotNull(group, "redis group `" + key + "` not defined");
