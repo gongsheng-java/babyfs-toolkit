@@ -75,7 +75,7 @@ public class RedisImpl implements IRedis {
         this.pool = pool;
         this.codec = codec;
         this.enableProbe = enableProbe;
-        this.shards = this.pool.getResource().getAllShardInfo().size();
+        this.shards = this.pool.getResource().getAllShards().size();
     }
 
 
