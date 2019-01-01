@@ -102,7 +102,7 @@ public final class CounterConst {
 
         // 将id取模，作为hashKey，使用该hash保证counterkey和synckey分在同一个redis shard
         if (shards > 0) {
-            return String.format(SHARD_HASH_KEY_TEMPLATE, Long.parseLong(id) & (shards - 1)) + prefix + "h:" + type + INTERNAL_PREFIX + id;
+            return String.format(SHARD_HASH_KEY_TEMPLATE, id.hashCode() & (shards - 1)) + prefix + "h:" + type + INTERNAL_PREFIX + id;
         } else {
             return prefix + "h:" + type + INTERNAL_PREFIX + id;
         }
