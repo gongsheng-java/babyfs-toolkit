@@ -511,14 +511,6 @@ public interface IRedis {
      */
     <T> T template(Function<ShardedJedis, T> func);
 
-    /**
-     * 提供redis操作的模版方法
-     *
-     * @param func 操作函数
-     * @param <T>  返回的类型
-     * @return 返回func执行后的结果
-     */
-    <T> T templateby(Function<Jedis, T> func);
 
     /**
      * 在所有的redis实例上执行操作
