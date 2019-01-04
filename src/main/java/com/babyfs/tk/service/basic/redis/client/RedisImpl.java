@@ -54,6 +54,8 @@ public class RedisImpl implements IRedis {
      */
     private final boolean enableProbe;
 
+    private final int shards;
+
     /**
      * 默认使用{@link HessianCodec}作为编码器
      *
@@ -73,6 +75,7 @@ public class RedisImpl implements IRedis {
         this.pool = pool;
         this.codec = codec;
         this.enableProbe = enableProbe;
+        this.shards = this.pool.getResource().getAllShards().size();
     }
 
 
@@ -1248,13 +1251,7 @@ public class RedisImpl implements IRedis {
     @Override
     public int shards() {
         // 获取shard的数量，如果有异常，默认返回1
-        if (pool != null && pool.getResource() != null) {
-            Collection<Jedis> allShards = pool.getResource().getAllShards();
-            if (allShards != null) {
-                return allShards.size();
-            }
-        }
-        return 1;
+        return this.shards;
     }
 
     private <T> void setObject0(final String key, final T value, final int expireSecond) {

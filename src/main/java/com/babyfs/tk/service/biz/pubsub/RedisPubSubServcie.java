@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolAbstract;
 import redis.clients.jedis.JedisPubSub;
 
 import java.util.Set;
@@ -36,7 +37,7 @@ import java.util.concurrent.Executors;
 @ShutdownOrder
 public class RedisPubSubServcie extends LifeServiceSupport {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPubSubServcie.class);
-    protected final INameResourceService<JedisPool> redisService;
+    protected final INameResourceService<JedisPoolAbstract> redisService;
     private final ExecutorService subscribeExecutor = Executors.newCachedThreadPool(new NamedThreadFactory("redis-subscribe"));
 
     private final Object subscribedLock = new Object();
@@ -50,7 +51,7 @@ public class RedisPubSubServcie extends LifeServiceSupport {
     EventBus eventBus;
 
     @Inject
-    public RedisPubSubServcie(@ServiceRedis INameResourceService<JedisPool> redisService, IConfigService configService) {
+    public RedisPubSubServcie(@ServiceRedis INameResourceService<JedisPoolAbstract> redisService, IConfigService configService) {
         this.redisService = Preconditions.checkNotNull(redisService);
         this.deaultRedisGroup = MapUtil.get(configService, Const.CONF_PUBSUB_DEFAULT_REDISGROUP, "default_pubsub");
         this.defaultChannelName = MapUtil.get(configService, Const.CONF_PUBSUB_DEFAULT_CHANNELNAME, "default_channel");

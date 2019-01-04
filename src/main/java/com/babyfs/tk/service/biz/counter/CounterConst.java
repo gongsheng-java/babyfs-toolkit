@@ -98,11 +98,13 @@ public final class CounterConst {
         prefix = Preconditions.checkNotNull(StringUtils.trimToNull(prefix));
         id = Preconditions.checkNotNull(StringUtils.trimToNull(id));
         Preconditions.checkArgument(!prefix.contains(":"), "prefix can't contain `:`");
-        Preconditions.checkArgument(shards <= 0, "shards must > 0");
+        Preconditions.checkArgument(shards > 0, "shards must > 0");
 
         // 将id取模，作为hashKey，使用该hash保证counterkey和synckey分在同一个redis shard
         if (shards > 0) {
-            return String.format(SHARD_HASH_KEY_TEMPLATE, Long.parseLong(id) & (shards - 1)) + prefix + "h:" + type + INTERNAL_PREFIX + id;
+            String key = String.format(SHARD_HASH_KEY_TEMPLATE, id.hashCode() & (shards - 1)) + prefix + "h:" + type + INTERNAL_PREFIX + id;
+            // LOGGER.info("rediscounterkey: prex {},id {}, shareds:{}, result:{}",SHARD_HASH_KEY_TEMPLATE,id.hashCode() & (shards - 1),shards,key);
+            return key;
         } else {
             return prefix + "h:" + type + INTERNAL_PREFIX + id;
         }

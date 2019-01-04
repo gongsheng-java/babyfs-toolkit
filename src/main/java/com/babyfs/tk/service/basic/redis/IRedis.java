@@ -511,6 +511,7 @@ public interface IRedis {
      */
     <T> T template(Function<ShardedJedis, T> func);
 
+
     /**
      * 在所有的redis实例上执行操作
      *
