@@ -183,6 +183,6 @@ public class RedisTemporalCounterService implements ITemporalCounterService {
     }
 
     private String getCounterCacheKey(int type, String id) {
-        return buildCounterKey(this.counterCacheParameter.getRedisKeyPrefix(), type, id, 0);
+        return buildCounterKey(this.counterCacheParameter.getRedisKeyPrefix(), type, id, getRedis().shards());
     }
 }
