@@ -21,7 +21,8 @@ import com.babyfs.tk.service.basic.guice.annotation.ServiceRedis;
 import com.babyfs.tk.service.basic.redis.IRedis;
 import com.babyfs.tk.service.basic.security.guice.CryptoServiceModule;
 import com.babyfs.tk.service.biz.validator.guice.ValidateServiceModule;
-import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolAbstract;
+
 
 /**
  * 常用的Module , 主要是一些基础服务
@@ -74,7 +75,8 @@ public final class Modules {
             // 初始化redis配置
             bindBasicService(ServiceRedis.class, IRedis.class, BasicServiceModuleProviders.ShardedRedisServiceProvider.class);
             // 增加JedisPool配置
-            bindBasicService(ServiceRedis.class, JedisPool.class, BasicServiceModuleProviders.JedisPoolServiceProvider.class);
+            //
+            bindBasicService(ServiceRedis.class, JedisPoolAbstract.class, BasicServiceModuleProviders.JedisPoolServiceProvider.class);
         }
     };
 

@@ -17,6 +17,9 @@ import com.babyfs.tk.service.basic.redis.IRedis;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolAbstract;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -33,13 +36,17 @@ public class RedisGuiceTest {
     @ServiceRedis
     INameResourceService<IRedis> cacheService;
 
+    @Inject
+    @ServiceRedis
+    INameResourceService<JedisPoolAbstract> redisPoolService;
+
     @Before
     public void setUp() throws Exception {
         Module confgModule = new AbstractModule() {
             @Override
             protected void configure() {
                 // 配置模块
-                bind(IConfigService.class).toInstance(new ConfigServiceMapImpl(MapConfig.pasreConf("redis.conf.xml")));
+               //  bind(IConfigService.class).toInstance(new ConfigServiceMapImpl(MapConfig.pasreConf("redis.conf.xml")));
             }
 
         };
@@ -57,8 +64,11 @@ public class RedisGuiceTest {
             protected void configure() {
                 // 初始化redis配置
                 bindBasicService(ServiceRedis.class, IRedis.class, BasicServiceModuleProviders.ShardedRedisServiceProvider.class);
+                bindBasicService(ServiceRedis.class, JedisPoolAbstract.class, BasicServiceModuleProviders.JedisPoolServiceProvider.class);
             }
         };
+
+
 
         ArrayList<Module> modules = Lists.newArrayList(confgModule, redisConfgModule, redisServiceModule);
         Injector injector = Guice.createInjector(modules);
@@ -115,6 +125,24 @@ public class RedisGuiceTest {
 
     }
 
+    @Test
+    public void testSentinel(){
+        try {
+            JedisPoolAbstract pool =  this.redisPoolService.get("subscribe");
+            Jedis jedis = pool.getResource();
+            String timespan = String.valueOf(System.currentTimeMillis()) ;
+            String key = "testkey";
+            jedis.set(key,timespan);
+            jedis.expire(key,200);
+            String result = jedis.get(key);
+            Assert.assertEquals(result,timespan);
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+
     /**
      * 测试对象
      */
@@ -136,5 +164,7 @@ public class RedisGuiceTest {
             this.testStr = testStr;
         }
     }
+
+
 
 }

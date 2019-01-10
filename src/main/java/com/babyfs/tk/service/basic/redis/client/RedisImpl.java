@@ -54,6 +54,8 @@ public class RedisImpl implements IRedis {
      */
     private final boolean enableProbe;
 
+    private final int shards;
+
     /**
      * 默认使用{@link HessianCodec}作为编码器
      *
@@ -73,6 +75,7 @@ public class RedisImpl implements IRedis {
         this.pool = pool;
         this.codec = codec;
         this.enableProbe = enableProbe;
+        this.shards = this.pool.getResource().getAllShards().size();
     }
 
 
@@ -480,7 +483,11 @@ public class RedisImpl implements IRedis {
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.del(key);
+            Long status = shardedJedis.del(key);
+            if (status <= 0 && shardedJedis.exists(key)) {
+                LOGGER.error("del key {} error,key is still exist", key);
+            }
+            return status;
         } catch (Exception e) {
             success = false;
             throw new JedisException(getShardInfo(shardedJedis, key), e);
@@ -1243,6 +1250,12 @@ public class RedisImpl implements IRedis {
         } finally {
             close(shardedJedis);
         }
+    }
+
+    @Override
+    public int shards() {
+        // 获取shard的数量，如果有异常，默认返回1
+        return this.shards;
     }
 
     private <T> void setObject0(final String key, final T value, final int expireSecond) {

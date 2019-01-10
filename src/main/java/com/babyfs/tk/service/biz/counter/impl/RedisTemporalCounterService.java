@@ -16,7 +16,9 @@ import redis.clients.jedis.ShardedJedisPipeline;
 
 import javax.annotation.Nullable;
 import java.util.*;
+
 import com.babyfs.tk.service.biz.counter.CounterConst;
+
 import static com.babyfs.tk.service.biz.counter.CounterConst.*;
 
 
@@ -181,6 +183,6 @@ public class RedisTemporalCounterService implements ITemporalCounterService {
     }
 
     private String getCounterCacheKey(int type, String id) {
-        return buildCounterKey(this.counterCacheParameter.getRedisKeyPrefix(), type, id);
+        return buildCounterKey(this.counterCacheParameter.getRedisKeyPrefix(), type, id, getRedis().shards());
     }
 }

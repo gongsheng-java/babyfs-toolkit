@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.util.Hashing;
+import redis.clients.jedis.util.Hashing;
 
 import java.util.List;
 import java.util.Map;
@@ -49,6 +49,7 @@ import static com.babyfs.tk.service.biz.counter.CounterConst.*;
 public class RedisCounterService implements ICounterService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisCounterService.class);
 
+
     private final INameResourceService<IRedis> cacheServcie;
     /**
      * 计数器持久化服务
@@ -68,6 +69,7 @@ public class RedisCounterService implements ICounterService {
      * counter的名称
      */
     private final String name;
+
 
     /**
      * @param name                  not null
@@ -239,7 +241,8 @@ public class RedisCounterService implements ICounterService {
     public String getSyncSetSlotKeyForCounter(String counterKey) {
         final long counterKeyHash = Math.abs(Hashing.MURMUR_HASH.hash(counterKey));
         final long counterKeySlot = counterKeyHash % slots;
-        return getSyncSetSlotKey(counterKeySlot);
+        final String shardHash = getShardHashKey(counterKey);
+        return getSyncSetSlotKey(counterKeySlot, shardHash);
     }
 
     /**
@@ -248,8 +251,8 @@ public class RedisCounterService implements ICounterService {
      * @param slotIndex
      * @return
      */
-    public String getSyncSetSlotKey(long slotIndex) {
-        return counterCacheParameter.getRedisKeyPrefix() + "z.sync:" + slotIndex;
+    public String getSyncSetSlotKey(long slotIndex, String shardHash) {
+        return shardHash + counterCacheParameter.getRedisKeyPrefix() + "z.sync:" + slotIndex;
     }
 
     public String getName() {
@@ -283,7 +286,7 @@ public class RedisCounterService implements ICounterService {
     }
 
     private String getCounterCacheKey(int type, String id) {
-        return buildCounterKey(this.counterCacheParameter.getRedisKeyPrefix(), type, id);
+        return buildCounterKey(this.counterCacheParameter.getRedisKeyPrefix(), type, id, getRedis().shards());
     }
 
     private List<Pair<String, Long>> buildInitFields(Map<String, Long> origin) {

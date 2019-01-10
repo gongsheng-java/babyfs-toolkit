@@ -107,6 +107,8 @@ public class RedisCounterSyncService {
      */
     public void scanAll() {
         IRedis redis = this.getSyncSetRedis();
+        int shards = redis.shards();
+
         redis.processOnAllJedis(new Function<Jedis, Future>() {
             @Nullable
             @Override
@@ -116,7 +118,9 @@ public class RedisCounterSyncService {
                     final Client client = input.getClient();
                     LOGGER.info("begin scan redis {}:{},db:{}", client.getHost(), client.getPort(), client.getDB());
                     for (int i = 0; i < redisCounterService.getSlots(); i++) {
-                        scan(redis, input, i);
+                        for (int j = 0; j < shards; j++) {
+                            scan(redis, input, i, String.format(SHARD_HASH_KEY_TEMPLATE, j));
+                        }
                     }
                     LOGGER.info("finish scan redis {}:{},db:{}", client.getHost(), client.getPort(), client.getDB());
                     return null;
@@ -134,13 +138,17 @@ public class RedisCounterSyncService {
      */
     public void scanAll(ExecutorService executorService) {
         IRedis redis = this.getSyncSetRedis();
+        int shards = redis.shards();
+
         redis.processOnAllJedis(new Function<Jedis, Future>() {
             @Nullable
             @Override
             public Future apply(@Nullable Jedis input) {
                 Callable<Void> callable = () -> {
                     for (int i = 0; i < redisCounterService.getSlots(); i++) {
-                        scan(redis, input, i);
+                        for (int j = 0; j < shards; j++) {
+                            scan(redis, input, i, String.format(SHARD_HASH_KEY_TEMPLATE, j));
+                        }
                     }
                     return null;
                 };
@@ -156,7 +164,7 @@ public class RedisCounterSyncService {
      * @param jedis
      * @param slotIndex slotIndex &gt;=0 and < {@link RedisCounterService#getSlots()}
      */
-    private void scan(IRedis wrapper, Jedis jedis, int slotIndex) {
+    private void scan(IRedis wrapper, Jedis jedis, int slotIndex, String hashKey) {
         Preconditions.checkArgument(slotIndex >= 0 && slotIndex < redisCounterService.getSlots(), "Invalid slotIndex:%d", slotIndex);
 
         if (stop) {
@@ -164,7 +172,7 @@ public class RedisCounterSyncService {
             return;
         }
 
-        final String syncSetSlotKey = redisCounterService.getSyncSetSlotKey(slotIndex);
+        final String syncSetSlotKey = redisCounterService.getSyncSetSlotKey(slotIndex, hashKey);
         final long originLength = jedis.zcard(syncSetSlotKey);
         final long overItems = originLength - this.slotMaxItems;
 

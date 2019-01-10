@@ -511,12 +511,19 @@ public interface IRedis {
      */
     <T> T template(Function<ShardedJedis, T> func);
 
+
     /**
      * 在所有的redis实例上执行操作
      *
      * @param function not null
      */
     void processOnAllJedis(Function<Jedis, Future> function);
+
+    /**
+     * Redis shard的个数
+     * @return
+     */
+    int shards();
 
     /**
      * 在一个jedis服务上执行lua脚本
