@@ -75,7 +75,13 @@ public class RedisImpl implements IRedis {
         this.pool = pool;
         this.codec = codec;
         this.enableProbe = enableProbe;
-        this.shards = this.pool.getResource().getAllShards().size();
+        ShardedJedis resource = this.pool.getResource();
+        this.shards = resource.getAllShards().size();
+        try{
+            resource.close();
+        }catch (Exception e){
+
+        }
     }
 
 
@@ -582,6 +588,11 @@ public class RedisImpl implements IRedis {
             close(shardedJedis);
             metric("ltrim", st, success);
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.pool.close();
     }
 
     @Override
