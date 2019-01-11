@@ -483,7 +483,11 @@ public class RedisImpl implements IRedis {
         final long st = System.nanoTime();
         boolean success = true;
         try {
-            return shardedJedis.del(key);
+            Long status = shardedJedis.del(key);
+            if (status <= 0 && shardedJedis.exists(key)) {
+                LOGGER.error("del key {} error,key is still exist", key);
+            }
+            return status;
         } catch (Exception e) {
             success = false;
             throw new JedisException(getShardInfo(shardedJedis, key), e);
