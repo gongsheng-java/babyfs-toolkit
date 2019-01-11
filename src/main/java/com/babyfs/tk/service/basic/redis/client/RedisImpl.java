@@ -75,7 +75,9 @@ public class RedisImpl implements IRedis {
         this.pool = pool;
         this.codec = codec;
         this.enableProbe = enableProbe;
-        this.shards = this.pool.getResource().getAllShards().size();
+        ShardedJedis resource = this.pool.getResource();
+        this.shards = resource.getAllShards().size();
+        close(resource);
     }
 
 
@@ -87,10 +89,11 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public Long scard(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         boolean success = true;
         final long st = System.nanoTime();
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.scard(key);
         } catch (Exception e) {
             success = false;
@@ -111,11 +114,12 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public <T extends Serializable> Long saddObject(String key, T value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             final byte[] keyBytes = getStringBytes(key);
             final byte[] valueBytes = codec.encode(value);
             return shardedJedis.sadd(keyBytes, valueBytes);
@@ -137,11 +141,12 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public boolean sismember(final String key, final String member) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.sismember(key, member);
         } catch (Exception e) {
             success = false;
@@ -162,11 +167,12 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public <T extends Serializable> Boolean sismemberObject(String key, T value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             final byte[] keyBytes = getStringBytes(key);
             final byte[] valueBytes = codec.encode(value);
             return shardedJedis.sismember(keyBytes, valueBytes);
@@ -187,11 +193,12 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public Set<String> smembers(final String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.smembers(key);
         } catch (Exception e) {
             success = false;
@@ -211,11 +218,12 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public <T extends Serializable> Set<T> smembersObject(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             final byte[] keyBytes = getStringBytes(key);
             Set<byte[]> set = shardedJedis.smembers(keyBytes);
             Set<T> result = new HashSet<T>();
@@ -236,11 +244,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long hincr(final String key, final String field, final long value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hincrBy(key, field, value);
         } catch (Exception e) {
             success = false;
@@ -253,11 +262,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public void hincr(final String key, final String field, final long value, final int expireSeconds) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             if (expireSeconds > 0) {
                 ShardedJedisPipeline pipelined = shardedJedis.pipelined();
                 pipelined.hincrBy(key, field, (int) value);
@@ -278,11 +288,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public String hget(String key, String field) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hget(key, field);
         } catch (Exception e) {
             success = false;
@@ -295,11 +306,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public byte[] hget(byte[] key, byte[] field) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hget(key, field);
         } catch (Exception e) {
             success = false;
@@ -312,10 +324,11 @@ public class RedisImpl implements IRedis {
 
     @Override
     public boolean hexists(String key, String field) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hexists(key, field);
         } catch (Exception e) {
             success = false;
@@ -328,10 +341,11 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Map<String, String> hgetAll(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hgetAll(key);
         } catch (Exception e) {
             success = false;
@@ -344,10 +358,11 @@ public class RedisImpl implements IRedis {
 
     @Override
     public List<String> hmget(String key, String... fields) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hmget(key, fields);
         } catch (Exception e) {
             success = false;
@@ -360,11 +375,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Set<String> hkeys(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hkeys(key);
         } catch (Exception e) {
             success = false;
@@ -377,10 +393,11 @@ public class RedisImpl implements IRedis {
 
     @Override
     public List<String> hvals(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hvals(key);
         } catch (Exception e) {
             success = false;
@@ -393,11 +410,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long hset(String key, String field, String value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hset(key, field, value);
         } catch (Exception e) {
             success = false;
@@ -410,11 +428,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long hset(byte[] key, byte[] field, byte[] value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hset(key, field, value);
         } catch (Exception e) {
             success = false;
@@ -427,11 +446,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long hlen(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hlen(key);
         } catch (Exception e) {
             success = false;
@@ -444,11 +464,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long hdel(String key, String field) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hdel(key, field);
         } catch (Exception e) {
             success = false;
@@ -461,11 +482,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long hdel(byte[] key, byte[] field) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.hdel(key, field);
         } catch (Exception e) {
             success = false;
@@ -478,11 +500,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long del(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             Long status = shardedJedis.del(key);
             if (status <= 0 && shardedJedis.exists(key)) {
                 LOGGER.error("del key {} error,key is still exist", key);
@@ -499,11 +522,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long rpush(String key, String string) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.rpush(key, string);
         } catch (Exception e) {
             success = false;
@@ -516,11 +540,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long lpush(String key, String string) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.lpush(key, string);
         } catch (Exception e) {
             success = false;
@@ -533,11 +558,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long llen(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.llen(key);
 
         } catch (Exception e) {
@@ -551,11 +577,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public List<String> lrange(String key, long start, long end) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.lrange(key, start, end);
 
         } catch (Exception e) {
@@ -569,11 +596,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public String ltrim(String key, long start, long end) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.ltrim(key, start, end);
         } catch (Exception e) {
             success = false;
@@ -585,12 +613,18 @@ public class RedisImpl implements IRedis {
     }
 
     @Override
+    public void close() throws Exception {
+        this.pool.close();
+    }
+
+    @Override
     public String lindex(String key, long index) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.lindex(key, index);
         } catch (Exception e) {
             success = false;
@@ -603,11 +637,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public String lset(String key, long index, String value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.lset(key, index, value);
         } catch (Exception e) {
             success = false;
@@ -620,11 +655,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long lrem(String key, long count, String value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.lrem(key, count, value);
         } catch (Exception e) {
             success = false;
@@ -637,11 +673,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public String lpop(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.lpop(key);
         } catch (Exception e) {
             success = false;
@@ -654,11 +691,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public String rpop(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.rpop(key);
         } catch (Exception e) {
             success = false;
@@ -672,11 +710,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long incr(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.incr(key);
         } catch (Exception e) {
             success = false;
@@ -689,11 +728,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Boolean exists(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.exists(key);
         } catch (Exception e) {
             success = false;
@@ -706,11 +746,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long incr(final String key, final int expireSec) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             Long value;
             if (expireSec > 0) {
                 ShardedJedisPipeline pipelined = shardedJedis.pipelined();
@@ -735,10 +776,11 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long expire(String key, int seconds) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.expire(key, seconds);
         } catch (Exception e) {
             success = false;
@@ -758,11 +800,12 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public Long zrevrank(String key, String member) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.zrevrank(key, member);
         } catch (Exception e) {
             success = false;
@@ -781,11 +824,12 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public Long zcard(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.zcard(key);
         } catch (Exception e) {
             success = false;
@@ -804,11 +848,12 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public byte[] get(byte[] key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.get(key);
         } catch (Exception e) {
             success = false;
@@ -828,11 +873,12 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public String set(byte[] key, byte[] value) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.set(key, value);
         } catch (Exception e) {
             success = false;
@@ -852,11 +898,12 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public Long expire(byte[] key, int seconds) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.expire(key, seconds);
         } catch (Exception e) {
             success = false;
@@ -876,11 +923,12 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public Long zrem(String key, String member) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.zrem(key, member);
         } catch (Exception e) {
             success = false;
@@ -899,11 +947,12 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public Long decr(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.decr(key);
         } catch (Exception e) {
             success = false;
@@ -916,11 +965,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long decr(final String key, final int expireSec) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             Long value;
             if (expireSec > 0) {
                 ShardedJedisPipeline pipelined = shardedJedis.pipelined();
@@ -944,10 +994,11 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long ttl(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.ttl(key);
         } catch (Exception e) {
             success = false;
@@ -960,11 +1011,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public String set(String key, String value, int expireSecond) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             if (expireSecond > 0) {
                 return shardedJedis.setex(key, expireSecond, value);
             } else {
@@ -982,11 +1034,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public String get(String key) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.get(key);
         } catch (Exception e) {
             success = false;
@@ -999,11 +1052,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public String get(final String key, final int expireSecond) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             if (expireSecond > 0) {
                 // 访LRU,如果命中，则续时，需要指定续时时间
                 ShardedJedisPipeline pipelined = shardedJedis.pipelined();
@@ -1025,11 +1079,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long srem(String key, String member) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.srem(key, member);
         } catch (Exception e) {
             success = false;
@@ -1042,11 +1097,12 @@ public class RedisImpl implements IRedis {
 
     @Override
     public Long sadd(String key, String member) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         try {
+            shardedJedis = pool.getResource();
             return shardedJedis.sadd(key, member);
         } catch (Exception e) {
             success = false;
@@ -1065,12 +1121,13 @@ public class RedisImpl implements IRedis {
 
     @Override
     public <T> T getObject(String key, final int expireSecond) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         final byte[] keyBytes = getStringBytes(key);
         try {
+            shardedJedis = pool.getResource();
             byte[] bytes;
             if (expireSecond > 0) {
                 // 访LRU,如果命中，则续时，需要指定续时时间
@@ -1104,13 +1161,14 @@ public class RedisImpl implements IRedis {
         }
 
         // 获取 Redis 分片
-        ShardedJedis shardedJedis = this.pool.getResource();
+        ShardedJedis shardedJedis = null;
 
         // 性能监控数据初始化
         long st = System.nanoTime();
         boolean success = true;
 
         try {
+            shardedJedis = pool.getResource();
             // 获取 Redis 管道
             ShardedJedisPipeline pipelined = shardedJedis.pipelined();
 
@@ -1169,12 +1227,13 @@ public class RedisImpl implements IRedis {
      */
     @Override
     public List<Object> pipelined(PipelineFunc pipelineFunc) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         String itemName = pipelineFunc.getName();
         try {
+            shardedJedis = pool.getResource();
             ShardedJedisPipeline pipelined = shardedJedis.pipelined();
             pipelineFunc.apply(pipelined);
             return pipelined.syncAndReturnAll();
@@ -1192,11 +1251,12 @@ public class RedisImpl implements IRedis {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(script));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(scriptSHA1));
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         final long st = System.nanoTime();
         boolean success = true;
         final byte[] keyBytes = getStringBytes(key);
         try {
+            shardedJedis = pool.getResource();
             Jedis jedis = shardedJedis.getShard(keyBytes);
             return evalInOneJedis(jedis, key, script, scriptSHA1, args);
         } catch (Exception e) {
@@ -1219,8 +1279,9 @@ public class RedisImpl implements IRedis {
     public <T> T template(Function<ShardedJedis, T> func) {
         final long st = System.nanoTime();
         boolean success = true;
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         try {
+            shardedJedis = pool.getResource();
             return func.apply(shardedJedis);
         } catch (Exception e) {
             success = false;
@@ -1233,8 +1294,9 @@ public class RedisImpl implements IRedis {
 
     @Override
     public void processOnAllJedis(Function<Jedis, Future> function) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         try {
+            shardedJedis = pool.getResource();
             List<Future> futureList = Lists.newArrayList();
             Collection<Jedis> allShards = shardedJedis.getAllShards();
             for (Jedis jedis : allShards) {
@@ -1259,12 +1321,13 @@ public class RedisImpl implements IRedis {
     }
 
     private <T> void setObject0(final String key, final T value, final int expireSecond) {
-        ShardedJedis shardedJedis = pool.getResource();
+        ShardedJedis shardedJedis = null;
         // 性能监控数据初始化
         final long st = System.nanoTime();
         boolean success = true;
         final byte[] keyBytes = getStringBytes(key);
         try {
+            shardedJedis = pool.getResource();
             final byte[] valueBytes = codec.encode(value);
             if (expireSecond > 0) {
                 shardedJedis.setex(keyBytes, expireSecond, valueBytes);
