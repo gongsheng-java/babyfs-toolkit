@@ -4,7 +4,7 @@
     <groupId>com.babyfs</groupId>
     <artifactId>toolkit</artifactId>
     <packaging>jar</packaging>
-    <version>1.8.1-SNAPSHOT</version>
+    <version>1.8.2-SNAPSHOT</version>
 
     <parent>
         <groupId>com.babyfs</groupId>
