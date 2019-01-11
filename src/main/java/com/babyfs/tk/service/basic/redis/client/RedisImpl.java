@@ -581,6 +581,11 @@ public class RedisImpl implements IRedis {
     }
 
     @Override
+    public void close() throws Exception {
+        this.pool.close();
+    }
+
+    @Override
     public String lindex(String key, long index) {
         ShardedJedis shardedJedis = pool.getResource();
         // 性能监控数据初始化
