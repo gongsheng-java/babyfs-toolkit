@@ -21,7 +21,7 @@ import java.util.concurrent.Future;
  * <p/>
  */
 
-public interface IRedis {
+public interface IRedis extends AutoCloseable {
     Logger LOGGER = LoggerFactory.getLogger(IRedis.class);
 
     /**

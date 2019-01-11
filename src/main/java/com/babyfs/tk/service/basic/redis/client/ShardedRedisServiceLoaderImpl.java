@@ -11,6 +11,9 @@ import com.babyfs.tk.service.basic.xml.client.ServerElement;
 import com.babyfs.tk.service.basic.xml.client.ServiceGroup;
 import com.babyfs.tk.service.basic.xml.server.Server;
 import com.babyfs.tk.service.basic.xml.server.Servers;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedisPool;
@@ -18,6 +21,9 @@ import redis.clients.jedis.ShardedJedisPool;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Shard Redis的服务加载器
@@ -25,6 +31,11 @@ import java.util.Map;
 public class ShardedRedisServiceLoaderImpl extends ServiceLoader<IRedis> {
     private final Servers servers;
     private final ServiceGroup serviceGroup;
+
+    private final Logger LOGGER = LoggerFactory.getLogger(ShardedRedisServiceLoaderImpl.class);
+    private final static ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 5, -1,
+            TimeUnit.DAYS, new LinkedBlockingDeque<>(1), new ThreadFactoryBuilder().
+            setDaemon(true).setNameFormat("redis-monitor-%d").build());
 
     /**
      * 配置
@@ -74,7 +85,17 @@ public class ShardedRedisServiceLoaderImpl extends ServiceLoader<IRedis> {
         config.setMaxWaitMillis(redisConfig.getPoolMaxWait());
         config.setMaxIdle(redisConfig.getPoolMaxIdel());
         config.setMinIdle(redisConfig.getPoolMinIdel());
-        ShardedJedisPool pool = new ShardedJedisPool(config, shards);
+        final ShardedJedisPool pool = new ShardedJedisPool(config, shards);
+        threadPoolExecutor.execute(() -> {
+            for(;;){
+                LOGGER.info("array key:{} - pool getNumActive:{}, getNumIdle:{}, getNumWaiters:{} ", key, pool.getNumActive(), pool.getNumIdle(), pool.getNumWaiters());
+                try {
+                    TimeUnit.SECONDS.sleep(5);
+                } catch (InterruptedException e) {
+                }
+
+            }
+        });
         return new RedisImpl(pool);
     }
 }
