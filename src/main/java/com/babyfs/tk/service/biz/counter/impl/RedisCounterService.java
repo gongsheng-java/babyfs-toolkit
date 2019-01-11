@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.util.Hashing;
+import redis.clients.util.Hashing;
 
 import java.util.List;
 import java.util.Map;

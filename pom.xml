@@ -4,12 +4,12 @@
     <groupId>com.babyfs</groupId>
     <artifactId>toolkit</artifactId>
     <packaging>jar</packaging>
-    <version>1.8.2-SNAPSHOT</version>
+    <version>1.8.3-SNAPSHOT</version>
 
     <parent>
         <groupId>com.babyfs</groupId>
         <artifactId>toolkit-maven</artifactId>
-        <version>1.6.0</version>
+        <version>1.6.2</version>
     </parent>
 
     <scm>
