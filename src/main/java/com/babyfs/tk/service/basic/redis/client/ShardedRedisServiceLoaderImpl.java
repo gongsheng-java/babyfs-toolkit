@@ -33,7 +33,7 @@ public class ShardedRedisServiceLoaderImpl extends ServiceLoader<IRedis> {
     private final ServiceGroup serviceGroup;
 
     private final Logger LOGGER = LoggerFactory.getLogger(ShardedRedisServiceLoaderImpl.class);
-    private ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 5, -1,
+    private final static ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 5, -1,
             TimeUnit.DAYS, new LinkedBlockingDeque<>(1), new ThreadFactoryBuilder().
             setDaemon(true).setNameFormat("redis-monitor-%d").build());
 
