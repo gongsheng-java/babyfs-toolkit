@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * Redis的服务加载器
  */
-public class JRedisPoolServiceLoaderImpl extends ServiceLoader<JedisPoolAbstract> {
+public class JRedisPoolServiceLoaderImpl extends ServiceLoader<JedisPool> {
     private final String HOST_SEPERATE = ",";
     private final Servers servers;
     private final ServiceGroup serviceGroup;
@@ -50,7 +50,7 @@ public class JRedisPoolServiceLoaderImpl extends ServiceLoader<JedisPoolAbstract
      * @throws Exception
      */
     @Override
-    public JedisPoolAbstract load(final String key) throws Exception {
+    public JedisPool load(final String key) throws Exception {
         Group group = serviceGroup.getGroups().get(key);
         Preconditions.checkNotNull(group, "group is null");
         List<ServerElement> serverList = group.getServerList().getServerElements();
@@ -69,9 +69,9 @@ public class JRedisPoolServiceLoaderImpl extends ServiceLoader<JedisPoolAbstract
         config.setMaxWaitMillis(redisConfig.getPoolMaxWait());
         config.setMaxIdle(redisConfig.getPoolMaxIdel());
         config.setMinIdle(redisConfig.getPoolMinIdel());
-        if (!host.isEmpty() && host.indexOf(HOST_SEPERATE) > 0) {
-            return sentinelPool(server.getName(), host, config, redisConfig.getTimeout(), password);
-        }
+//        if (!host.isEmpty() && host.indexOf(HOST_SEPERATE) > 0) {
+//            return sentinelPool(server.getName(), host, config, redisConfig.getTimeout(), password);
+//        }
         return new JedisPool(config, host, port, redisConfig.getTimeout(), password);
     }
 
@@ -83,20 +83,20 @@ public class JRedisPoolServiceLoaderImpl extends ServiceLoader<JedisPoolAbstract
      * @param config
      * @return
      */
-    private JedisPoolAbstract sentinelPool(String name, String hosts, JedisPoolConfig config, int timeout, String password) {
-        Preconditions.checkNotNull(name, "name is null");
-        Preconditions.checkNotNull(hosts, "hosts is null");
-
-        Set<String> sentinels = Sets.newHashSet();
-        // String[] hostList = hosts.replace('，', ',').replace(';', ',').split(",");
-        String[] hostList = hosts.split(HOST_SEPERATE);
-        for (String host : hostList) {
-            if (!host.isEmpty()) {
-                sentinels.add(host);
-            }
-        }
-
-        return new JedisSentinelPool(name, sentinels, config, timeout, password);
-    }
+//    private JedisPool sentinelPool(String name, String hosts, JedisPoolConfig config, int timeout, String password) {
+//        Preconditions.checkNotNull(name, "name is null");
+//        Preconditions.checkNotNull(hosts, "hosts is null");
+//
+//        Set<String> sentinels = Sets.newHashSet();
+//        // String[] hostList = hosts.replace('，', ',').replace(';', ',').split(",");
+//        String[] hostList = hosts.split(HOST_SEPERATE);
+//        for (String host : hostList) {
+//            if (!host.isEmpty()) {
+//                sentinels.add(host);
+//            }
+//        }
+//
+//        return new JedisSentinelPool(name, sentinels, config, timeout, password);
+//    }
 
 }
