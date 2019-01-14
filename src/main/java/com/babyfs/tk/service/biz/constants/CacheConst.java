@@ -55,6 +55,12 @@ public class CacheConst {
      * 计数相关的缓存组
      */
     public static final String DEFAULT_COUNTER_GROUP = "counter";
+
+    /**
+     * 直连redis缓存组
+     */
+    public static final String DEFAULT_DIRECTR_MANAGER_GROUP = "direct_manager_cache";
+
     /**
      * 每日计数服务的缓存组
      */
