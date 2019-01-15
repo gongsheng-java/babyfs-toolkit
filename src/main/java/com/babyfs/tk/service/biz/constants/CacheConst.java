@@ -59,7 +59,7 @@ public class CacheConst {
     /**
      * 直连redis缓存组
      */
-    public static final String DEFAULT_DIRECTR_MANAGER_GROUP = "direct_manager_cache";
+    public static final String DEFAULT_DIRECTR_GROUP = "direct_cache";
 
     /**
      * 每日计数服务的缓存组
