@@ -14,7 +14,7 @@ import com.babyfs.tk.service.basic.redis.client.RedisConfig;
 import com.babyfs.tk.service.basic.redis.client.ShardedRedisServiceLoaderImpl;
 import com.babyfs.tk.service.basic.xml.client.ServiceGroup;
 import com.babyfs.tk.service.basic.xml.server.Servers;
-import redis.clients.jedis.JedisPoolAbstract;
+import redis.clients.jedis.JedisPool;
 
 import java.util.Map;
 
@@ -71,9 +71,9 @@ public final class BasicServiceModuleProviders {
     }
 
     /**
-     * 提供{@link JedisPoolAbstract}的Provider
+     * 提供{@link JedisPool}的Provider
      */
-    public static final class JedisPoolServiceProvider implements Provider<INameResourceService<JedisPoolAbstract>> {
+    public static final class JedisPoolServiceProvider implements Provider<INameResourceService<JedisPool>> {
         @Inject
         @ServiceRedis
         private Servers servers;
@@ -89,7 +89,7 @@ public final class BasicServiceModuleProviders {
         private IConfigService conf;
 
         @Override
-        public INameResourceService<JedisPoolAbstract> get() {
+        public INameResourceService<JedisPool> get() {
             RedisConfig redisConfig = buildRedisConfig(conf);
             JRedisPoolServiceLoaderImpl redisServiceLoader = new JRedisPoolServiceLoaderImpl(redisConfig, servers, serviceGroup);
             return new CommonNameResourceService<>(redisServiceLoader);
