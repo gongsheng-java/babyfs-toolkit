@@ -33,9 +33,9 @@ public class ShardedRedisServiceLoaderImpl extends ServiceLoader<IRedis> {
     private final ServiceGroup serviceGroup;
 
     private final Logger LOGGER = LoggerFactory.getLogger(ShardedRedisServiceLoaderImpl.class);
-    private final static ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 5, 0,
-            TimeUnit.DAYS, new LinkedBlockingDeque<>(1), new ThreadFactoryBuilder().
-            setDaemon(true).setNameFormat("redis-monitor-%d").build());
+//    private final static ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 5, 0,
+//            TimeUnit.DAYS, new LinkedBlockingDeque<>(1), new ThreadFactoryBuilder().
+//            setDaemon(true).setNameFormat("redis-monitor-%d").build());
 
     /**
      * 配置
@@ -86,16 +86,16 @@ public class ShardedRedisServiceLoaderImpl extends ServiceLoader<IRedis> {
         config.setMaxIdle(redisConfig.getPoolMaxIdel());
         config.setMinIdle(redisConfig.getPoolMinIdel());
         final ShardedJedisPool pool = new ShardedJedisPool(config, shards);
-        threadPoolExecutor.execute(() -> {
-            for(;;){
-                LOGGER.info("array key:{} - pool getNumActive:{}, getNumIdle:{}, getNumWaiters:{} ", key, pool.getNumActive(), pool.getNumIdle(), pool.getNumWaiters());
-                try {
-                    TimeUnit.SECONDS.sleep(5);
-                } catch (InterruptedException e) {
-                }
-
-            }
-        });
+//        threadPoolExecutor.execute(() -> {
+//            for(;;){
+//                LOGGER.info("array key:{} - pool getNumActive:{}, getNumIdle:{}, getNumWaiters:{} ", key, pool.getNumActive(), pool.getNumIdle(), pool.getNumWaiters());
+//                try {
+//                    TimeUnit.SECONDS.sleep(5);
+//                } catch (InterruptedException e) {
+//                }
+//
+//            }
+//        });
         return new RedisImpl(pool);
     }
 
