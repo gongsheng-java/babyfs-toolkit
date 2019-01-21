@@ -449,10 +449,12 @@ public class RedisTest {
     @Test
     @Ignore
     public void testJedisPool() throws Exception {
-        Servers redisServers = JAXBUtil.unmarshal(Servers.class, "redis-servers.xml");
-        ServiceGroup serviceGroup = JAXBUtil.unmarshal(ServiceGroup.class, "redis-client.xml");
-        CommonNameResourceService<JedisPool> redisService = new CommonNameResourceService<JedisPool>(new JRedisPoolServiceLoaderImpl(new RedisConfig(), redisServers, serviceGroup));
-        JedisPool jedisPool = redisService.get("subscribe");
-        Assert.assertNotNull(jedisPool);
+//        Servers redisServers = JAXBUtil.unmarshal(Servers.class, "redis-servers.xml");
+//        ServiceGroup serviceGroup = JAXBUtil.unmarshal(ServiceGroup.class, "redis-client.xml");
+//        //CommonNameResourceService<JedisPool> redisService = new CommonNameResourceService<JedisPool>(new JRedisPoolServiceLoaderImpl(new RedisConfig(), redisServers, serviceGroup));
+//        CommonNameResourceService<JedisPoolAbstract> redisService = new CommonNameResourceService<JedisPoolAbstract>(new JRedisPoolServiceLoaderImpl(new RedisConfig(), redisServers, serviceGroup));
+//
+//        JedisPoolAbstract jedisPool = redisService.get("subscribe");
+//        Assert.assertNotNull(jedisPool);
     }
 }

@@ -15,7 +15,7 @@
         </group>
         <group name="subscribe">
             <servers>
-                <server name="redis_1"/>
+                <server name="redis_master_group1"/>
             </servers>
         </group>
         <group name="daily.counter">

@@ -22,6 +22,10 @@ public final class CounterConst {
 
     public static final String INTERNAL_PREFIX = "_";
 
+    public static final String SHARD_HASH_KEY_TEMPLATE = "{%d}";
+
+    public static final String SHARD_HASH_TAG = "}";
+
     public static final LuaScript COUNTER_UPDATE_LUA = LuaScript.createRedisLuaScript("lua/counter_update.lua");
     public static final LuaScript COUNTER_SET_SYNC_LUA = LuaScript.createRedisLuaScript("lua/counter_update_sync.lua");
     public static final LuaScript COUNTER_EVICT_LUA = LuaScript.createRedisLuaScript("lua/counter_evict.lua");
@@ -74,6 +78,7 @@ public final class CounterConst {
 
     /**
      * 真实的UTC时间
+     *
      * @param counterEpochSecond
      * @return
      */
@@ -89,11 +94,21 @@ public final class CounterConst {
      * @param id
      * @return
      */
-    public static String buildCounterKey(String prefix, int type, String id) {
+    public static String buildCounterKey(String prefix, int type, String id, int shards) {
         prefix = Preconditions.checkNotNull(StringUtils.trimToNull(prefix));
         id = Preconditions.checkNotNull(StringUtils.trimToNull(id));
         Preconditions.checkArgument(!prefix.contains(":"), "prefix can't contain `:`");
-        return prefix + "h:" + type + INTERNAL_PREFIX + id;
+        Preconditions.checkArgument(shards > 0, "shards must > 0");
+
+        // 将id取模，作为hashKey，使用该hash保证counterkey和synckey分在同一个redis shard
+        if (shards > 0) {
+            String typeId = type + INTERNAL_PREFIX + id;
+            String key = String.format(SHARD_HASH_KEY_TEMPLATE, typeId.hashCode() & (shards - 1)) + prefix + "h:" + typeId;
+            // LOGGER.info("rediscounterkey: prex {},id {}, shareds:{}, result:{}",SHARD_HASH_KEY_TEMPLATE,id.hashCode() & (shards - 1),shards,key);
+            return key;
+        } else {
+            return prefix + "h:" + type + INTERNAL_PREFIX + id;
+        }
     }
 
     /**
@@ -108,6 +123,21 @@ public final class CounterConst {
         Preconditions.checkArgument(strings.size() == 2, "invalid counter key:`" + counterKey + "`");
         List<String> typeAndId = Splitter.on(INTERNAL_PREFIX).limit(2).trimResults().omitEmptyStrings().splitToList(strings.get(1));
         return Pair.of(Integer.parseInt(typeAndId.get(0)), typeAndId.get(1));
+    }
+
+    /**
+     * 从counterKey中解析hash片段，如countkey 是{1}co_co_1, 将返回{1}
+     *
+     * @param counterKey
+     * @return
+     */
+    public static String getShardHashKey(String counterKey) {
+        counterKey = Preconditions.checkNotNull(StringUtils.trimToNull(counterKey));
+        int hashTagEnd = counterKey.indexOf(SHARD_HASH_TAG);
+        if (hashTagEnd > 1) {
+            return counterKey.substring(0, hashTagEnd + 1);
+        }
+        return "";
     }
 
     /**
