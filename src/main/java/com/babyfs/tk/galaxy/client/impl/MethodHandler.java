@@ -55,9 +55,35 @@ public final class MethodHandler {
      * @throws Throwable
      */
     public Object invoke(Object[] argv) {
-        RpcRequest request = createRequest(argv);
         byte[] body = codec.encode(createRequest(argv));
         String interfaceName = target.getType().getName();
+        String url = "";
+        int retryCount = 0;
+        while (true) {
+            try {
+                url = getExecuteUrl(interfaceName);
+                byte[] content = client.execute(url, body);
+                return codec.decode(content);
+            }
+            catch (java.net.ConnectException e) {
+                if(retryCount==2){
+                    LOGGER.error("rpc connect remote url :{},tryCount:{}", url,retryCount);
+                    LOGGER.error("rpc invoke remote method fail,tryCount:{}",retryCount, e);
+                    throw new RpcException(String.format("rpc invoke remote method fail after %s try",retryCount),e);
+                }
+                LOGGER.warn("rpc connect error, retry to connect again");
+            }
+            catch (Exception e) {
+                LOGGER.error("rpc connect remote url :{}", url);
+                LOGGER.error("rpc invoke remote method fail", e);
+                throw new RpcException("rpc invoke remote method fail", e);
+            } finally {
+                retryCount++;
+            }
+        }
+    }
+
+    private String getExecuteUrl(String interfaceName) {
         ServiceServer serviceServer = loadBalance.findServer(interfaceName);
         if (serviceServer == null) {
             LOGGER.error("no serviceInstance for {}", interfaceName);
@@ -65,22 +91,7 @@ public final class MethodHandler {
         }
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("http://").append(serviceServer.getHost()).append(":").append(serviceServer.getPort());
-        String url = stringBuilder.append(urlPrefix).toString();
-        final long st = System.nanoTime();
-        boolean success = true;
-        try {
-            byte[] content = client.execute(url, body);
-            return codec.decode(content);
-        } catch (Exception e) {
-            success = false;
-            LOGGER.error("rpc connect remote url :{}", url);
-            LOGGER.error("rpc invoke remote method fail", e);
-            throw new RpcException("rpc invoke remote method fail", e);
-        } finally {
-            //oldMetric
-//            oldMetric(request,serviceServer, st, success);
-//            metric(request, serviceServer, st, success);
-        }
+        return stringBuilder.append(urlPrefix).toString();
     }
 
     /**
