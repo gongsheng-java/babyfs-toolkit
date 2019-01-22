@@ -82,7 +82,7 @@ public final class MethodHandler {
                     LOGGER.error("rpc invoke remote method fail,tryCount:{}",retryCount, e);
                     throw new RpcException(String.format("rpc invoke remote method fail after %s try",retryCount),e);
                 }
-                LOGGER.warn("rpc connect error, retry to connect again, add service server [{}] to blacklist", serviceServer.toString());
+                LOGGER.warn("rpc connect error, retry to connect again, mark service server [{}] with unavailable", serviceServer.toString());
                 exceptionServer = serviceServer;
             }
             catch (Exception e) {
