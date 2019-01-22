@@ -2,6 +2,7 @@ package com.babyfs.tk.galaxy.register;
 
 import javax.xml.ws.Service;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 负载均衡器规则接口
@@ -15,5 +16,5 @@ public interface IRule {
      */
     ServiceServer choose(List<ServiceServer> list);
 
-    ServiceServer chooseAfterFilter(List<ServiceServer> list, ServiceServer exceptionServer);
+    ServiceServer chooseAfterFilter(List<ServiceServer> list, Set<ServiceServer> exceptionServerSet);
 }
