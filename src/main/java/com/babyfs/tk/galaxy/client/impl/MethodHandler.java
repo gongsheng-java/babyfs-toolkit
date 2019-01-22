@@ -59,9 +59,20 @@ public final class MethodHandler {
         String interfaceName = target.getType().getName();
         String url = "";
         int retryCount = 0;
+        ServiceServer exceptionServer = null;
+        ServiceServer serviceServer = null;
         while (true) {
             try {
-                url = getExecuteUrl(interfaceName);
+                if(exceptionServer != null){
+                    serviceServer = loadBalance.findServerAfterFilter(interfaceName, exceptionServer);
+                }else {
+                    serviceServer = loadBalance.findServer(interfaceName);
+                }
+                if(serviceServer == null){
+                    LOGGER.error("rpc connect remote url :{},tryCount:{}, no service server is available", url,retryCount);
+                    throw new RpcException(String.format("rpc invoke remote method fail after %s try, no service server is available",retryCount));
+                }
+                url = getExecuteUrl(interfaceName, serviceServer);
                 byte[] content = client.execute(url, body);
                 return codec.decode(content);
             }
@@ -71,7 +82,8 @@ public final class MethodHandler {
                     LOGGER.error("rpc invoke remote method fail,tryCount:{}",retryCount, e);
                     throw new RpcException(String.format("rpc invoke remote method fail after %s try",retryCount),e);
                 }
-                LOGGER.warn("rpc connect error, retry to connect again");
+                LOGGER.warn("rpc connect error, retry to connect again, add service server [{}] to blacklist", serviceServer.toString());
+                exceptionServer = serviceServer;
             }
             catch (Exception e) {
                 LOGGER.error("rpc connect remote url :{}", url);
@@ -83,8 +95,7 @@ public final class MethodHandler {
         }
     }
 
-    private String getExecuteUrl(String interfaceName) {
-        ServiceServer serviceServer = loadBalance.findServer(interfaceName);
+    private String getExecuteUrl(String interfaceName, ServiceServer serviceServer) {
         if (serviceServer == null) {
             LOGGER.error("no serviceInstance for {}", interfaceName);
             throw new RpcException("no serviceInstance for:" + interfaceName);

@@ -12,4 +12,6 @@ public interface ILoadBalance {
      * @return
      */
     ServiceServer findServer(String servcieName);
+
+    ServiceServer findServerAfterFilter(String serviceName, ServiceServer serviceServer);
 }
