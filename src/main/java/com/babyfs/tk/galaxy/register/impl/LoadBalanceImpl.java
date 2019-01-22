@@ -26,7 +26,13 @@ public class LoadBalanceImpl implements ILoadBalance {
      * @param servcieName
      * @return
      */
+    @Override
     public ServiceServer findServer(String servcieName) {
         return rule.choose(servcieNames.findServers(servcieName));
+    }
+
+    @Override
+    public ServiceServer findServerAfterFilter(String serviceName, ServiceServer serviceServer) {
+        return rule.chooseAfterFilter(servcieNames.findServers(serviceName), serviceServer);
     }
 }

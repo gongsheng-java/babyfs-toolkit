@@ -1,5 +1,6 @@
 package com.babyfs.tk.galaxy.register;
 
+import javax.xml.ws.Service;
 import java.util.List;
 
 /**
@@ -13,4 +14,6 @@ public interface IRule {
      * @return 可用服务实例
      */
     ServiceServer choose(List<ServiceServer> list);
+
+    ServiceServer chooseAfterFilter(List<ServiceServer> list, ServiceServer exceptionServer);
 }
