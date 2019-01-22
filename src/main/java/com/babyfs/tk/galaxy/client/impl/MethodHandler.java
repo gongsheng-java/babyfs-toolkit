@@ -71,6 +71,7 @@ public final class MethodHandler {
                     LOGGER.error("rpc invoke remote method fail,tryCount:{}",retryCount, e);
                     throw new RpcException(String.format("rpc invoke remote method fail after %s try",retryCount),e);
                 }
+                LOGGER.warn("rpc connect error, retry to connect again");
             }
             catch (Exception e) {
                 LOGGER.error("rpc connect remote url :{}", url);
