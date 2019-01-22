@@ -14,6 +14,9 @@ import io.prometheus.client.Summary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -59,12 +62,12 @@ public final class MethodHandler {
         String interfaceName = target.getType().getName();
         String url = "";
         int retryCount = 0;
-        ServiceServer exceptionServer = null;
+        Set<ServiceServer> exceptionServerSet = null;
         ServiceServer serviceServer = null;
         while (true) {
             try {
-                if(exceptionServer != null){
-                    serviceServer = loadBalance.findServerAfterFilter(interfaceName, exceptionServer);
+                if(exceptionServerSet != null && exceptionServerSet.size() > 0){
+                    serviceServer = loadBalance.findServerAfterFilter(interfaceName, exceptionServerSet);
                 }else {
                     serviceServer = loadBalance.findServer(interfaceName);
                 }
@@ -83,7 +86,10 @@ public final class MethodHandler {
                     throw new RpcException(String.format("rpc invoke remote method fail after %s try",retryCount),e);
                 }
                 LOGGER.warn("rpc connect error, retry to connect again, mark service server [{}] with unavailable", serviceServer.toString());
-                exceptionServer = serviceServer;
+                if(exceptionServerSet == null){
+                    exceptionServerSet = new HashSet<>();
+                }
+                exceptionServerSet.add(serviceServer);
             }
             catch (Exception e) {
                 LOGGER.error("rpc connect remote url :{}", url);

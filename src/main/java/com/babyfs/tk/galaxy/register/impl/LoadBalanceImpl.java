@@ -8,6 +8,8 @@ import com.babyfs.tk.galaxy.register.ServiceServer;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
+import java.util.Set;
+
 /**
  * 负载均衡器
  */
@@ -32,7 +34,7 @@ public class LoadBalanceImpl implements ILoadBalance {
     }
 
     @Override
-    public ServiceServer findServerAfterFilter(String serviceName, ServiceServer serviceServer) {
-        return rule.chooseAfterFilter(servcieNames.findServers(serviceName), serviceServer);
+    public ServiceServer findServerAfterFilter(String serviceName, Set<ServiceServer> serviceServerSet) {
+        return rule.chooseAfterFilter(servcieNames.findServers(serviceName), serviceServerSet);
     }
 }

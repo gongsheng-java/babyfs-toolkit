@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -44,8 +45,8 @@ public class RoundRobinRule implements IRule {
     }
 
     @Override
-    public ServiceServer chooseAfterFilter(List<ServiceServer> list, ServiceServer exceptionServer) {
-        List<ServiceServer> filtered = list.stream().filter(p -> !p.equals(exceptionServer)).collect(Collectors.toList());
+    public ServiceServer chooseAfterFilter(List<ServiceServer> list, Set<ServiceServer> exceptionServer) {
+        List<ServiceServer> filtered = list.stream().filter(p -> !exceptionServer.contains(p)).collect(Collectors.toList());
         if(filtered.size() == 0) {
             return null;
         }
