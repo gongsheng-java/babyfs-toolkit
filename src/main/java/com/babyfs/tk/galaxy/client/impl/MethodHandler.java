@@ -14,6 +14,9 @@ import io.prometheus.client.Summary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -55,32 +58,57 @@ public final class MethodHandler {
      * @throws Throwable
      */
     public Object invoke(Object[] argv) {
-        RpcRequest request = createRequest(argv);
         byte[] body = codec.encode(createRequest(argv));
         String interfaceName = target.getType().getName();
-        ServiceServer serviceServer = loadBalance.findServer(interfaceName);
+        String url = "";
+        int retryCount = 0;
+        Set<ServiceServer> exceptionServerSet = null;
+        ServiceServer serviceServer = null;
+        while (true) {
+            try {
+                if(exceptionServerSet != null && exceptionServerSet.size() > 0){
+                    serviceServer = loadBalance.findServerAfterFilter(interfaceName, exceptionServerSet);
+                }else {
+                    serviceServer = loadBalance.findServer(interfaceName);
+                }
+                if(serviceServer == null){
+                    LOGGER.error("rpc connect remote url :{},tryCount:{}, no service server is available", url,retryCount);
+                    throw new RpcException(String.format("rpc invoke remote method fail after %s try, no service server is available",retryCount));
+                }
+                url = getExecuteUrl(interfaceName, serviceServer);
+                byte[] content = client.execute(url, body);
+                return codec.decode(content);
+            }
+            catch (java.net.ConnectException e) {
+                if(retryCount==2){
+                    LOGGER.error("rpc connect remote url :{},tryCount:{}", url,retryCount);
+                    LOGGER.error("rpc invoke remote method fail,tryCount:{}",retryCount, e);
+                    throw new RpcException(String.format("rpc invoke remote method fail after %s try",retryCount),e);
+                }
+                LOGGER.warn("rpc connect error, retry to connect again, mark service server [{}] with unavailable", serviceServer.toString());
+                if(exceptionServerSet == null){
+                    exceptionServerSet = new HashSet<>();
+                }
+                exceptionServerSet.add(serviceServer);
+            }
+            catch (Exception e) {
+                LOGGER.error("rpc connect remote url :{}", url);
+                LOGGER.error("rpc invoke remote method fail", e);
+                throw new RpcException("rpc invoke remote method fail", e);
+            } finally {
+                retryCount++;
+            }
+        }
+    }
+
+    private String getExecuteUrl(String interfaceName, ServiceServer serviceServer) {
         if (serviceServer == null) {
             LOGGER.error("no serviceInstance for {}", interfaceName);
             throw new RpcException("no serviceInstance for:" + interfaceName);
         }
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("http://").append(serviceServer.getHost()).append(":").append(serviceServer.getPort());
-        String url = stringBuilder.append(urlPrefix).toString();
-        final long st = System.nanoTime();
-        boolean success = true;
-        try {
-            byte[] content = client.execute(url, body);
-            return codec.decode(content);
-        } catch (Exception e) {
-            success = false;
-            LOGGER.error("rpc connect remote url :{}", url);
-            LOGGER.error("rpc invoke remote method fail", e);
-            throw new RpcException("rpc invoke remote method fail", e);
-        } finally {
-            //oldMetric
-//            oldMetric(request,serviceServer, st, success);
-//            metric(request, serviceServer, st, success);
-        }
+        return stringBuilder.append(urlPrefix).toString();
     }
 
     /**
