@@ -84,6 +84,13 @@ public class ServiceResponse<T> implements Serializable {
         this.msg = msg;
     }
 
+    public ServiceResponse() {
+        this.success = false;
+        this.code = 0;
+        this.data = null;
+        this.msg = null;
+    }
+
     public T getData() {
         return data;
     }
