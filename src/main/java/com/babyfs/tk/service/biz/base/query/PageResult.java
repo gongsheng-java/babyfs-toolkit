@@ -52,6 +52,13 @@ public final class PageResult<T> implements Serializable {
         this.genMaxPageIndex();
     }
 
+    /*
+    * 默认构造用于grpc调用
+    * */
+    public PageResult() {
+
+    }
+
     public int getTotalCount() {
         return totalCount;
     }
