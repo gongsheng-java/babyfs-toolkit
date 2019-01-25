@@ -54,22 +54,22 @@ public class ServiceResponse<T> implements Serializable {
     /**
      * 调用结果成功还是失败
      */
-    private final boolean success;
+    private boolean success;
 
     /**
      * 结果代码
      */
-    private final int code;
+    private int code;
 
     /**
      * 数据
      */
-    private final T data;
+    private T data;
 
     /**
      * 结果的描述
      */
-    private final String msg;
+    private String msg;
 
     /**
      * @param success 是否成功
@@ -252,5 +252,21 @@ public class ServiceResponse<T> implements Serializable {
     @SuppressWarnings("unchecked")
     public static <T> ServiceResponse<T> existedErrorResponse() {
         return FAIL_EXISTED_RESPONSE;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 }
