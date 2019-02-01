@@ -5,12 +5,13 @@ import com.alibaba.fastjson.JSON;
 import com.babyfs.tk.apollo.guice.ApolloModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-
+@Ignore
 public class ApolloTest {
 
     private final static Logger logger = LoggerFactory.getLogger(ApolloTest.class);
