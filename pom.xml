@@ -4,12 +4,12 @@
     <groupId>com.babyfs</groupId>
     <artifactId>toolkit</artifactId>
     <packaging>jar</packaging>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>2.2.0-SNAPSHOT</version>
 
     <parent>
         <groupId>com.babyfs</groupId>
         <artifactId>toolkit-maven</artifactId>
-        <version>2.0.0</version>
+        <version>2.2.0</version>
     </parent>
 
     <scm>
@@ -194,7 +194,7 @@
         <dependency>
             <groupId>com.babyfs.servicetk</groupId>
             <artifactId>api-grpc-core</artifactId>
-            <version>3.0.0</version>
+            <version>3.3.0</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
@@ -204,6 +204,11 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_hotspot</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.babyfs</groupId>
+            <artifactId>toolkit-entity</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 </project>
