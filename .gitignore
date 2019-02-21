@@ -14,4 +14,3 @@ DerivedData/
 .idea
 target
 src/main/resources/git.properties
-apollo.properties
