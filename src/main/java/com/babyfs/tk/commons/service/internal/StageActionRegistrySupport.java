@@ -1,10 +1,13 @@
 package com.babyfs.tk.commons.service.internal;
 
+import com.babyfs.servicetk.grpcapicore.registry.ServiceRegister;
+import com.babyfs.tk.apollo.ApolloUtil;
 import com.babyfs.tk.commons.Constants;
 import com.babyfs.tk.commons.enums.ShutdownOrder;
 import com.babyfs.tk.commons.service.ILifeService;
 import com.babyfs.tk.commons.service.IStageActionRegistry;
 import com.babyfs.tk.commons.service.annotation.LifecycleServiceRegistry;
+import com.ctrip.framework.apollo.Config;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -58,6 +61,8 @@ public class StageActionRegistrySupport implements IStageActionRegistry {
             }
         }
         LOGGER.info("finish run {} actions", this.getClass().getSimpleName());
+
+
     }
 
     protected boolean isDisableStartLifeServcie() {

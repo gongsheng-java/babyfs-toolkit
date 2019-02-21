@@ -6,6 +6,7 @@ import com.babyfs.tk.commons.service.IContext;
 import com.babyfs.tk.commons.service.IStageActionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -28,5 +29,11 @@ public class GuiceDispatcherServlet extends DispatcherServlet {
             LOGGER.info("Execute after " + afterActionRegistry.getClass());
             afterActionRegistry.execute();
         }
+    }
+
+    @Override
+    protected void onRefresh(ApplicationContext context) {
+        logger.info("refresh");
+        super.onRefresh(context);
     }
 }
