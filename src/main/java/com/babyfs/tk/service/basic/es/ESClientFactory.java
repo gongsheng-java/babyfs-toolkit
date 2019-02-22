@@ -50,6 +50,11 @@ public final class ESClientFactory {
      */
     public static final String DISABLE_CHECK_CLIENT = "es.client.disable.check";
 
+    /**
+     * 默认关闭client检查
+     */
+    public static final String ENABLE_CHECK_CLIENT = "es.client.enable.check";
+
     static {
         System.setProperty("es.set.netty.runtime.available.processors", "false");
     }
@@ -142,8 +147,8 @@ public final class ESClientFactory {
      */
     private static Client checkClient(Client client) {
         Preconditions.checkArgument(client != null);
-        if ("true".equalsIgnoreCase(System.getProperty(DISABLE_CHECK_CLIENT))) {
-            LOGGER.info("Skip es client chekc");
+        if (!"true".equalsIgnoreCase(System.getProperty(ENABLE_CHECK_CLIENT))) {
+            LOGGER.info("Skip es client check by default");
             return client;
         }
 

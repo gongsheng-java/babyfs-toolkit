@@ -1,12 +1,16 @@
 package com.babyfs.tk.galaxy.register.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.babyfs.servicetk.grpcapicore.registry.ServiceRegister;
+import com.babyfs.tk.apollo.ApolloUtil;
+import com.babyfs.tk.apollo.ConfigLoader;
 import com.babyfs.tk.commons.enums.ShutdownOrder;
 import com.babyfs.tk.commons.service.LifeServiceSupport;
 import com.babyfs.tk.commons.utils.ListUtil;
 import com.babyfs.tk.commons.zookeeper.BackoffHelper;
 import com.babyfs.tk.galaxy.register.IServcieRegister;
 import com.babyfs.tk.galaxy.register.ServiceServer;
+import com.ctrip.framework.apollo.Apollo;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import org.apache.curator.framework.CuratorFramework;
@@ -25,6 +29,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static com.babyfs.servicetk.grpcapicore.EnvConstant.APOLLO_GRPC_NAMESPACE;
+import static com.babyfs.servicetk.grpcapicore.EnvConstant.KEY_CONSUL_REGISTRY_ADDRESS;
 
 /**
  * 基于zk的服务注册
@@ -174,6 +181,13 @@ public class ZkServiceRegister extends LifeServiceSupport implements IServcieReg
 
     private synchronized boolean doRegister() {
         final String nodePath = getNodePath();
+
+        //临时加在这
+        LOGGER.info("register service to consul");
+        String registry = ConfigLoader.getConfig(APOLLO_GRPC_NAMESPACE, KEY_CONSUL_REGISTRY_ADDRESS);
+        ServiceRegister.init(ApolloUtil.getAppId(), this.serverPort, registry);
+        ServiceRegister.defaultRegister();
+
         LOGGER.info("register servcie to {}", nodePath);
 
         try {
