@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * kafka生产者的实现
@@ -31,6 +32,9 @@ public class KafkaProducerImpl<K, V> implements IKafkaProducer<K, V> {
     private KafkaProducer<K, V> producer;
     private boolean sync;
 
+    private ReentrantLock newProducerLock = new ReentrantLock();
+    private volatile boolean hasInitProducer = false;
+
     @SuppressWarnings("unchecked")
     public KafkaProducerImpl(@Nonnull Map<String, String> conf) {
         config = new Properties();
@@ -38,20 +42,7 @@ public class KafkaProducerImpl<K, V> implements IKafkaProducer<K, V> {
         KafkaConfs.setDefaultConfs(config);
 
         this.name = config.getProperty(CLIENT_ID);
-        String producerType = config.getProperty(PRODUCER_TYPE);
-        config.remove(PRODUCER_TYPE);
-        if (ASYNC.equals(producerType)) {
-            //异步Producer
-            this.producer = new KafkaProducer<>(config);
-            sync = false;
-        } else if (SYNC.equals(producerType)) {
-            //同步Producer
-            this.producer = new KafkaProducer<>(config);
-            sync = true;
-        } else {
-            throw new IllegalArgumentException("Unknown producer tyep:" + producerType);
-        }
-        KafkaProducerTraceUtil.init();
+
     }
 
 
@@ -60,6 +51,36 @@ public class KafkaProducerImpl<K, V> implements IKafkaProducer<K, V> {
         return this.name;
     }
 
+
+    private void lazyNewProducer(){
+        if(hasInitProducer){
+            return;
+        }
+        newProducerLock.lock();
+        try{
+            if(hasInitProducer) {
+                return;
+            }
+            LOGGER.info("try to connect to kafka");
+            String producerType = config.getProperty(PRODUCER_TYPE);
+            config.remove(PRODUCER_TYPE);
+            if (ASYNC.equals(producerType)) {
+                //异步Producer
+                this.producer = new KafkaProducer<>(config);
+                sync = false;
+            } else if (SYNC.equals(producerType)) {
+                //同步Producer
+                this.producer = new KafkaProducer<>(config);
+                sync = true;
+            } else {
+                throw new IllegalArgumentException("Unknown producer tyep:" + producerType);
+            }
+            KafkaProducerTraceUtil.init();
+            hasInitProducer = true;
+        }finally {
+            newProducerLock.unlock();
+        }
+    }
 
     /**
      * 向kafka中send数据
@@ -70,8 +91,8 @@ public class KafkaProducerImpl<K, V> implements IKafkaProducer<K, V> {
      */
     @Override
     public boolean send(final String topic, final K key, final List<V> datas) {
+        lazyNewProducer();
         try {
-
             for (V data : datas) {
                 ProducerRecord<K, V> record = new ProducerRecord<K, V>(topic, key, data);
                 if (this.sync) {
