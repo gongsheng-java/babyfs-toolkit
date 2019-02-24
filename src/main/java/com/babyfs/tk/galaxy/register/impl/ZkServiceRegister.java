@@ -185,7 +185,7 @@ public class ZkServiceRegister extends LifeServiceSupport implements IServcieReg
         //临时加在这
         LOGGER.info("register service to consul");
         String registry = ConfigLoader.getConfig(APOLLO_GRPC_NAMESPACE, KEY_CONSUL_REGISTRY_ADDRESS);
-        ServiceRegister.init(ApolloUtil.getAppId().replaceAll(".", "-"), this.serverPort, registry);
+        ServiceRegister.init(ApolloUtil.getAppId().replaceAll("\\.", "-"), this.serverPort, registry);
         ServiceRegister.defaultRegister();
 
         LOGGER.info("register servcie to {}", nodePath);
