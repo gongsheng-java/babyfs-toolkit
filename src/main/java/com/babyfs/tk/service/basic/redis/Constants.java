@@ -28,7 +28,7 @@ public final class Constants {
     /**
      * 链接池最小空闲数
      */
-    public static final int DEFAULT_MIN_IDEL = 8;
+    public static final int DEFAULT_MIN_IDEL = 0;
     /**
      * 链接池最小空闲数   配置key
      */
