@@ -69,7 +69,7 @@ public final class ZkServiceNames extends LifeServiceSupport implements IService
 
 
     @Override
-    public List<ServiceServer> findServers(String servcieName) {
+    public ServerGroup findServers(String servcieName) {
         return serviceServers.serviceServers.getOrDefault(servcieName, emptyServiceServers).getServers();
     }
 

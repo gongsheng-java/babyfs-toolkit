@@ -27,9 +27,7 @@ final class ServiceServers {
     public void addServer(ServiceServer server) {
         uniqServers.remove(server);
         uniqServers.add(server);
-        if (uniqServers.add(server)) {
-            servers.add(server);
-        }
+        groupServers();
     }
 
     /**
@@ -38,17 +36,17 @@ final class ServiceServers {
      * @param server
      */
     public void removeServer(ServiceServer server) {
-        if (uniqServers.remove(server)) {
-            servers.remove(server);
-        }
+        uniqServers.remove(server);
+        groupServers();
     }
 
     private void groupServers(){
         Map<Long, List<ServiceServer>> map = new HashMap<>();
         Long minVersion = Long.MAX_VALUE;
+        ServiceServer[] serviceServersArray = uniqServers.toArray(new ServiceServer[uniqServers.size()]);
         //分组
         for (ServiceServer serviceServer :
-                uniqServers) {
+                serviceServersArray) {
             long v = Long.MAX_VALUE;
             try{
                 v = Long.parseLong(serviceServer.getVersion());
@@ -63,8 +61,26 @@ final class ServiceServers {
 
             serviceServers.add(serviceServer);
         }
-        List<ServiceServer> grayList = new ArrayList<>(uniqServers.size());
-        grayList.addAll(map.get(minVersion));
+        ArrayList<ServiceServer> grayList = new ArrayList<>(serviceServersArray.length);
+        ArrayList<ServiceServer> list = new ArrayList<>(serviceServersArray.length);
+        if(map.keySet().size() > 1){
+            grayList.addAll(map.get(minVersion));
+
+            for (Long version :
+                    map.keySet()) {
+                if(version.equals(minVersion)){
+                    continue;
+                }
+                list.addAll(map.get(version));
+            }
+        }else{
+            list.addAll(map.get(minVersion));
+        }
+
+        list.trimToSize();
+        grayList.trimToSize();
+
+        serverGroup = new ServerGroup(list, grayList);
 
     }
 
@@ -73,15 +89,15 @@ final class ServiceServers {
      *
      * @return
      */
-    public List<ServiceServer> getServers() {
-        return servers;
+    public ServerGroup getServers() {
+        return serverGroup;
     }
 
     @Override
     public String toString() {
         return "ServiceServers{" +
                 "servcieName='" + servcieName + '\'' +
-                ", servers=" + servers +
+                ", servers=" + serverGroup +
                 ", uniqServers=" + uniqServers +
                 '}';
     }
