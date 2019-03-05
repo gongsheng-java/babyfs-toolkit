@@ -1,5 +1,6 @@
 package com.babyfs.tk.galaxy.register.impl;
 
+import com.babyfs.servicetk.grpcapicore.gray.GrayContext;
 import com.babyfs.tk.galaxy.register.IRule;
 import com.babyfs.tk.galaxy.register.ServiceServer;
 import org.slf4j.Logger;
@@ -25,8 +26,15 @@ public class RoundRobinRule implements IRule {
      * @return
      */
     @Override
-    public ServiceServer choose(List<ServiceServer> list) {
-        if (list == null || list.isEmpty()) {
+    public ServiceServer choose(List<ServiceServer> list, List<ServiceServer> grayList) {
+        List<ServiceServer> chosenList;
+        if(GrayContext.get().isHasTag() && grayList != null && grayList.size() > 0){
+            chosenList = grayList;
+        }else{
+            chosenList = list;
+        }
+
+        if (chosenList == null || chosenList.isEmpty()) {
             log.warn("no ServiceInstance");
             return null;
         }
@@ -34,22 +42,24 @@ public class RoundRobinRule implements IRule {
         ServiceServer server;
         int index;
 
-        int serverCount = list.size();
+        int serverCount = chosenList.size();
         index = (int) (nextIndexAI.incrementAndGet() % serverCount);
         if (index < 0) {
             index = 0;
             nextIndexAI.set(0);
         }
-        server = list.get(index);
+        server = chosenList.get(index);
         return server;
     }
 
     @Override
-    public ServiceServer chooseAfterFilter(List<ServiceServer> list, Set<ServiceServer> exceptionServer) {
+    public ServiceServer chooseAfterFilter(List<ServiceServer> list, List<ServiceServer> grayList, Set<ServiceServer> exceptionServer) {
         List<ServiceServer> filtered = list.stream().filter(p -> !exceptionServer.contains(p)).collect(Collectors.toList());
+        List<ServiceServer> filteredGray = grayList.stream().filter(p -> !exceptionServer.contains(p)).collect(Collectors.toList());
+
         if(filtered.size() == 0) {
             return null;
         }
-        return choose(filtered);
+        return choose(filtered, filteredGray);
     }
 }

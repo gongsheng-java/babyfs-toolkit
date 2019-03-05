@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.babyfs.tk.galaxy.register.ServiceServer.DEFAULT_VERSION;
+
 /**
  * {@link IServiceNames}的本地实现
  */
@@ -40,7 +42,7 @@ public class LocalServiceNamesModule extends ServiceModule {
             List<ServiceServer> serverList = Splitter.on(",").trimResults().omitEmptyStrings().splitToList(servers).stream().map(input -> {
                 List<String> strings = Splitter.on(":").trimResults().omitEmptyStrings().splitToList(input);
                 Preconditions.checkArgument(strings.size() == 2);
-                return new ServiceServer("", strings.get(0), Integer.parseInt(strings.get(1)));
+                return new ServiceServer("", strings.get(0), Integer.parseInt(strings.get(1)), DEFAULT_VERSION);
             }).collect(Collectors.toList());
 
 

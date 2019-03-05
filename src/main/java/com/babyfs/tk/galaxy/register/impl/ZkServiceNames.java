@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static com.babyfs.tk.galaxy.register.ServiceServer.DEFAULT_VERSION;
+
 /**
  * 基于zk的服务发现客户端
  */
@@ -206,9 +208,11 @@ public final class ZkServiceNames extends LifeServiceSupport implements IService
         }
         String nodeFromPath = ZKPaths.getNodeFromPath(data.getPath());
         List<String> strings = Splitter.on(":").omitEmptyStrings().splitToList(nodeFromPath);
+
         if (strings.size() != 2) {
             return null;
         }
-        return new ServiceServer(null, strings.get(0), Integer.parseInt(strings.get(1)));
+        return new ServiceServer(null, strings.get(0), Integer.parseInt(strings.get(1)), DEFAULT_VERSION);
     }
+
 }
