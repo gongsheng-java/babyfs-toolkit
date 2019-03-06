@@ -22,10 +22,6 @@ public class RpcServerSupportModule extends ServiceModule {
     protected void configure() {
         Multibinder<ServicePoint> multibinder = Multibinder.newSetBinder(binder(), ServicePoint.class, Names.named(RpcConstant.NAME_RPC_SERVER_EXPOSE));
         LOGGER.debug("add map binder {} for ServicePoint", multibinder);
-
-        bindService(IServer.class, ServerImpl.class);
-        LifeServiceBindUtil.addLifeService(binder(), Key.get(IServer.class));
-        install(new RpcServiceRegisterModule());
     }
 
 }

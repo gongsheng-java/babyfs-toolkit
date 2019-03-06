@@ -1,11 +1,10 @@
 package com.babyfs.tk.galaxy.register.impl;
 
 import com.babyfs.tk.galaxy.register.ServiceServer;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 
-import javax.xml.ws.Service;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * service对应的服务列表
@@ -13,7 +12,7 @@ import java.util.*;
 final class ServiceServers {
     private final String servcieName;
     private ServerGroup serverGroup;
-    private final Set<ServiceServer> uniqServers = Sets.newConcurrentHashSet();
+    private final Map<ServiceServer, ServiceServer> uniqServers = Maps.newConcurrentMap();
 
     ServiceServers(String servcieName) {
         this.servcieName = servcieName;
@@ -24,10 +23,25 @@ final class ServiceServers {
      *
      * @param server
      */
-    public void addServer(ServiceServer server) {
-        uniqServers.remove(server);
-        uniqServers.add(server);
-        groupServers();
+    public void addServer(final ServiceServer server) {
+        AtomicBoolean hasChange = new AtomicBoolean(false);
+        uniqServers.compute(server, (serverKey, serverValue) -> {
+            if(serverValue == null){
+                hasChange.compareAndSet(false, true);
+                return server;
+            }
+
+            if(!serverValue.getVersion().equalsIgnoreCase(server.getVersion())){
+                hasChange.compareAndSet(false, true);
+                return server;
+            }
+
+            return serverValue;
+        });
+
+        if(hasChange.get()){
+            groupServers();
+        }
     }
 
     /**
@@ -43,7 +57,7 @@ final class ServiceServers {
     private void groupServers(){
         Map<Long, List<ServiceServer>> map = new HashMap<>();
         Long minVersion = Long.MAX_VALUE;
-        ServiceServer[] serviceServersArray = uniqServers.toArray(new ServiceServer[uniqServers.size()]);
+        ServiceServer[] serviceServersArray = uniqServers.values().toArray(new ServiceServer[uniqServers.size()]);
         //分组
         for (ServiceServer serviceServer :
                 serviceServersArray) {
@@ -64,16 +78,16 @@ final class ServiceServers {
         ArrayList<ServiceServer> grayList = new ArrayList<>(serviceServersArray.length);
         ArrayList<ServiceServer> list = new ArrayList<>(serviceServersArray.length);
         if(map.keySet().size() > 1){
-            grayList.addAll(map.get(minVersion));
+            list.addAll(map.get(minVersion));
 
             for (Long version :
                     map.keySet()) {
                 if(version.equals(minVersion)){
                     continue;
                 }
-                list.addAll(map.get(version));
+                grayList.addAll(map.get(version));
             }
-        }else{
+        }else if(map.keySet().size() == 1){
             list.addAll(map.get(minVersion));
         }
 

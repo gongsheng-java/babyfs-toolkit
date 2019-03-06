@@ -224,6 +224,6 @@ public class ZkServiceRegister extends LifeServiceSupport implements IServcieReg
     }
 
     private String getServerID() {
-        return this.serverIP + ":" + serverPort + ":" + ServiceRegister.getReleaseVersion();
+        return this.serverIP + ":" + serverPort;
     }
 }
