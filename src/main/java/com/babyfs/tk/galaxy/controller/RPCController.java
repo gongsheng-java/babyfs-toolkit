@@ -32,7 +32,7 @@ public class RPCController {
     @RequestMapping(value = "/invoke", method = RequestMethod.POST)
     @InternalAccess
     public void invokeRpcMethod(final HttpServletRequest request, final HttpServletResponse response) {
-        injectRpcContext(request);
+        invokeRpcContext(request);
         try {
             ServiceResponse<byte[]> handle = rpcService.handle(getBody(request));
             if (handle.isFailure()) {
@@ -47,7 +47,7 @@ public class RPCController {
         }
     }
 
-    private void injectRpcContext(HttpServletRequest request){
+    private void invokeRpcContext(HttpServletRequest request){
         try{
             String header = request.getHeader(KEY_GRAY_FLAG);
             if(header != null && header.length() != 0){
