@@ -157,7 +157,8 @@ public class KafkaProducerImpl<K, V> implements IKafkaProducer<K, V> {
     public void shutdown() {
         // 添加shutdownHook,当结束使用时会把队列中的数据发完再结束程序
         try {
-            producer.close();
+            if(producer != null)
+                producer.close();
         } catch (Exception e) {
             LOGGER.error("failed shutdown kafka producer {} connector.", this.getName(), e);
         }

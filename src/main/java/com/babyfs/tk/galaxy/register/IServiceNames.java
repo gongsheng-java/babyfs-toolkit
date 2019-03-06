@@ -2,6 +2,7 @@ package com.babyfs.tk.galaxy.register;
 
 
 import com.babyfs.tk.commons.service.ILifeService;
+import com.babyfs.tk.galaxy.register.impl.ServerGroup;
 
 import java.util.List;
 
@@ -15,5 +16,5 @@ public interface IServiceNames extends ILifeService {
      * @param servcieInterfaceName not null or empty
      * @return
      */
-    List<ServiceServer> findServers(String servcieInterfaceName);
+    ServerGroup findServers(String servcieInterfaceName);
 }
