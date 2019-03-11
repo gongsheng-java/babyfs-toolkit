@@ -1,5 +1,6 @@
 package com.babyfs.tk.galaxy.controller;
 
+import com.babyfs.servicetk.grpcapicore.gray.GrayContext;
 import com.babyfs.tk.commons.model.ServiceResponse;
 import com.babyfs.tk.galaxy.server.IServer;
 import com.babyfs.tk.service.basic.utils.ResponseUtil;
@@ -24,13 +25,14 @@ import java.io.IOException;
 @RequestMapping(value = "/internal/rpc")
 public class RPCController {
     private static final Logger LOGGER = LoggerFactory.getLogger(RPCController.class);
-
+    private static final String KEY_GRAY_FLAG = "gray";
     @Inject
     private IServer rpcService;
 
     @RequestMapping(value = "/invoke", method = RequestMethod.POST)
     @InternalAccess
     public void invokeRpcMethod(final HttpServletRequest request, final HttpServletResponse response) {
+        invokeRpcContext(request);
         try {
             ServiceResponse<byte[]> handle = rpcService.handle(getBody(request));
             if (handle.isFailure()) {
@@ -45,6 +47,17 @@ public class RPCController {
         }
     }
 
+    private void invokeRpcContext(HttpServletRequest request){
+        try{
+            String header = request.getHeader(KEY_GRAY_FLAG);
+            if(header != null && header.length() != 0){
+                GrayContext.set(header);
+            }
+        }catch (Exception e){
+
+        }
+
+    }
 
     protected void sendError(HttpServletResponse response, int status, String error) {
         try {

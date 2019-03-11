@@ -1,10 +1,13 @@
 package com.babyfs.tk.galaxy.client.impl;
 
+import com.babyfs.servicetk.grpcapicore.gray.GrayContext;
 import com.babyfs.tk.galaxy.RpcException;
 import com.babyfs.tk.galaxy.client.IClient;
+import com.google.common.base.Strings;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +21,7 @@ import static java.lang.String.format;
 public class RpcOkHttpClient implements IClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcOkHttpClient.class);
     public static final MediaType BINARY = MediaType.parse("application/octet-stream; charset=utf-8");
-
+    private static final String KEY_GRAY_FLAG = "gray";
     private OkHttpClient client;
 
     /**
@@ -39,9 +42,15 @@ public class RpcOkHttpClient implements IClient {
 
     @Override
     public byte[] execute(final String uri, final byte[] requestBody) throws IOException {
-        Request request = new Request.Builder()
+        Request.Builder post = new Request.Builder()
                 .url(uri)
-                .post(RequestBody.create(BINARY, requestBody))
+                .post(RequestBody.create(BINARY, requestBody));
+
+        if(GrayContext.get().isHasTag()){
+            post.addHeader(KEY_GRAY_FLAG, String.join(",", GrayContext.get().getTags()));
+        }
+
+        Request request = post
                 .build();
 
         try (Response response = client.newCall(request).execute()) {

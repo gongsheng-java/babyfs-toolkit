@@ -20,17 +20,17 @@ import java.util.List;
 public final class LocalServiceNames extends LifeServiceSupport implements IServiceNames {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalServiceNames.class);
 
-    private final List<ServiceServer> servers;
+    private final ServerGroup serverGroup;
 
     /**
      */
     public LocalServiceNames(List<ServiceServer> serviceServers) {
-        servers = Collections.unmodifiableList(Lists.newArrayList(serviceServers));
+        serverGroup = new ServerGroup( Collections.unmodifiableList(Lists.newArrayList(serviceServers)), Collections.emptyList());
     }
 
     @Override
-    public List<ServiceServer> findServers(String servcieName) {
-        return servers;
+    public ServerGroup findServers(String servcieName) {
+        return serverGroup;
     }
 
     /**

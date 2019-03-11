@@ -1,19 +1,18 @@
 package com.babyfs.tk.galaxy.register.impl;
 
 import com.babyfs.tk.galaxy.register.ServiceServer;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * service对应的服务列表
  */
 final class ServiceServers {
     private final String servcieName;
-    private final List<ServiceServer> servers = Lists.newCopyOnWriteArrayList();
-    private final Set<ServiceServer> uniqServers = Sets.newConcurrentHashSet();
+    private ServerGroup serverGroup;
+    private final Map<ServiceServer, ServiceServer> uniqServers = Maps.newConcurrentMap();
 
     ServiceServers(String servcieName) {
         this.servcieName = servcieName;
@@ -24,9 +23,24 @@ final class ServiceServers {
      *
      * @param server
      */
-    public void addServer(ServiceServer server) {
-        if (uniqServers.add(server)) {
-            servers.add(server);
+    public void addServer(final ServiceServer server) {
+        AtomicBoolean hasChange = new AtomicBoolean(false);
+        uniqServers.compute(server, (serverKey, serverValue) -> {
+            if(serverValue == null){
+                hasChange.compareAndSet(false, true);
+                return server;
+            }
+
+            if(!serverValue.getVersion().equalsIgnoreCase(server.getVersion())){
+                hasChange.compareAndSet(false, true);
+                return server;
+            }
+
+            return serverValue;
+        });
+
+        if(hasChange.get()){
+            groupServers();
         }
     }
 
@@ -36,9 +50,52 @@ final class ServiceServers {
      * @param server
      */
     public void removeServer(ServiceServer server) {
-        if (uniqServers.remove(server)) {
-            servers.remove(server);
+        uniqServers.remove(server);
+        groupServers();
+    }
+
+    private void groupServers(){
+        Map<Long, List<ServiceServer>> map = new HashMap<>();
+        Long minVersion = Long.MAX_VALUE;
+        ServiceServer[] serviceServersArray = uniqServers.values().toArray(new ServiceServer[uniqServers.size()]);
+        //分组
+        for (ServiceServer serviceServer :
+                serviceServersArray) {
+            long v = Long.MAX_VALUE;
+            try{
+                v = Long.parseLong(serviceServer.getVersion());
+            }catch (Exception e){}
+
+            minVersion = v < minVersion ? v : minVersion;
+            List<ServiceServer> serviceServers = map.get(v);
+            if(serviceServers == null){
+                serviceServers = new LinkedList<>();
+                map.put(v, serviceServers);
+            }
+
+            serviceServers.add(serviceServer);
         }
+        ArrayList<ServiceServer> grayList = new ArrayList<>(serviceServersArray.length);
+        ArrayList<ServiceServer> list = new ArrayList<>(serviceServersArray.length);
+        if(map.keySet().size() > 1){
+            list.addAll(map.get(minVersion));
+
+            for (Long version :
+                    map.keySet()) {
+                if(version.equals(minVersion)){
+                    continue;
+                }
+                grayList.addAll(map.get(version));
+            }
+        }else if(map.keySet().size() == 1){
+            list.addAll(map.get(minVersion));
+        }
+
+        list.trimToSize();
+        grayList.trimToSize();
+
+        serverGroup = new ServerGroup(list, grayList);
+
     }
 
     /**
@@ -46,15 +103,15 @@ final class ServiceServers {
      *
      * @return
      */
-    public List<ServiceServer> getServers() {
-        return servers;
+    public ServerGroup getServers() {
+        return serverGroup;
     }
 
     @Override
     public String toString() {
         return "ServiceServers{" +
                 "servcieName='" + servcieName + '\'' +
-                ", servers=" + servers +
+                ", servers=" + serverGroup +
                 ", uniqServers=" + uniqServers +
                 '}';
     }
