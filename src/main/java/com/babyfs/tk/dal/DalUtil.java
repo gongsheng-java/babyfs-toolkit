@@ -169,15 +169,11 @@ public final class DalUtil {
         if (limit > 0) {
             final String countCondition = conditionPair.first;
             final MapSqlParameterSource countQueryParams = new MapSqlParameterSource(conditionPair.second);
-            //fortest
-            if("com.babyfs.core.progress.UserProgressEntity".equals(dalContext.getEntityClass().getName())){
-                count = 10000000;
-            }else{
-                List<Object[]> countColumns = daoFactory.getDaoSupport().queryEntityColumns(
-                        dalContext.getEntityClass(), "count(*)",
-                        countCondition, countQueryParams, Collections.<String, Object>emptyMap());
-                count = extractInt(countColumns, 0);
-            }
+
+            List<Object[]> countColumns = daoFactory.getDaoSupport().queryEntityColumns(
+                    dalContext.getEntityClass(), "count(*)",
+                    countCondition, countQueryParams, Collections.<String, Object>emptyMap());
+            count = extractInt(countColumns, 0);
         }else {
             //对于不分页的查询，如导出等，加上最多返回条数限制，防止对数据库造成压力
             limit = MAX_ROW_COUNT;
