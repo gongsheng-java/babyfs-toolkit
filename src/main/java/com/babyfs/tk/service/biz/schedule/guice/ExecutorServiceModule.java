@@ -14,6 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.internal.Scoping;
 import com.google.inject.name.Names;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 
@@ -31,7 +34,7 @@ public class ExecutorServiceModule extends AbstractModule {
     private final String name;
     private final String executorConfPrefix;
     private final boolean needShutdown;
-
+    private static final Logger logger = LoggerFactory.getLogger(ExecutorServiceModule.class);
     /**
      * 使用默认配置,且需要shutdown的线程池
      *
@@ -77,6 +80,8 @@ public class ExecutorServiceModule extends AbstractModule {
 
         @Override
         public ExecutorService get() {
+            logger.info(ExceptionUtils.getFullStackTrace(new Exception()));
+
             int coreSize = getIntConfig("coreSize", defaultCoreSize);
             int maxSize = getIntConfig("maxSize", defaultMaxSize);
             int keepAliveTime = getIntConfig("keepAliveTimeMinuts", defaultKeepAliveTimeMinutes);
