@@ -83,7 +83,11 @@ public class KafkaProducerModule extends AbstractModule {
     protected void configure() {
         boolean hasAsyncProducer = installProducerModule(this.confOfAsyncProducer, this.asyncProducerName);
         boolean hasSyncProducer = installProducerModule(this.confOfSyncProducer, this.syncProducerName);
-        boolean hasUserDataCenterProducer = installProducerModule(CONF_KAFKA_USER_DATACENTER_PRODUCER, USER_DATACENTER_PRODUCER);
+        try{
+            boolean hasUserDataCenterProducer = installProducerModule(CONF_KAFKA_USER_DATACENTER_PRODUCER, USER_DATACENTER_PRODUCER);
+        }catch (Exception e){
+            LOGGER.warn("error when build user datacenter: {}", e);
+        }
         if (!(hasAsyncProducer || hasSyncProducer)) {
             throw new IllegalArgumentException("Can't find async or sync producer config,please check the config file name for async:" + this.confOfAsyncProducer + ",sync:" + this.confOfSyncProducer);
         }
