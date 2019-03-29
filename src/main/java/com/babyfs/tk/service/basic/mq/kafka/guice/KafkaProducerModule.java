@@ -28,6 +28,8 @@ public class KafkaProducerModule extends AbstractModule {
      */
     public static final String CONF_KAFAK_SYNC_PRODUCER = "kafka-producer-sync.xml";
 
+    public static final String CONF_KAFKA_USER_DATACENTER_PRODUCER = "user-data-center.xml";
+
     /**
      * 异步Producer的名称
      */
@@ -37,6 +39,8 @@ public class KafkaProducerModule extends AbstractModule {
      * 同步Producer的名称
      */
     public static final String SYNC_PRODUCER = "sync_producer";
+
+    public static final String USER_DATACENTER_PRODUCER = "user_datacenter_producer";
 
     private final String confOfAsyncProducer;
     private final String confOfSyncProducer;
@@ -79,6 +83,7 @@ public class KafkaProducerModule extends AbstractModule {
     protected void configure() {
         boolean hasAsyncProducer = installProducerModule(this.confOfAsyncProducer, this.asyncProducerName);
         boolean hasSyncProducer = installProducerModule(this.confOfSyncProducer, this.syncProducerName);
+        boolean hasUserDataCenterProducer = installProducerModule(CONF_KAFKA_USER_DATACENTER_PRODUCER, USER_DATACENTER_PRODUCER);
         if (!(hasAsyncProducer || hasSyncProducer)) {
             throw new IllegalArgumentException("Can't find async or sync producer config,please check the config file name for async:" + this.confOfAsyncProducer + ",sync:" + this.confOfSyncProducer);
         }
