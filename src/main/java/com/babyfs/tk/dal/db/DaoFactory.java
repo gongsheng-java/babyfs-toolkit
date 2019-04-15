@@ -40,6 +40,7 @@ public class DaoFactory {
      * 目前主要是调用{@link DaoSupport#doTransaction(Class, java.util.Map, com.google.common.base.Function)}方法实现事务操作
      *
      * @return
+     *
      */
     public DaoSupport getDaoSupport() {
         return daoSupport;
