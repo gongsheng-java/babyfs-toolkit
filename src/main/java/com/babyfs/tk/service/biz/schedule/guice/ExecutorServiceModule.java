@@ -80,7 +80,7 @@ public class ExecutorServiceModule extends AbstractModule {
 
         @Override
         public ExecutorService get() {
-            logger.info(ExceptionUtils.getFullStackTrace(new Exception()));
+//            logger.info(ExceptionUtils.getFullStackTrace(new Exception()));
 
             int coreSize = getIntConfig("coreSize", defaultCoreSize);
             int maxSize = getIntConfig("maxSize", defaultMaxSize);
