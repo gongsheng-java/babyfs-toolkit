@@ -1,5 +1,6 @@
 package com.babyfs.tk.dal.meta;
 
+import com.babyfs.tk.commons.base.Pair;
 import com.babyfs.tk.commons.utils.ListUtil;
 import com.babyfs.tk.dal.DalUtil;
 import com.babyfs.tk.dal.orm.IEntity;
@@ -37,6 +38,8 @@ public class SimpleEntityMeta<T extends IEntity> implements IEntityMeta<T> {
     private final String updateSqlColumns;
     private final String querySqlColumns;
     private final String insertSqlColumnsValues;
+    private final String shardGroup;
+    private final String shardId;
 
     public SimpleEntityMeta(@Nonnull Class<T> entityClass) {
         Preconditions.checkNotNull(entityClass, "entityClass");
@@ -119,6 +122,20 @@ public class SimpleEntityMeta<T extends IEntity> implements IEntityMeta<T> {
             tQuery.addAll(noIdFields);
             this.query = Collections.unmodifiableList(tQuery);
             this.querySqlColumns = genColumnFields(this.query);
+        }
+        {
+            //shardGroup字段
+            String sgName = null;
+            String sId = "shard0";
+            ShardGroup shardGroup = entityClass.getAnnotation(ShardGroup.class);
+            if(shardGroup!=null){
+                sgName = shardGroup.name();
+                if(!Strings.isNullOrEmpty(sgName)&&!Strings.isNullOrEmpty(shardGroup.shardId())){
+                    sId = shardGroup.shardId();
+                }
+            }
+            this.shardGroup = sgName;
+            this.shardId = sId;
         }
     }
 
@@ -206,6 +223,11 @@ public class SimpleEntityMeta<T extends IEntity> implements IEntityMeta<T> {
         return Joiner.on(",").skipNulls().join(fields.values().stream().map(this::toUpdateColumn).collect(Collectors.toList()));
     }
 
+    @Override
+    public Pair<String, String> getShardGroup() {
+        return new Pair<>(this.shardGroup,this.shardId);
+    }
+
     protected String toUpdateColumn(EntityField field) {
         return field.getColumnName() + "=:" + field.getAttribueName();
     }
@@ -277,11 +299,15 @@ public class SimpleEntityMeta<T extends IEntity> implements IEntityMeta<T> {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("SimpleEntityMeta");
-        sb.append("{entityClass=").append(entityClass);
-        sb.append(", tableName='").append(tableName).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "SimpleEntityMeta{" +
+                "entityClass=" + entityClass +
+                ", tableName='" + tableName + '\'' +
+                ", insertSqlColumns='" + insertSqlColumns + '\'' +
+                ", updateSqlColumns='" + updateSqlColumns + '\'' +
+                ", querySqlColumns='" + querySqlColumns + '\'' +
+                ", insertSqlColumnsValues='" + insertSqlColumnsValues + '\'' +
+                ", shardGroup='" + shardGroup + '\'' +
+                ", shardId='" + shardId + '\'' +
+                '}';
     }
 }

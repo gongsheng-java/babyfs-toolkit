@@ -542,6 +542,17 @@ public class DaoSupport {
                 } else if (!realShardValue.isEmpty()) {
                     LOGGER.error("setupDBShard for {} with shardValue:{},but can't find shard name:{},", entityName, realShardValue);
                 }
+            }else {
+                //shardGroup annotation
+                Pair<String,String> groupPair = pair.first.getShardGroup();
+                final String shardGroup = groupPair.first;
+                if(!Strings.isNullOrEmpty(shardGroup)) {
+                    LOGGER.debug("shardGroup annotation,shardValue:{},shardgroup:{}", shardValue, shardGroup);
+                    Pair<String, String> lookupKey = ShardUtil.createLookupKey(shardGroup, groupPair.second);
+                    LOGGER.debug("setupDBShar,shardValue:{},metaPair:{},lookupKey:{}", shardValue, pair, lookupKey);
+                    ShardUtil.setLookKey(lookupKey);
+                    return;
+                }
             }
         }
         LOGGER.debug("setupDBShar,shardValue:{},metaPair:{},lookupKey:NULL_LOOKUP_KEY", shardValue, pair);
