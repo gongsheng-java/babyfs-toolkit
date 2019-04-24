@@ -37,6 +37,8 @@ public class RpcConstant {
 
     public static final String SERVER_PORT = "rpc.server.port";
 
+    public static final String SERVER_NAME = "rpc.server.name";
+
     public static final String ZK_CONNECT_TIMEOUT = "rpc.zk.connect.timeout";
 
     public static final int ZK_CONNECT_TIMEOUT_DEFAULT = 5000;
