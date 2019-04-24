@@ -14,6 +14,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
+@Deprecated
 public class DubboClientModule extends ServiceModule {
 
     private static final Logger logger = LoggerFactory.getLogger(DalXmlConfModule.class);

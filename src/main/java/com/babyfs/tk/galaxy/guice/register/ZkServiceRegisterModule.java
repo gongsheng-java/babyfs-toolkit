@@ -1,5 +1,8 @@
 package com.babyfs.tk.galaxy.guice.register;
 
+import com.babyfs.servicetk.grpcapicore.registry.ServiceRegister;
+import com.babyfs.tk.apollo.ApolloUtil;
+import com.babyfs.tk.apollo.ConfigLoader;
 import com.babyfs.tk.commons.MapConfig;
 import com.babyfs.tk.commons.application.LifeServiceBindUtil;
 import com.babyfs.tk.commons.config.IConfigService;
@@ -13,8 +16,14 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import org.apache.curator.framework.CuratorFramework;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.babyfs.servicetk.grpcapicore.EnvConstant.APOLLO_GRPC_NAMESPACE;
+import static com.babyfs.servicetk.grpcapicore.EnvConstant.KEY_CONSUL_REGISTRY_ADDRESS;
 
 public class ZkServiceRegisterModule extends ServiceModule {
+
 
     @Override
     protected void configure() {
@@ -36,6 +45,11 @@ public class ZkServiceRegisterModule extends ServiceModule {
             int sessionTimeout = MapConfig.getInt(RpcConstant.ZK_SESSION_TIMEOUT, conf, RpcConstant.ZK_SESSION_TIMEOUT_DEFAULT);
             String serverRoot = MapConfig.getString(RpcConstant.ZK_REGISTER_ROOT, conf, RpcConstant.ZK_REGISTER_ROOT_DEFAULT);
             CuratorFramework curator = Utils.buildAndStartCurator(zkRegisterUrl, connectTimeout, sessionTimeout);
+
+
+
+
+
             return new ZkServiceRegister(curator, ip, port, serverRoot);
         }
     }
