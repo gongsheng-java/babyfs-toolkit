@@ -1,6 +1,7 @@
 package com.babyfs.tk.dal.db;
 
 import com.babyfs.tk.commons.base.Pair;
+import com.babyfs.tk.dal.meta.ShardGroup;
 import com.babyfs.tk.dal.orm.AssignIdEntity;
 import com.babyfs.tk.dal.orm.IEntityMeta;
 import org.junit.Assert;
@@ -15,6 +16,7 @@ import javax.persistence.Table;
 public class EntityMetaSetTest {
     @Entity
     @Table(name="ta")
+    @ShardGroup(name = "group0",shardId = "shard0")
     public static class ClassA extends AssignIdEntity {
         private String name;
 
