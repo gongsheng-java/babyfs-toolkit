@@ -22,15 +22,20 @@ public class ServiceServer {
      */
     private int port;
 
+    private String version;
+
+    public final static String DEFAULT_VERSION = "1000";
+
     private Set<String> servcies = Sets.newHashSet();
 
     public ServiceServer() {
     }
 
-    public ServiceServer(String token, String host, int port) {
+    public ServiceServer(String token, String host, int port, String version) {
         this.token = token;
         this.host = host;
         this.port = port;
+        this.version = version;
     }
 
     public String getToken() {
@@ -97,7 +102,15 @@ public class ServiceServer {
         return "ServiceInstance{" +
                 "host='" + host + '\'' +
                 ", port=" + port +
-                '}';
+                "', version='" + version + "'}'";
     }
 
+    public String getVersion() {
+        //兼容不带version
+        return version == null ? DEFAULT_VERSION : version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
 }

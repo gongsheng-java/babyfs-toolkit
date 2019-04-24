@@ -14,7 +14,7 @@ public interface IRule {
      * @param list
      * @return 可用服务实例
      */
-    ServiceServer choose(List<ServiceServer> list);
+    ServiceServer choose(List<ServiceServer> list, List<ServiceServer> grayList);
 
-    ServiceServer chooseAfterFilter(List<ServiceServer> list, Set<ServiceServer> exceptionServerSet);
+    ServiceServer chooseAfterFilter(List<ServiceServer> list, List<ServiceServer> grayList, Set<ServiceServer> exceptionServerSet);
 }

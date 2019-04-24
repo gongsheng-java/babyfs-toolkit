@@ -169,6 +169,7 @@ public final class DalUtil {
         if (limit > 0) {
             final String countCondition = conditionPair.first;
             final MapSqlParameterSource countQueryParams = new MapSqlParameterSource(conditionPair.second);
+
             List<Object[]> countColumns = daoFactory.getDaoSupport().queryEntityColumns(
                     dalContext.getEntityClass(), "count(*)",
                     countCondition, countQueryParams, Collections.<String, Object>emptyMap());

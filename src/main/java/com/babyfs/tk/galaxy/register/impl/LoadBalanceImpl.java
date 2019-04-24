@@ -30,11 +30,13 @@ public class LoadBalanceImpl implements ILoadBalance {
      */
     @Override
     public ServiceServer findServer(String servcieName) {
-        return rule.choose(servcieNames.findServers(servcieName));
+        ServerGroup servers = servcieNames.findServers(servcieName);
+        return rule.choose(servers.getList(), servers.getGrayList());
     }
 
     @Override
     public ServiceServer findServerAfterFilter(String serviceName, Set<ServiceServer> serviceServerSet) {
-        return rule.chooseAfterFilter(servcieNames.findServers(serviceName), serviceServerSet);
+        ServerGroup servers = servcieNames.findServers(serviceName);
+        return rule.chooseAfterFilter(servers.getList(), servers.getGrayList(), serviceServerSet);
     }
 }

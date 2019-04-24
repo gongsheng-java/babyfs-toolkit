@@ -191,7 +191,7 @@ public class ZkServiceRegister extends LifeServiceSupport implements IServcieReg
         LOGGER.info("register servcie to {}", nodePath);
 
         try {
-            ServiceServer server = new ServiceServer(this.regToken, this.serverIP, this.serverPort);
+            ServiceServer server = new ServiceServer(this.regToken, this.serverIP, this.serverPort, ServiceRegister.getReleaseVersion());
             server.addService(this.interfaceNames);
             byte[] data = JSON.toJSONBytes(server);
             if (exist(nodePath)) {
