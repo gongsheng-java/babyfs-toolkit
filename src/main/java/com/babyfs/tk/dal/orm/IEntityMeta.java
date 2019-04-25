@@ -1,5 +1,6 @@
 package com.babyfs.tk.dal.orm;
 
+import com.babyfs.tk.commons.base.Pair;
 import com.babyfs.tk.dal.meta.EntityField;
 
 import java.util.List;
@@ -93,4 +94,10 @@ public interface IEntityMeta<T extends IEntity> {
      * @return
      */
     String paritalUpdateColumns(String[] includeColumns, String[] excludeColumns);
+
+    /**
+     * 获取shardgroup annotation，如果指定了的话
+     * @return
+     */
+    Pair<String,String> getShardGroup();
 }

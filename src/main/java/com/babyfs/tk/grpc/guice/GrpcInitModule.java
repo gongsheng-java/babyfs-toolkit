@@ -8,13 +8,13 @@ import org.elasticsearch.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class GrpcInitModule  extends ServiceModule {
 
     private static final String GRPC_INTERFACES_NAMESPACE = "babyfs.grpc";
     private static final String GRPC_INTERFACES_KEY = "guice.interfaces";
 
     private final static Logger logger = LoggerFactory.getLogger(ApolloModule.class);
-
 
     public GrpcInitModule(){
 

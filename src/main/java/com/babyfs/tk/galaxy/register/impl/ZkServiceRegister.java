@@ -128,6 +128,7 @@ public class ZkServiceRegister extends LifeServiceSupport implements IServcieReg
         };
         cache.getListenable().addListener(listener);
 
+
         try {
             cache.start();
             if (!this.interfaceNames.isEmpty()) {
@@ -181,12 +182,6 @@ public class ZkServiceRegister extends LifeServiceSupport implements IServcieReg
 
     private synchronized boolean doRegister() {
         final String nodePath = getNodePath();
-
-        //临时加在这
-        LOGGER.info("register service to consul");
-        String registry = ConfigLoader.getConfig(APOLLO_GRPC_NAMESPACE, KEY_CONSUL_REGISTRY_ADDRESS);
-        ServiceRegister.init(ApolloUtil.getAppId(), this.serverPort, registry);
-        ServiceRegister.defaultRegister();
 
         LOGGER.info("register servcie to {}", nodePath);
 
