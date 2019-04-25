@@ -207,5 +207,6 @@
             <groupId>com.babyfs</groupId>
             <artifactId>toolkit-entity</artifactId>
         </dependency>
+
     </dependencies>
 </project>
