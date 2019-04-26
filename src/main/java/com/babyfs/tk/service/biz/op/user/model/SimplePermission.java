@@ -1,5 +1,6 @@
 package com.babyfs.tk.service.biz.op.user.model;
 
+import com.babyfs.servicetk.apicore.rbac.ResourceV2;
 import com.google.common.base.Preconditions;
 
 import javax.annotation.Nonnull;
@@ -9,14 +10,14 @@ import javax.annotation.Nonnull;
  */
 public class SimplePermission implements Permission {
     private final long id;
-    private final Resource target;
+    private final ResourceV2 target;
     private final Operation operation;
 
     /**
      * @param target
      * @param operation
      */
-    public SimplePermission(@Nonnull Resource target, @Nonnull Operation operation, long id) {
+    public SimplePermission(@Nonnull ResourceV2 target, @Nonnull Operation operation, long id) {
         this.target = Preconditions.checkNotNull(target);
         this.operation = Preconditions.checkNotNull(operation);
         this.id = id;
@@ -28,7 +29,7 @@ public class SimplePermission implements Permission {
     }
 
     @Override
-    public Resource getTarget() {
+    public ResourceV2 getTarget() {
         return target;
     }
 

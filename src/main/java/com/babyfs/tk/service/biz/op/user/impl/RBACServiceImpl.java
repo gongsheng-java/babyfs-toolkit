@@ -1,5 +1,9 @@
 package com.babyfs.tk.service.biz.op.user.impl;
 
+import com.babyfs.servicetk.apicore.rbac.IBizResourceV2;
+import com.babyfs.servicetk.apicore.rbac.RbacUtil;
+import com.babyfs.servicetk.apicore.rbac.ResourceV2;
+import com.babyfs.tk.apollo.ConfigLoader;
 import com.babyfs.tk.service.biz.op.user.model.Operation;
 import com.babyfs.tk.service.biz.op.user.model.Resource;
 import com.babyfs.tk.service.biz.op.user.Util;
@@ -38,10 +42,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Nullable;
 import java.sql.Timestamp;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -52,6 +53,7 @@ import java.util.stream.Collectors;
 public class RBACServiceImpl implements IRBACService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RBACServiceImpl.class);
 
+    public static final String AK_NAMESPACE = "babyfs.rbac";
     public static final String RBAC_BIZ_RESOURCE_ENUM = "rbac.biz_resource_enum";
     public static final String RBAC_ROOT_ROLE_ID = "rbac.root_role_id";
     public static final String RBAC_REQUIRED_PERMISSION_ANNOTATION_CLASS = "rbac.required_perm_anno_class";
@@ -77,11 +79,13 @@ public class RBACServiceImpl implements IRBACService {
     /**
      * 业务资源列表
      */
-    private final List<IBizResource> bizRessources;
+    private final List<IBizResourceV2> bizRessources;
+
+    private Map<Integer, List<IBizResourceV2>> groupedBizResources;
     /**
      * 业务资源Map, 根据id查找对应的资源
      */
-    private final Map<String, ? extends IBizResource> bizResourceMap;
+    private final Map<String, IBizResourceV2> bizResourceMap;
     /**
      * 用于声明权限的Annotation类名
      */
@@ -89,21 +93,58 @@ public class RBACServiceImpl implements IRBACService {
 
     @Inject
     public RBACServiceImpl(IConfigService configService) {
-        String bizResourceClass = configService.get(RBAC_BIZ_RESOURCE_ENUM);
+        String bizResourceClassStr = ConfigLoader.getConfig(AK_NAMESPACE, RBAC_BIZ_RESOURCE_ENUM);
+        String[] bizResourceClasses = bizResourceClassStr.split(",");
         String rootRoleIdStr = configService.get(RBAC_ROOT_ROLE_ID);
-        String requiredPermissionAnnotationClassStr = configService.get(RBAC_REQUIRED_PERMISSION_ANNOTATION_CLASS);
+        String requiredPermissionAnnotationClassStr = ConfigLoader.getConfig(AK_NAMESPACE, RBAC_REQUIRED_PERMISSION_ANNOTATION_CLASS);
         try {
-            @SuppressWarnings("unchecked")
-            Class<IBizResource> clazz = (Class<IBizResource>) Class.forName(bizResourceClass);
-            Preconditions.checkState(clazz.isEnum(), "%s is not enum", clazz.getName());
-            IBizResource[] enumConstants = clazz.getEnumConstants();
-            bizRessources = Lists.newArrayList(enumConstants);
-            bizResourceMap = Util.buildBizFlatMap(bizRessources);
             this.requiredPermissionAnnotationClass = Class.forName(requiredPermissionAnnotationClassStr);
+            Pair<Map<String, IBizResourceV2>, Map<Integer, List<IBizResourceV2>>> mapMapPair = buildBizResourceMap(bizResourceClasses);
+            this.bizResourceMap = mapMapPair.getFirst();
+            this.groupedBizResources = mapMapPair.getSecond();
+            bizRessources = Lists.newArrayList(this.bizResourceMap.values());
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
         rootRoleId = Strings.isNullOrEmpty(rootRoleIdStr) ? 1L : Long.parseLong(rootRoleIdStr);
+    }
+
+    private Pair<Map<String, IBizResourceV2>, Map<Integer, List<IBizResourceV2>>> buildBizResourceMap(String[] classes){
+        Map<Integer, List<IBizResourceV2>> result2 = new HashMap<>();
+        Map<String, IBizResourceV2> result = new HashMap<>();
+        for (String bizResourceClass:
+                classes) {
+            try{
+                Class<IBizResourceV2> clazz = (Class<IBizResourceV2>) Class.forName(bizResourceClass);
+                Preconditions.checkState(clazz.isEnum(), "%s is not enum", clazz.getName());
+                IBizResourceV2[] enumConstants = clazz.getEnumConstants();
+                List<IBizResourceV2> bizResourceV2s = Lists.newArrayList(enumConstants);
+                Map<String, ? extends IBizResourceV2> stringMap = RbacUtil.buildBizFlatMap(bizResourceV2s);
+
+                for (String key :
+                        stringMap.keySet()) {
+                    IBizResourceV2 iBizResourceV2 = stringMap.get(key);
+                    if(result.containsKey(key)){
+                        LOGGER.warn("duplicate key {} when parsing class {}", key, bizResourceClass);
+                    }else{
+                        result.put(key, iBizResourceV2);
+                    }
+                    int type = iBizResourceV2.getType();
+                    List<IBizResourceV2> list = result2.get(type);
+                    if(list == null){
+                        list = new LinkedList<>();
+                        result2.put(type, list);
+                    }
+                    list.add(iBizResourceV2);
+                }
+
+            }catch (Exception e){
+                LOGGER.error("error when get resource class {}", bizResourceClass);
+                LOGGER.error("Exception is:", e);
+            }
+
+        }
+        return new Pair<>(result, result2);
     }
 
 
@@ -186,7 +227,7 @@ public class RBACServiceImpl implements IRBACService {
             boolean found = false;
             while (newIterator.hasNext()) {
                 Permission next = newIterator.next();
-                Resource target = next.getTarget();
+                ResourceV2 target = next.getTarget();
                 if (target.getId().equals(permissionResId) && target.getType() == permissionResType) {
                     //找到
                     found = true;
@@ -313,10 +354,8 @@ public class RBACServiceImpl implements IRBACService {
     }
 
     @Override
-    public Map<Integer, List<? extends Resource>> queryPermissionResources() {
-        Map<Integer, List<? extends Resource>> resourceMap = Maps.newHashMap();
-        resourceMap.put(ResourceType.BIZ_RESOURCE.getValue(), bizRessources);
-        return resourceMap;
+    public Map<Integer, List<IBizResourceV2>> queryPermissionResources() {
+        return new HashMap<>(groupedBizResources);
     }
 
     @Override
@@ -449,7 +488,7 @@ public class RBACServiceImpl implements IRBACService {
         }
     }
 
-    private Resource getResourceByType(int resType, String resId) {
+    private ResourceV2 getResourceByType(int resType, String resId) {
         if (resType == ResourceType.BIZ_RESOURCE.getValue()) {
             return bizResourceMap.get(resId);
         } else {
@@ -492,7 +531,7 @@ public class RBACServiceImpl implements IRBACService {
             int permissionResType = input.getPermissionResType();
             String permissionResId = input.getPermissionResId();
             int permissionResOpMask = input.getPermissionResOpMask();
-            Resource resource = getResourceByType(permissionResType, permissionResId);
+            ResourceV2 resource = getResourceByType(permissionResType, permissionResId);
             if (resource == null) {
                 LOGGER.warn("can't find resource for:{}", permissionResId);
                 return null;
