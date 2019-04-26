@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 public class RBACServiceImpl implements IRBACService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RBACServiceImpl.class);
 
-    private static final String AK_NAMESPACE = "babyfs.rbac";
+    public static final String AK_NAMESPACE = "babyfs.rbac";
     public static final String RBAC_BIZ_RESOURCE_ENUM = "rbac.biz_resource_enum";
     public static final String RBAC_ROOT_ROLE_ID = "rbac.root_role_id";
     public static final String RBAC_REQUIRED_PERMISSION_ANNOTATION_CLASS = "rbac.required_perm_anno_class";
@@ -80,6 +80,8 @@ public class RBACServiceImpl implements IRBACService {
      * 业务资源列表
      */
     private final List<IBizResourceV2> bizRessources;
+
+    private Map<Integer, List<IBizResourceV2>> groupedBizResources;
     /**
      * 业务资源Map, 根据id查找对应的资源
      */
@@ -94,10 +96,12 @@ public class RBACServiceImpl implements IRBACService {
         String bizResourceClassStr = ConfigLoader.getConfig(AK_NAMESPACE, RBAC_BIZ_RESOURCE_ENUM);
         String[] bizResourceClasses = bizResourceClassStr.split(",");
         String rootRoleIdStr = configService.get(RBAC_ROOT_ROLE_ID);
-        String requiredPermissionAnnotationClassStr = configService.get(AK_NAMESPACE, RBAC_REQUIRED_PERMISSION_ANNOTATION_CLASS);
+        String requiredPermissionAnnotationClassStr = ConfigLoader.getConfig(AK_NAMESPACE, RBAC_REQUIRED_PERMISSION_ANNOTATION_CLASS);
         try {
             this.requiredPermissionAnnotationClass = Class.forName(requiredPermissionAnnotationClassStr);
-            this.bizResourceMap = buildBizResourceMap(bizResourceClasses);
+            Pair<Map<String, IBizResourceV2>, Map<Integer, List<IBizResourceV2>>> mapMapPair = buildBizResourceMap(bizResourceClasses);
+            this.bizResourceMap = mapMapPair.getFirst();
+            this.groupedBizResources = mapMapPair.getSecond();
             bizRessources = Lists.newArrayList(this.bizResourceMap.values());
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -105,7 +109,8 @@ public class RBACServiceImpl implements IRBACService {
         rootRoleId = Strings.isNullOrEmpty(rootRoleIdStr) ? 1L : Long.parseLong(rootRoleIdStr);
     }
 
-    private Map<String, IBizResourceV2> buildBizResourceMap(String[] classes){
+    private Pair<Map<String, IBizResourceV2>, Map<Integer, List<IBizResourceV2>>> buildBizResourceMap(String[] classes){
+        Map<Integer, List<IBizResourceV2>> result2 = new HashMap<>();
         Map<String, IBizResourceV2> result = new HashMap<>();
         for (String bizResourceClass:
                 classes) {
@@ -115,13 +120,22 @@ public class RBACServiceImpl implements IRBACService {
                 IBizResourceV2[] enumConstants = clazz.getEnumConstants();
                 List<IBizResourceV2> bizResourceV2s = Lists.newArrayList(enumConstants);
                 Map<String, ? extends IBizResourceV2> stringMap = RbacUtil.buildBizFlatMap(bizResourceV2s);
+
                 for (String key :
                         stringMap.keySet()) {
+                    IBizResourceV2 iBizResourceV2 = stringMap.get(key);
                     if(result.containsKey(key)){
                         LOGGER.warn("duplicate key {} when parsing class {}", key, bizResourceClass);
                     }else{
-                        result.put(key, stringMap.get(key));
+                        result.put(key, iBizResourceV2);
                     }
+                    int type = iBizResourceV2.getType();
+                    List<IBizResourceV2> list = result2.get(type);
+                    if(list == null){
+                        list = new LinkedList<>();
+                        result2.put(type, list);
+                    }
+                    list.add(iBizResourceV2);
                 }
 
             }catch (Exception e){
@@ -130,7 +144,7 @@ public class RBACServiceImpl implements IRBACService {
             }
 
         }
-        return result;
+        return new Pair<>(result, result2);
     }
 
 
@@ -340,10 +354,8 @@ public class RBACServiceImpl implements IRBACService {
     }
 
     @Override
-    public Map<Integer, List<? extends ResourceV2>> queryPermissionResources() {
-        Map<Integer, List<? extends ResourceV2>> resourceMap = Maps.newHashMap();
-        resourceMap.put(ResourceType.BIZ_RESOURCE.getValue(), bizRessources);
-        return resourceMap;
+    public Map<Integer, List<IBizResourceV2>> queryPermissionResources() {
+        return new HashMap<>(groupedBizResources);
     }
 
     @Override
