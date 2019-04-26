@@ -13,6 +13,7 @@ import java.util.Map;
  */
 public class RBACServiceImplTest {
 
+    @Ig
     @Test
     public void testAddRole() throws Exception {
         Map<String, String> map = Maps.newHashMap();
