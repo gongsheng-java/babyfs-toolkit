@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class GrpcAbstractModule extends ServiceModule {
 
-    private ConcurrentHashMap<Class, Object> REGISTER_CONTAINER = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Class, Object> REGISTER_CONTAINER = new ConcurrentHashMap<>();
 
     protected abstract Class[] grpcClients();
     private final static Logger logger = LoggerFactory.getLogger(ApolloModule.class);
