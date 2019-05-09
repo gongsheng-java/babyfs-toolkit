@@ -1,5 +1,7 @@
 package com.babyfs.tk.service.biz.op.user.model;
 
+import com.babyfs.servicetk.apicore.rbac.ResourceV2;
+
 import java.io.Serializable;
 
 /**
@@ -22,7 +24,7 @@ public class PlainPermission implements Permission, Serializable {
     }
 
     @Override
-    public Resource getTarget() {
+    public ResourceV2 getTarget() {
         return target;
     }
 

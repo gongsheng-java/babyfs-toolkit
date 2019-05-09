@@ -1,8 +1,9 @@
 package com.babyfs.tk.service.biz.op.user.impl;
 
+import com.babyfs.servicetk.apicore.rbac.IBizResourceV2;
+import com.babyfs.servicetk.apicore.rbac.ResourceV2;
 import com.google.common.collect.Maps;
 import com.babyfs.tk.commons.config.internal.ConfigServiceMapImpl;
-import com.babyfs.tk.service.biz.op.user.model.Resource;
 import org.junit.Test;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class RBACServiceImplTest {
         map.put(RBACServiceImpl.RBAC_REQUIRED_PERMISSION_ANNOTATION_CLASS,RequiredPermission.class.getName());
         ConfigServiceMapImpl serviceMap = new ConfigServiceMapImpl(map);
         RBACServiceImpl rbacService = new RBACServiceImpl(serviceMap);
-        Map<Integer, List<? extends Resource>> pr = rbacService.queryPermissionResources();
+        Map<Integer, List<IBizResourceV2>> pr = rbacService.queryPermissionResources();
         System.out.println(pr);
     }
 }

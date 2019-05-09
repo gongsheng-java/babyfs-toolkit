@@ -1,5 +1,6 @@
 package com.babyfs.tk.service.biz.web.backend;
 
+import com.babyfs.servicetk.apicore.rbac.ResourceV2;
 import com.babyfs.tk.service.biz.op.user.model.*;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
@@ -108,7 +109,7 @@ public class PermissionInterceptor extends HandlerInterceptorAdapter {
                 @Override
                 public Permission apply(Annotation input) {
                     Preconditions.checkNotNull(input);
-                    Resource resource = getAnnotationValue(input, "resource");
+                    ResourceV2 resource = getAnnotationValue(input, "resource");
                     OperationType[] operations = getAnnotationValue(input, "operations");
                     return new SimplePermission(resource, Operation.createOperation(operations), 0);
                 }
