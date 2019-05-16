@@ -30,7 +30,6 @@ public class ConsulRegisterModule  extends ServiceModule {
         if(port == null)
         {
             LOGGER.info("no input server_port as jvm_option, register service to consul for port 0");
-            return;
         }else{
             try{
                 portNum = Integer.parseInt(port);
