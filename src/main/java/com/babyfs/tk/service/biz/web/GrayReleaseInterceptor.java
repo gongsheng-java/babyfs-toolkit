@@ -20,7 +20,6 @@ public class GrayReleaseInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
         String header = request.getHeader(KEY_GRAY_FLAG);
         if(!Strings.isNullOrEmpty(header)){
             GrayContext.set(header);

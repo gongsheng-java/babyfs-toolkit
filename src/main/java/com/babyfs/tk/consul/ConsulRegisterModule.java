@@ -26,17 +26,18 @@ public class ConsulRegisterModule  extends ServiceModule {
     protected void configure() {
         //临时加在这
         String port = System.getProperty(RpcConstant.SERVER_PORT);
+        int portNum = 0;
         if(port == null)
         {
-            LOGGER.info("no input server_port as jvm_option, can't register service to consul");
+            LOGGER.info("no input server_port as jvm_option, register service to consul for port 0");
             return;
-        }
-        int portNum = 0;
-        try{
-            portNum = Integer.parseInt(port);
-        }catch (Exception e){
-            LOGGER.info("error no input server_port {} as jvm_option, can't register service to consul", port);
-            return;
+        }else{
+            try{
+                portNum = Integer.parseInt(port);
+            }catch (Exception e){
+                LOGGER.info("error no input server_port {} as jvm_option, can't register service to consul", port);
+                return;
+            }
         }
 
         String serverName = System.getProperty(SERVER_NAME);
