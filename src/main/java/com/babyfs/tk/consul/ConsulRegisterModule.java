@@ -9,6 +9,7 @@ import com.babyfs.tk.commons.service.ServiceModule;
 import com.babyfs.tk.galaxy.constant.RpcConstant;
 import com.babyfs.tk.galaxy.register.impl.ZkServiceRegister;
 import com.google.inject.Inject;
+import org.elasticsearch.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +27,14 @@ public class ConsulRegisterModule  extends ServiceModule {
     protected void configure() {
         //临时加在这
         String port = System.getProperty(RpcConstant.SERVER_PORT);
+        if(port == null){
+            LOGGER.info("no input server_port as jvm_option, try to get from apollo");
+            port = System.getProperty(RpcConstant.SERVER_PORT);
+        }
         int portNum = 0;
-        if(port == null)
+        if(Strings.isNullOrEmpty(port))
         {
-            LOGGER.info("no input server_port as jvm_option, register service to consul for port 0");
+            LOGGER.info("no input server_port as jvm_option or apollo, register service to consul for port 0");
         }else{
             try{
                 portNum = Integer.parseInt(port);
@@ -41,7 +46,12 @@ public class ConsulRegisterModule  extends ServiceModule {
 
         String serverName = System.getProperty(SERVER_NAME);
         if(serverName == null){
-            serverName = ApolloUtil.getAppId();
+            serverName = ConfigLoader.getConfig(SERVER_NAME);
+            if(Strings.isNullOrEmpty(serverName)){
+                serverName = ApolloUtil.getAppId();
+                LOGGER.info("no input server_name as jvm_option or apollo, register service as appid to consul");
+
+            }
         }
 
         LOGGER.info("register service to consul");
