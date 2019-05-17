@@ -43,6 +43,15 @@ public class KafkaProducerImpl<K, V> implements IKafkaProducer<K, V> {
 
         this.name = config.getProperty(CLIENT_ID);
 
+        String producerType = config.getProperty(PRODUCER_TYPE);
+        config.remove(PRODUCER_TYPE);
+        if (ASYNC.equals(producerType)) {
+            sync = false;
+        } else if (SYNC.equals(producerType)) {
+            sync = true;
+        } else {
+            throw new IllegalArgumentException("Unknown producer tyep:" + producerType);
+        }
     }
 
 
@@ -62,19 +71,7 @@ public class KafkaProducerImpl<K, V> implements IKafkaProducer<K, V> {
                 return;
             }
             LOGGER.info("try to connect to kafka");
-            String producerType = config.getProperty(PRODUCER_TYPE);
-            config.remove(PRODUCER_TYPE);
-            if (ASYNC.equals(producerType)) {
-                //异步Producer
-                this.producer = new KafkaProducer<>(config);
-                sync = false;
-            } else if (SYNC.equals(producerType)) {
-                //同步Producer
-                this.producer = new KafkaProducer<>(config);
-                sync = true;
-            } else {
-                throw new IllegalArgumentException("Unknown producer tyep:" + producerType);
-            }
+            this.producer = new KafkaProducer<>(config);
             KafkaProducerTraceUtil.init();
             hasInitProducer = true;
         }finally {
