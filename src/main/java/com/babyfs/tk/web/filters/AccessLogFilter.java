@@ -124,7 +124,11 @@ public class AccessLogFilter extends OncePerRequestFilter {
     private String byteBufferToString(byte[] buf, String encoding) {
         if (Objects.nonNull(buf) && buf.length > 0) {
             try {
-                return new String(buf, 0, buf.length, encoding);
+                if(StringUtils.isBlank(encoding)) {
+                    return new String(buf, 0, buf.length);
+                }else {
+                    return new String(buf, 0, buf.length, encoding);
+                }
             } catch (UnsupportedEncodingException ex) {
                 return "[unknown]";
             }
