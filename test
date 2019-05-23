@@ -1,0 +1,131 @@
+class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        int start1 = 0, end1 = nums1.length - 1;
+        int start2 = 0, end2 = nums2.length - 1;
+        for(;;){
+            System.out.println("start1 " + start1 + " end1 " + end1 + " start2 " + start2 + " end2 " + end2);
+            if(end1 - start1 < 2 || end2 -start2 < 2){
+                int left1 = end1 - start1;
+                int left2 = end2 - start2;
+                if(left1 <= left2){
+                    return merge(nums1, start1, end1, nums2, start2, end2);
+                }else{
+                    return merge(nums2, start2, end2, nums1, start1, end1);
+                }
+            }
+
+
+
+            double middleValue1 = getMiddleValue(nums1, start1, end1);
+            double middleValue2 = getMiddleValue(nums2, start2, end2);
+
+            if(middleValue1 == middleValue2){
+                return middleValue1;
+            }
+            int middleInt1 = (start1 + end1) / 2;
+            int middleInt2 = (start2 + end2) / 2;
+            int moveCount1 = middleInt1 - start1;
+            int moveCount2 = middleInt2 - start2;
+
+            int resultMoveCount = moveCount1 >= moveCount2 ? moveCount2 : moveCount1;
+            System.out.println("middleValue1 " + middleValue1 + " middleValue2 " + middleValue2 + " resultMoveCount " + resultMoveCount);
+            if(middleValue1 < middleValue2){
+                start1 = start1 + resultMoveCount;
+                end2 = end2 - resultMoveCount;
+            }else{
+                start2 = start2 + resultMoveCount;
+                end1 = end1 - resultMoveCount;
+            }
+        }
+    }
+
+    double getMiddleValue(int[] nums, int start, int end){
+        int middleInt = (start + end) / 2;
+        if((start + end) % 2 == 1){
+            return ((double)(nums[middleInt] + nums[middleInt + 1])) / 2;
+        }else{
+            return nums[middleInt];
+        }
+    }
+
+    double merge(int[] numsBase, int startBase, int endBase, int[] numsTarget, int startTarget, int endTarget){
+        if(numsBase.length == 0){
+            return getMiddleValue(numsTarget, startTarget, endTarget);
+        }
+        if(numsBase.length == 1){
+            if((startTarget + endTarget) % 2 == 0){
+                int middle = (startTarget + endTarget) / 2;
+                if(numsTarget[middle] == numsBase[startBase]){
+                    return numsBase[0];
+                }else if(numsTarget[middle] < numsBase[startBase]){
+                    if((middle + 1) > endTarget ||  numsTarget[middle + 1] >= numsBase[startBase]){
+                        return ((double)(numsBase[startBase] + numsTarget[middle])) / 2;
+                    }else{
+                        return ((double)(numsTarget[middle + 1] + numsTarget[middle])) / 2;
+                    }
+                }else if(numsTarget[middle] > numsBase[startBase]){
+                    if((middle - 1) < startTarget || numsTarget[middle - 1] <= numsBase[0]){
+                        return ((double)(numsBase[0] + numsTarget[middle])) / 2;
+                    }else{
+                        return ((double)(numsTarget[middle - 1] + numsTarget[middle])) / 2;
+                    }
+                }
+            }else{
+                int middleSmaller = (startTarget + endTarget) / 2;
+                int middleBigger = middleSmaller + 1;
+                if(numsBase[0] >= numsTarget[middleSmaller] && numsBase[0] <= numsTarget[middleBigger]){
+                    return numsBase[0];
+                }else if(numsBase[0] < numsTarget[middleSmaller]){
+                    return numsTarget[middleSmaller];
+                }else if(numsBase[0] > numsTarget[middleBigger]){
+                    return numsTarget[middleBigger];
+                }
+            }
+        }
+        else{
+            if((startTarget + endTarget) % 2 == 0){
+                int middle = (startTarget + endTarget) / 2;
+                if(numsTarget[middle] >= numsBase[0] && numsTarget[middle] <= numsBase[1]){
+                    return numsTarget[middle];
+                }else if(numsBase[0] > numsTarget[middle] && (middle + 1 > endTarget || numsBase[0] <= numsTarget[middle + 1 ])){
+                    return numsBase[0];
+                }else if(numsBase[0] > numsTarget[middle + 1]){
+                    return numsTarget[middle + 1];
+                }else if(numsBase[1] < numsTarget[middle] && (middle - 1 < startTarget || numsBase[0] >= numsTarget[middle - 1])){
+                    return numsBase[1];
+                }else{
+                    return numsTarget[middle - 1];
+                }
+            }else{
+                int middleSmaller = (startTarget + endTarget) / 2;
+                int middleBigger = middleSmaller + 1;
+                if(numsTarget[middleSmaller] <= numsBase[0] && numsTarget[middleBigger] >= numsBase[1]){
+                    return ((double)(numsBase[0] + numsBase[1])) / 2;
+                }else if(numsTarget[middleSmaller] >= numsBase[0] && numsTarget[middleBigger] <= numsBase[1]){
+                    return ((double)(numsTarget[middleBigger] + numsTarget[middleSmaller])) / 2;
+                }
+
+                else if(numsTarget[middleBigger] >= numsBase[1] && numsTarget[middleSmaller] >= numsBase[0]){
+                    System.out.println("b3");
+                    return ((double)(numsTarget[middleSmaller] + numsBase[1])) / 2;
+                }else if(numsBase[1] <= numsTarget[middleSmaller] && (middleSmaller - 1 < startTarget
+                                                                      || numsTarget[middleSmaller - 1] <= numsBase[1])){
+                    return ((double)(numsTarget[middleSmaller] + numsBase[1])) / 2;
+                }else if(numsTarget[middleSmaller] <= numsBase[0] && numsBase[1] >= numsTarget[middleBigger]){
+                    return ((double)(numsTarget[middleBigger] + numsBase[0])) / 2;
+                }else if(numsBase[0] >= numsTarget[middleBigger] && ((middleBigger + 1 > endTarget)
+                                                                   || numsTarget[middleBigger + 1] >= numsBase[0])){
+                    return ((double)(numsTarget[middleBigger] + numsBase[0])) / 2;
+                }else if(numsBase[1] <= numsTarget[middleSmaller - 1]){
+                    return ((double)(numsTarget[middleSmaller] + numsTarget[middleSmaller - 1])) / 2;
+                }else{
+                    return ((double)(numsTarget[middleBigger] + numsTarget[middleBigger + 1])) / 2;
+                }
+
+            }
+        }
+        return -1;
+
+    }
+
+}
