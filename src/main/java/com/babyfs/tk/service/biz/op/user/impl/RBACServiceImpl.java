@@ -1,17 +1,20 @@
 package com.babyfs.tk.service.biz.op.user.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.babyfs.servicetk.apicore.rbac.IBizResourceV2;
 import com.babyfs.servicetk.apicore.rbac.RbacUtil;
 import com.babyfs.servicetk.apicore.rbac.ResourceV2;
+import com.babyfs.servicetk.grpcapicore.registry.ServiceSeeker;
 import com.babyfs.tk.apollo.ConfigLoader;
-import com.babyfs.tk.service.biz.op.user.model.Operation;
-import com.babyfs.tk.service.biz.op.user.model.Resource;
+import com.babyfs.tk.http.client.HttpClientService;
+import com.babyfs.tk.service.biz.op.user.model.*;
 import com.babyfs.tk.service.biz.op.user.Util;
 import com.babyfs.tk.service.biz.op.user.dal.IBackendUserDao;
 import com.babyfs.tk.service.biz.op.user.dal.IBackendUserRoleDao;
 import com.babyfs.tk.service.biz.op.user.dal.IRoleDao;
-import com.babyfs.tk.service.biz.op.user.model.IBizResource;
 import com.babyfs.tk.service.biz.op.user.model.entity.BackendUserRoleEntity;
+import com.babyfs.tk.service.biz.op.user.model.entity.BizResourcePojo;
 import com.babyfs.tk.service.biz.op.user.model.entity.RoleEntity;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
@@ -30,9 +33,6 @@ import com.babyfs.tk.commons.utils.ListUtil;
 import com.babyfs.tk.dal.db.DaoFactory;
 import com.babyfs.tk.service.biz.op.user.IRBACService;
 import com.babyfs.tk.service.biz.op.user.dal.IRolePermissionDao;
-import com.babyfs.tk.service.biz.op.user.model.ResourceType;
-import com.babyfs.tk.service.biz.op.user.model.Permission;
-import com.babyfs.tk.service.biz.op.user.model.SimplePermission;
 import com.babyfs.tk.service.biz.op.user.model.entity.RolePermissionEntity;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -58,6 +58,10 @@ public class RBACServiceImpl implements IRBACService {
     public static final String RBAC_ROOT_ROLE_ID = "rbac.root_role_id";
     public static final String RBAC_REQUIRED_PERMISSION_ANNOTATION_CLASS = "rbac.required_perm_anno_class";
 
+    public static final String RBAC_OUT_OP_LIST = "rbac.out_op_list";
+
+    private static final String INTERNAL_PATH = "/internal/roleperms";
+
     @Inject
     IRoleDao roleDao;
 
@@ -72,6 +76,9 @@ public class RBACServiceImpl implements IRBACService {
 
     @Inject
     DaoFactory daoFactory;
+
+    @Inject
+    HttpClientService httpClientService;
     /**
      * 具有超级用户的角色id
      */
@@ -138,6 +145,20 @@ public class RBACServiceImpl implements IRBACService {
                     list.add(iBizResourceV2);
                 }
 
+                Map<String, BizResourcePojo> allOtherOp = getAllOtherOp();
+                for(String key : allOtherOp.keySet()) {
+                    IBizResourceV2 iBizResourceV2 = allOtherOp.get(key);
+                    result.put(key, iBizResourceV2);
+
+                    int type = iBizResourceV2.getType();
+                    List<IBizResourceV2> list = result2.get(type);
+                    if(list == null){
+                        list = new LinkedList<>();
+                        result2.put(type, list);
+                    }
+                    list.add(iBizResourceV2);
+                }
+
             }catch (Exception e){
                 LOGGER.error("error when get resource class {}", bizResourceClass);
                 LOGGER.error("Exception is:", e);
@@ -145,6 +166,40 @@ public class RBACServiceImpl implements IRBACService {
 
         }
         return new Pair<>(result, result2);
+    }
+
+    @Override
+    public Map<String, BizResourcePojo> getAllOtherOp() {
+        HttpClientService httpClientService = this.httpClientService;
+        if(httpClientService == null) {
+            httpClientService = new HttpClientService();
+        }
+
+        List<BizResourcePojo> result = new ArrayList<>();
+        String config = ConfigLoader.getConfig(AK_NAMESPACE, RBAC_OUT_OP_LIST);
+        for (String opName :
+                config.split(",")) {
+            List<BizResourcePojo> bizResources = new LinkedList<>();
+
+            List<ServiceSeeker.ServiceNode> addresss = ServiceSeeker.getAddress(opName);
+
+            for (ServiceSeeker.ServiceNode node :
+                    addresss) {
+                String url = "http://" + node.getIp() + ":" + node.getPort() + INTERNAL_PATH;
+                try{
+                    String jsonResult = httpClientService.sendGet(url, new HashMap<>(0), new HashMap<>(0));
+                    bizResources =  JSON.parseObject(jsonResult, new TypeReference<List<BizResourcePojo>>() {});
+                }catch (Exception e){
+                    LOGGER.error("unable to fetch resource from [{}] by url [{}]", opName, url);
+                }
+            }
+            result.addAll(bizResources);
+        }
+        Map<String, BizResourcePojo> map = new HashMap<>();
+        result.forEach(item -> {
+            map.put(item.getId(), item);
+        });
+        return map;
     }
 
 
