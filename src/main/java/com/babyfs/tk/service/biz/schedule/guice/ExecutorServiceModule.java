@@ -28,6 +28,7 @@ public class ExecutorServiceModule extends AbstractModule {
     private final static int defaultCoreSize = Runtime.getRuntime().availableProcessors();
     private final static int defaultMaxSize = defaultCoreSize * 5;
     private final static int defaultKeepAliveTimeMinutes = 1;
+    private final static int defaultDisposeCoreThread = 0;
     private final static int defaultQueueSize = 5000;
     private final static RejectedExecutionHandler defaultRejectedExecutionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
 
@@ -87,8 +88,15 @@ public class ExecutorServiceModule extends AbstractModule {
             int keepAliveTime = getIntConfig("keepAliveTimeMinuts", defaultKeepAliveTimeMinutes);
             int queueSzie = getIntConfig("queueSize", defaultQueueSize);
 
+            int disposeCoreThread = getIntConfig("disposeCoreThreadOfExecutorService", defaultDisposeCoreThread);
+
             ThreadPoolExecutor executor = new ThreadPoolExecutor(coreSize, maxSize, keepAliveTime, TimeUnit.MINUTES, new LinkedBlockingQueue<>(queueSzie), new NamedThreadFactory(name));
             executor.setRejectedExecutionHandler(defaultRejectedExecutionHandler);
+
+            if (disposeCoreThread > 0) {
+                executor.allowCoreThreadTimeOut(true);
+            }
+
             if (needShutdown) {
                 registry.addAction(() -> ThreadUtil.runQuitely(() -> ThreadUtil.shutdownAndAwaitTermination(executor, 60)));
             }
