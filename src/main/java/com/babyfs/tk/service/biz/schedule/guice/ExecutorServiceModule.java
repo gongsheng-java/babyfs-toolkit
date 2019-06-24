@@ -36,6 +36,7 @@ public class ExecutorServiceModule extends AbstractModule {
     private final String executorConfPrefix;
     private final boolean needShutdown;
     private static final Logger logger = LoggerFactory.getLogger(ExecutorServiceModule.class);
+
     /**
      * 使用默认配置,且需要shutdown的线程池
      *
@@ -88,7 +89,7 @@ public class ExecutorServiceModule extends AbstractModule {
             int keepAliveTime = getIntConfig("keepAliveTimeMinuts", defaultKeepAliveTimeMinutes);
             int queueSzie = getIntConfig("queueSize", defaultQueueSize);
 
-            int disposeCoreThread = getIntConfig("disposeCoreThreadOfExecutorService", defaultDisposeCoreThread);
+            int disposeCoreThread = MapUtil.getInt(conf, "disposeCoreThreadOfExecutorService", defaultDisposeCoreThread);
 
             ThreadPoolExecutor executor = new ThreadPoolExecutor(coreSize, maxSize, keepAliveTime, TimeUnit.MINUTES, new LinkedBlockingQueue<>(queueSzie), new NamedThreadFactory(name));
             executor.setRejectedExecutionHandler(defaultRejectedExecutionHandler);
