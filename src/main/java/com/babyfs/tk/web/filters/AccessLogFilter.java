@@ -1,13 +1,13 @@
 package com.babyfs.tk.web.filters;
 
-import com.babyfs.tk.apollo.ConfigLoader;
+import com.babyfs.servicetk.apollo.ConfigLoader;
+import com.babyfs.tk.safes.Safes;
 import com.babyfs.tk.trace.TraceConstant;
 import com.babyfs.tk.trace.TraceGenerator;
 import com.babyfs.tk.web.cache.CachedHttpServletRequestWrapper;
 import com.babyfs.tk.web.cache.CachedHttpServletResponseWrapper;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +35,12 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
     private static final int INIT_CACHE_LEN = 512 * 1024;
 
-    private static LoadingCache<String, Set<String>> apiExcludeCache = CacheBuilder.newBuilder()
-            .maximumSize(1000L)
-            .expireAfterAccess(5L, TimeUnit.MINUTES)
-            .build(createCacheLoader());
+    //apollo config key
+    private static final String EXCLUDE_CONFIG_KEY = "api.log.exclude";
+
+    //exclude set, refresh 5 mins
+    private static Supplier<Set<String>> API_EXCLUDE_CACHE = Suppliers
+            .memoizeWithExpiration(excludeUrlSupplier(), 5, TimeUnit.MINUTES);
 
 
     @Override
@@ -91,14 +93,11 @@ public class AccessLogFilter extends OncePerRequestFilter {
         String requestPayload = getMessagePayload(request);
         String responsePayload = getMessagePayload(response);
 
-        try {
-            Set<String> excludeSet = apiExcludeCache.get("api_log_exclude");
-            if (excludeSet.contains(requestURI)) {
-                logger.info("uri={};query={};elapsed={}ms;", requestURI, queryString, elapsed);
-                return;
-            }
-        } catch (Exception e) {
-            logger.warn("api.log.exclude warning!", e);
+        //exclude
+        Set<String> excludeSet = API_EXCLUDE_CACHE.get();
+        if (excludeSet.contains(requestURI)) {
+            logger.info("uri={};query={};elapsed={}ms;skipped", requestURI, queryString, elapsed);
+            return;
         }
 
         logger.info("uri={};query={};elapsed={}ms;request={};response={}", requestURI, queryString, elapsed, requestPayload, responsePayload);
@@ -156,22 +155,16 @@ public class AccessLogFilter extends OncePerRequestFilter {
         return "";
     }
 
-    private static CacheLoader<String, Set<String>> createCacheLoader() {
-        return new CacheLoader<String, Set<String>>() {
-            @Override
-            public Set<String> load(String s) throws Exception {
-                Set<String> excludeSet = new HashSet<>();
-                try {
-                    String exclude = ConfigLoader.getConfig("api.log.exclude");
-                    if (exclude != null) {
-                        String[] excludes = exclude.split(",");
-                        Collections.addAll(excludeSet, excludes);
-                    }
-                } catch (Exception e) {
-                    logger.warn("加载api.log.exclude到缓存失败", e);
-                }
-                return excludeSet;
+    private static Supplier<Set<String>> excludeUrlSupplier() {
+        return () -> {
+            Set<String> excludeSet = new HashSet<>();
+            try {
+                String exclude = ConfigLoader.getConfig(EXCLUDE_CONFIG_KEY);
+                Collections.addAll(excludeSet, Safes.of(exclude).split(","));
+            } catch (Exception e) {
+                logger.warn("加载api.log.exclude到缓存失败:", e);
             }
+            return excludeSet;
         };
     }
 }
