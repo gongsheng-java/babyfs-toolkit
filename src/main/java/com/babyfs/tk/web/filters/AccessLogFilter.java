@@ -1,9 +1,13 @@
 package com.babyfs.tk.web.filters;
 
+import com.babyfs.servicetk.apollo.ConfigLoader;
+import com.babyfs.tk.safes.Safes;
 import com.babyfs.tk.trace.TraceConstant;
 import com.babyfs.tk.trace.TraceGenerator;
 import com.babyfs.tk.web.cache.CachedHttpServletRequestWrapper;
 import com.babyfs.tk.web.cache.CachedHttpServletResponseWrapper;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author gaowei
@@ -30,6 +34,14 @@ public class AccessLogFilter extends OncePerRequestFilter {
     private static final int MAX_CACHE_LEN = 2 * 1024 * 1024;
 
     private static final int INIT_CACHE_LEN = 512 * 1024;
+
+    //apollo config key
+    private static final String EXCLUDE_CONFIG_KEY = "api.log.exclude";
+
+    //exclude set, refresh 5 mins
+    private static Supplier<Set<String>> API_EXCLUDE_CACHE = Suppliers
+            .memoizeWithExpiration(excludeUrlSupplier(), 5, TimeUnit.MINUTES);
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -80,6 +92,13 @@ public class AccessLogFilter extends OncePerRequestFilter {
 
         String requestPayload = getMessagePayload(request);
         String responsePayload = getMessagePayload(response);
+
+        //exclude
+        Set<String> excludeSet = API_EXCLUDE_CACHE.get();
+        if (excludeSet.contains(requestURI)) {
+            logger.info("uri={};query={};elapsed={}ms;skipped", requestURI, queryString, elapsed);
+            return;
+        }
 
         logger.info("uri={};query={};elapsed={}ms;request={};response={}", requestURI, queryString, elapsed, requestPayload, responsePayload);
     }
@@ -134,5 +153,18 @@ public class AccessLogFilter extends OncePerRequestFilter {
             }
         }
         return "";
+    }
+
+    private static Supplier<Set<String>> excludeUrlSupplier() {
+        return () -> {
+            Set<String> excludeSet = new HashSet<>();
+            try {
+                String exclude = ConfigLoader.getConfig(EXCLUDE_CONFIG_KEY);
+                Collections.addAll(excludeSet, Safes.of(exclude).split(","));
+            } catch (Exception e) {
+                logger.warn("加载api.log.exclude到缓存失败:", e);
+            }
+            return excludeSet;
+        };
     }
 }
